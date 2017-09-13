@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 from csv import reader
-from typing import List,Dict
+from typing import List, Dict, Tuple
 import sys
+
 
 class TitleRecord:
     def __init__(self, code: str, title: str):
-        self.code = code  # type: str
-        self.title = title  # type: str
+        self.code = code.lower()  # type: str
+        self.title = title.lower()  # type: str
 
     def get_code(self, level: int):
         return self.code[0:level]
@@ -41,7 +42,7 @@ def read_levels(filename) -> 'Dict[str, str]':
                 jth_code = "%s%d" % (beginning, j)
                 level_codes[jth_code] = entry[1]
         else:
-            raise ("unparseable label detected: %s" % label)
+            raise ("unparseable label detected: %s" % entry[0])
     return level_codes
 
 
@@ -54,14 +55,34 @@ def read_titles(filename, target_level) -> 'List[TitleRecord]':
     return records
 
 
-def print_combined(level_codes: 'Dict[str, str]', title_records: 'List[TitleRecord]', target_level, target_file= sys.stdout):
+def generate_combined(level_codes: 'Dict[str, str]', title_records: 'List[TitleRecord]', target_level) -> 'Tuple[List[str], List[str]]':
+    x_list = []
+    y_list = []
     for trecord in title_records:
-        print("%s\t%s" % (trecord.get_code(target_level), trecord.combine_text(level_codes, target_level)), file=target_file)
+        y_list.append(trecord.get_code(target_level))
+        x_list.append(trecord.combine_text(level_codes, target_level))
+    return x_list, y_list
+
+
+def generate_uncombined_text_for_target_level(title_records: 'List[TitleRecord]', target_level) -> 'Tuple[List[str], List[str]]':
+    x_list = []
+    y_list = []
+    for trecord in title_records:
+        y_list.append(trecord.get_code(target_level))
+        x_list.append(trecord.title)
+    return x_list, y_list
+
+
+def print_combined(level_codes: 'Dict[str, str]', title_records: 'List[TitleRecord]', target_level, target_file= sys.stdout):
+    (x_list,y_list) = generate_combined(level_codes, title_records, target_level)
+    for i in range(len(x_list)):
+        print("%s\t%s" % (y_list[i], x_list[i]), file=target_file)
 
 
 def print_uncombined_text_for_target_level(title_records: 'List[TitleRecord]', target_level, target_file = sys.stdout):
-    for trecord in title_records:
-        print("%s\t%s" % (trecord.get_code(target_level), trecord.title), file=target_file)
+    (x_list, y_list) = generate_uncombined_text_for_target_level(title_records, target_level)
+    for i in range(len(x_list)):
+        print("%s\t%s" % (y_list[i], x_list[i]), file=target_file)
 
 
 def main():

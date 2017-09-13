@@ -1,9 +1,0 @@
-minimum viable project is to assign classification from that dataset
-our dataset has no subset of pre-labeled data according to the desired bins
-
-However we can use canadian gov't labels to get started. Once the NLP system is functioning we can
-try to begin to  define our own categorization with a mix of manual / semi-automatic labeling
-
-I will try to provide for generating appropriate bags of words for this purpose if I have the time to
-program it, but I will also write out my thoughts on the matter in the event that further code development
-is required for that purpose.
