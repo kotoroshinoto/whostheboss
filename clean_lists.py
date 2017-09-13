@@ -32,6 +32,7 @@ def clean_file(filename):
     print("\n".join(filecontent), file=outfile)
     outfile.close()
 
+
 os.chdir("data/unique_labels")
 clean_file("cities.txt")
 clean_file("countries.txt")

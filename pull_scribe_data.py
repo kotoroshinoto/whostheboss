@@ -2,7 +2,7 @@ import sqlalchemy
 import sqlalchemy.orm
 import pandas as pd
 from kmodes import kmodes
-from kmodes import prototypes
+from kmodes import kprototypes
 
 class DB_handler:
     def __init__(self,user: str, password: str, url: str):

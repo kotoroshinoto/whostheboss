@@ -1,0 +1,690 @@
+0	Management occupations		1
+1	Business, finance and administration occupations		1
+2	Natural and applied sciences and related occupations		1
+3	Health occupations		1
+4	Occupations in education, law and social, community and government services		1
+5	Occupations in art, culture, recreation and sport		1
+6	Sales and service occupations		1
+7	Trades, transport and equipment operators and related occupations		1
+8	Natural resources, agriculture and related production occupations		1
+9	Occupations in manufacturing and utilities		1
+00	Senior management occupations		2
+01-05	Specialized middle management occupations		2
+06	Middle management occupations in retail and wholesale trade and customer services		2
+07-09	Middle management occupations in trades, transportation, production and utilities		2
+11	Professional occupations in business and finance		2
+12	Administrative and financial supervisors and administrative occupations		2
+13	Finance, insurance and related business administrative occupations		2
+14	Office support occupations		2
+15	Distribution, tracking and scheduling co-ordination occupations		2
+21	Professional occupations in natural and applied sciences		2
+22	Technical occupations related to natural and applied sciences		2
+30	Professional occupations in nursing		2
+31	Professional occupations in health (except nursing)		2
+32	Technical occupations in health		2
+34	Assisting occupations in support of health services		2
+40	Professional occupations in education services		2
+41	Professional occupations in law and social, community and government services		2
+42	Paraprofessional occupations in legal, social, community and education services		2
+43	Occupations in front-line public protection services		2
+44	Care providers and educational, legal and public protection support occupations		2
+51	Professional occupations in art and culture		2
+52	Technical occupations in art, culture, recreation and sport		2
+62	Retail sales supervisors and specialized sales occupations		2
+63	Service supervisors and specialized service occupations		2
+64	Sales representatives and salespersons - wholesale and retail trade		2
+65	Service representatives and other customer and personal services occupations		2
+66	Sales support occupations		2
+67	Service support and other service occupations, n.e.c.		2
+72	Industrial, electrical and construction trades		2
+73	Maintenance and equipment operation trades		2
+74	Other installers, repairers and servicers and material handlers		2
+75	Transport and heavy equipment operation and related maintenance occupations		2
+76	Trades helpers, construction labourers and related occupations		2
+82	Supervisors and technical occupations in natural resources, agriculture and related production		2
+84	Workers in natural resources, agriculture and related production		2
+86	Harvesting, landscaping and natural resources labourers		2
+92	Processing, manufacturing and utilities supervisors and central control operators		2
+94	Processing and manufacturing machine operators and related production workers		2
+95	Assemblers in manufacturing		2
+96	Labourers in processing, manufacturing and utilities		2
+001	Legislators and senior management		3
+011	Administrative services managers		3
+012	Managers in financial and business services		3
+013	Managers in communication (except broadcasting)		3
+021	Managers in engineering, architecture, science and information systems		3
+031	Managers in health care		3
+041	Managers in public administration		3
+042	Managers in education and social and community services		3
+043	Managers in public protection services		3
+051	Managers in art, culture, recreation and sport		3
+060	Corporate sales managers		3
+062	Retail and wholesale trade managers		3
+063	Managers in food service and accommodation		3
+065	Managers in customer and personal services, n.e.c.		3
+071	Managers in construction and facility operation and maintenance		3
+073	Managers in transportation		3
+081	Managers in natural resources production and fishing		3
+082	Managers in agriculture, horticulture and aquaculture		3
+091	Managers in manufacturing and utilities		3
+111	Auditors, accountants and investment professionals		3
+112	Human resources and business service professionals		3
+121	Administrative services supervisors		3
+122	Administrative and regulatory occupations		3
+124	Office administrative assistants - general, legal and medical		3
+125	Court reporters, transcriptionists, records management technicians and statistical officers		3
+131	Finance, insurance and related business administrative occupations		3
+141	General office workers		3
+142	Office equipment operators		3
+143	Financial, insurance and related administrative support workers		3
+145	Library, correspondence and other clerks		3
+151	Mail and message distribution occupations		3
+152	Supply chain logistics, tracking and scheduling co-ordination occupations		3
+211	Physical science professionals		3
+212	Life science professionals		3
+213	Civil, mechanical, electrical and chemical engineers		3
+214	Other engineers		3
+215	Architects, urban planners and land surveyors		3
+216	Mathematicians, statisticians and actuaries		3
+217	Computer and information systems professionals		3
+221	Technical occupations in physical sciences		3
+222	Technical occupations in life sciences		3
+223	Technical occupations in civil, mechanical and industrial engineering		3
+224	Technical occupations in electronics and electrical engineering		3
+225	Technical occupations in architecture, drafting, surveying, geomatics and meteorology		3
+226	Other technical inspectors and regulatory officers		3
+227	Transportation officers and controllers		3
+228	Technical occupations in computer and information systems		3
+301	Professional occupations in nursing		3
+311	Physicians, dentists and veterinarians		3
+312	Optometrists, chiropractors and other health diagnosing and treating professionals		3
+313	Pharmacists, dietitians and nutritionists		3
+314	Therapy and assessment professionals		3
+321	Medical technologists and technicians (except dental health)		3
+322	Technical occupations in dental health care		3
+323	Other technical occupations in health care		3
+341	Assisting occupations in support of health services		3
+401	University professors and post-secondary assistants		3
+402	College and other vocational instructors		3
+403	Secondary and elementary school teachers and educational counsellors		3
+411	Judges, lawyers and Quebec notaries		3
+415	Social and community service professionals		3
+416	Policy and program researchers, consultants and officers		3
+421	Paraprofessional occupations in legal, social, community and education services		3
+431	Occupations in front-line public protection services		3
+441	Home care providers and educational support occupations		3
+442	Legal and public protection support occupations		3
+511	Librarians, archivists, conservators and curators		3
+512	Writing, translating and related communications professionals		3
+513	Creative and performing artists		3
+521	Technical occupations in libraries, public archives, museums and art galleries		3
+522	Photographers, graphic arts technicians and technical and co-ordinating occupations in motion pictures, broadcasting and the performing arts		3
+523	Announcers and other performers, n.e.c.		3
+524	Creative designers and craftspersons		3
+525	Athletes, coaches, referees and related occupations		3
+621	Retail sales supervisors		3
+622	Technical sales specialists in wholesale trade and retail and wholesale buyers		3
+623	Insurance, real estate and financial sales occupations		3
+631	Service supervisors		3
+632	Chefs and cooks		3
+633	Butchers and bakers		3
+634	Specialized occupations in personal and customer services		3
+641	Sales and account representatives - wholesale trade (non-technical)		3
+642	Retail salespersons		3
+651	Occupations in food and beverage service		3
+652	Occupations in travel and accommodation		3
+653	Tourism and amusement services occupations		3
+654	Security guards and related security service occupations		3
+655	Customer and information services representatives		3
+656	Other occupations in personal service		3
+661	Cashiers		3
+662	Other sales support and related occupations		3
+671	Food counter attendants, kitchen helpers and related support occupations		3
+672	Support occupations in accommodation, travel and amusement services		3
+673	Cleaners		3
+674	Other service support and related occupations, n.e.c.		3
+720	Contractors and supervisors, industrial, electrical and construction trades and related workers		3
+723	Machining, metal forming, shaping and erecting trades		3
+724	Electrical trades and electrical power line and telecommunications workers		3
+725	Plumbers, pipefitters and gas fitters		3
+727	Carpenters and cabinetmakers		3
+728	Masonry and plastering trades		3
+729	Other construction trades		3
+730	Contractors and supervisors, maintenance trades and heavy equipment and transport operators		3
+731	Machinery and transportation equipment mechanics (except motor vehicle)		3
+732	Automotive service technicians		3
+733	Other mechanics and related repairers		3
+736	Train crew operating occupations		3
+737	Crane operators, drillers and blasters		3
+738	Printing press operators and other trades and related occupations, n.e.c.		3
+744	Other installers, repairers and servicers		3
+745	Longshore workers and material handlers		3
+751	Motor vehicle and transit drivers		3
+752	Heavy equipment operators		3
+753	Other transport equipment operators and related maintenance workers		3
+761	Trades helpers and labourers		3
+762	Public works and other labourers, n.e.c.		3
+821	Supervisors, logging and forestry		3
+822	Contractors and supervisors, mining, oil and gas		3
+823	Underground miners, oil and gas drillers and related occupations		3
+824	Logging machinery operators		3
+825	Contractors and supervisors, agriculture, horticulture and related operations and services		3
+826	Fishing vessel masters and fishermen/women		3
+841	Mine service workers and operators in oil and gas drilling		3
+842	Logging and forestry workers		3
+843	Agriculture and horticulture workers		3
+844	Other workers in fishing and trapping and hunting occupations		3
+861	Harvesting, landscaping and natural resources labourers		3
+921	Supervisors, processing and manufacturing occupations		3
+922	Supervisors, assembly and fabrication		3
+923	Central control and process operators in processing and manufacturing		3
+924	Utilities equipment operators and controllers		3
+941	Machine operators and related workers in mineral and metal products processing and manufacturing		3
+942	Machine operators and related workers in chemical, plastic and rubber processing		3
+943	Machine operators and related workers in pulp and paper production and wood processing and manufacturing		3
+944	Machine operators and related workers in textile, fabric, fur and leather products processing and manufacturing		3
+946	Machine operators and related workers in food, beverage and associated products processing		3
+947	Printing equipment operators and related occupations		3
+952	Mechanical, electrical and electronics assemblers		3
+953	Other assembly and related occupations		3
+961	Labourers in processing, manufacturing and utilities		3
+0011	Legislators		4
+0012	Senior government managers and officials		4
+0013	Senior managers - financial, communications and other business services		4
+0014	Senior managers - health, education, social and community services and membership organizations		4
+0015	Senior managers - trade, broadcasting and other services, n.e.c.		4
+0016	Senior managers - construction, transportation, production and utilities		4
+0111	Financial managers		4
+0112	Human resources managers		4
+0113	Purchasing managers		4
+0114	Other administrative services managers		4
+0121	Insurance, real estate and financial brokerage managers		4
+0122	Banking, credit and other investment managers		4
+0124	Advertising, marketing and public relations managers		4
+0125	Other business services managers		4
+0131	Telecommunication carriers managers		4
+0132	Postal and courier services managers		4
+0211	Engineering managers		4
+0212	Architecture and science managers		4
+0213	Computer and information systems managers		4
+0311	Managers in health care		4
+0411	Government managers - health and social policy development and program administration		4
+0412	Government managers - economic analysis, policy development and program administration		4
+0413	Government managers - education policy development and program administration		4
+0414	Other managers in public administration		4
+0421	Administrators - post-secondary education and vocational training		4
+0422	School principals and administrators of elementary and secondary education		4
+0423	Managers in social, community and correctional services		4
+0431	Commissioned police officers		4
+0432	Fire chiefs and senior firefighting officers		4
+0433	Commissioned officers of the Canadian Forces		4
+0511	Library, archive, museum and art gallery managers		4
+0512	Managers - publishing, motion pictures, broadcasting and performing arts		4
+0513	Recreation, sports and fitness program and service directors		4
+0601	Corporate sales managers		4
+0621	Retail and wholesale trade managers		4
+0631	Restaurant and food service managers		4
+0632	Accommodation service managers		4
+0651	Managers in customer and personal services, n.e.c.		4
+0711	Construction managers		4
+0712	Home building and renovation managers		4
+0714	Facility operation and maintenance managers		4
+0731	Managers in transportation		4
+0811	Managers in natural resources production and fishing		4
+0821	Managers in agriculture		4
+0822	Managers in horticulture		4
+0823	Managers in aquaculture		4
+0911	Manufacturing managers		4
+0912	Utilities managers		4
+1111	Financial auditors and accountants		4
+1112	Financial and investment analysts		4
+1113	Securities agents, investment dealers and brokers		4
+1114	Other financial officers		4
+1121	Human resources professionals		4
+1122	Professional occupations in business management consulting		4
+1123	Professional occupations in advertising, marketing and public relations		4
+1211	Supervisors, general office and administrative support workers		4
+1212	Supervisors, finance and insurance office workers		4
+1213	Supervisors, library, correspondence and related information workers		4
+1214	Supervisors, mail and message distribution occupations		4
+1215	Supervisors, supply chain, tracking and scheduling co-ordination occupations		4
+1221	Administrative officers		4
+1222	Executive assistants		4
+1223	Human resources and recruitment officers		4
+1224	Property administrators		4
+1225	Purchasing agents and officers		4
+1226	Conference and event planners		4
+1227	Court officers and justices of the peace		4
+1228	Employment insurance, immigration, border services and revenue officers		4
+1241	Administrative assistants		4
+1242	Legal administrative assistants		4
+1243	Medical administrative assistants		4
+1251	Court reporters, medical transcriptionists and related occupations		4
+1252	Health information management occupations		4
+1253	Records management technicians		4
+1254	Statistical officers and related research support occupations		4
+1311	Accounting technicians and bookkeepers		4
+1312	Insurance adjusters and claims examiners		4
+1313	Insurance underwriters		4
+1314	Assessors, valuators and appraisers		4
+1315	Customs, ship and other brokers		4
+1411	General office support workers		4
+1414	Receptionists		4
+1415	Personnel clerks		4
+1416	Court clerks		4
+1422	Data entry clerks		4
+1423	Desktop publishing operators and related occupations		4
+1431	Accounting and related clerks		4
+1432	Payroll clerks		4
+1434	Banking, insurance and other financial clerks		4
+1435	Collectors		4
+1451	Library assistants and clerks		4
+1452	Correspondence, publication and regulatory clerks		4
+1454	Survey interviewers and statistical clerks		4
+1511	Mail, postal and related workers		4
+1512	Letter carriers		4
+1513	Couriers, messengers and door-to-door distributors		4
+1521	Shippers and receivers		4
+1522	Storekeepers and partspersons		4
+1523	Production logistics co-ordinators		4
+1524	Purchasing and inventory control workers		4
+1525	Dispatchers		4
+1526	Transportation route and crew schedulers		4
+2111	Physicists and astronomers		4
+2112	Chemists		4
+2113	Geoscientists and oceanographers		4
+2114	Meteorologists and climatologists		4
+2115	Other professional occupations in physical sciences		4
+2121	Biologists and related scientists		4
+2122	Forestry professionals		4
+2123	Agricultural representatives, consultants and specialists		4
+2131	Civil engineers		4
+2132	Mechanical engineers		4
+2133	Electrical and electronics engineers		4
+2134	Chemical engineers		4
+2141	Industrial and manufacturing engineers		4
+2142	Metallurgical and materials engineers		4
+2143	Mining engineers		4
+2144	Geological engineers		4
+2145	Petroleum engineers		4
+2146	Aerospace engineers		4
+2147	Computer engineers (except software engineers and designers)		4
+2148	Other professional engineers, n.e.c.		4
+2151	Architects		4
+2152	Landscape architects		4
+2153	Urban and land use planners		4
+2154	Land surveyors		4
+2161	Mathematicians, statisticians and actuaries		4
+2171	Information systems analysts and consultants		4
+2172	Database analysts and data administrators		4
+2173	Software engineers and designers		4
+2174	Computer programmers and interactive media developers		4
+2175	Web designers and developers		4
+2211	Chemical technologists and technicians		4
+2212	Geological and mineral technologists and technicians		4
+2221	Biological technologists and technicians		4
+2222	Agricultural and fish products inspectors		4
+2223	Forestry technologists and technicians		4
+2224	Conservation and fishery officers		4
+2225	Landscape and horticulture technicians and specialists		4
+2231	Civil engineering technologists and technicians		4
+2232	Mechanical engineering technologists and technicians		4
+2233	Industrial engineering and manufacturing technologists and technicians		4
+2234	Construction estimators		4
+2241	Electrical and electronics engineering technologists and technicians		4
+2242	Electronic service technicians (household and business equipment)		4
+2243	Industrial instrument technicians and mechanics		4
+2244	Aircraft instrument, electrical and avionics mechanics, technicians and inspectors		4
+2251	Architectural technologists and technicians		4
+2252	Industrial designers		4
+2253	Drafting technologists and technicians		4
+2254	Land survey technologists and technicians		4
+2255	Technical occupations in geomatics and meteorology		4
+2261	Non-destructive testers and inspection technicians		4
+2262	Engineering inspectors and regulatory officers		4
+2263	Inspectors in public and environmental health and occupational health and safety		4
+2264	Construction inspectors		4
+2271	Air pilots, flight engineers and flying instructors		4
+2272	Air traffic controllers and related occupations		4
+2273	Deck officers, water transport		4
+2274	Engineer officers, water transport		4
+2275	Railway traffic controllers and marine traffic regulators		4
+2281	Computer network technicians		4
+2282	User support technicians		4
+2283	Information systems testing technicians		4
+3011	Nursing co-ordinators and supervisors		4
+3012	Registered nurses and registered psychiatric nurses		4
+3111	Specialist physicians		4
+3112	General practitioners and family physicians		4
+3113	Dentists		4
+3114	Veterinarians		4
+3121	Optometrists		4
+3122	Chiropractors		4
+3124	Allied primary health practitioners		4
+3125	Other professional occupations in health diagnosing and treating		4
+3131	Pharmacists		4
+3132	Dietitians and nutritionists		4
+3141	Audiologists and speech-language pathologists		4
+3142	Physiotherapists		4
+3143	Occupational therapists		4
+3144	Other professional occupations in therapy and assessment		4
+3211	Medical laboratory technologists		4
+3212	Medical laboratory technicians and pathologists' assistants		4
+3213	Animal health technologists and veterinary technicians		4
+3214	Respiratory therapists, clinical perfusionists and cardiopulmonary technologists		4
+3215	Medical radiation technologists		4
+3216	Medical sonographers		4
+3217	Cardiology technologists and electrophysiological diagnostic technologists, n.e.c.		4
+3219	Other medical technologists and technicians (except dental health)		4
+3221	Denturists		4
+3222	Dental hygienists and dental therapists		4
+3223	Dental technologists, technicians and laboratory assistants		4
+3231	Opticians		4
+3232	Practitioners of natural healing		4
+3233	Licensed practical nurses		4
+3234	Paramedical occupations		4
+3236	Massage therapists		4
+3237	Other technical occupations in therapy and assessment		4
+3411	Dental assistants		4
+3413	Nurse aides, orderlies and patient service associates		4
+3414	Other assisting occupations in support of health services		4
+4011	University professors and lecturers		4
+4012	Post-secondary teaching and research assistants		4
+4021	College and other vocational instructors		4
+4031	Secondary school teachers		4
+4032	Elementary school and kindergarten teachers		4
+4033	Educational counsellors		4
+4111	Judges		4
+4112	Lawyers and Quebec notaries		4
+4151	Psychologists		4
+4152	Social workers		4
+4153	Family, marriage and other related counsellors		4
+4154	Professional occupations in religion		4
+4155	Probation and parole officers and related occupations		4
+4156	Employment counsellors		4
+4161	Natural and applied science policy researchers, consultants and program officers		4
+4162	Economists and economic policy researchers and analysts		4
+4163	Business development officers and marketing researchers and consultants		4
+4164	Social policy researchers, consultants and program officers		4
+4165	Health policy researchers, consultants and program officers		4
+4166	Education policy researchers, consultants and program officers		4
+4167	Recreation, sports and fitness policy researchers, consultants and program officers		4
+4168	Program officers unique to government		4
+4169	Other professional occupations in social science, n.e.c.		4
+4211	Paralegal and related occupations		4
+4212	Social and community service workers		4
+4214	Early childhood educators and assistants		4
+4215	Instructors of persons with disabilities		4
+4216	Other instructors		4
+4217	Other religious occupations		4
+4311	Police officers (except commissioned)		4
+4312	Firefighters		4
+4313	Non-commissioned ranks of the Canadian Forces		4
+4411	Home child care providers		4
+4412	Home support workers, housekeepers and related occupations		4
+4413	Elementary and secondary school teacher assistants		4
+4421	Sheriffs and bailiffs		4
+4422	Correctional service officers		4
+4423	By-law enforcement and other regulatory officers, n.e.c.		4
+5111	Librarians		4
+5112	Conservators and curators		4
+5113	Archivists		4
+5121	Authors and writers		4
+5122	Editors		4
+5123	Journalists		4
+5125	Translators, terminologists and interpreters		4
+5131	Producers, directors, choreographers and related occupations		4
+5132	Conductors, composers and arrangers		4
+5133	Musicians and singers		4
+5134	Dancers		4
+5135	Actors and comedians		4
+5136	Painters, sculptors and other visual artists		4
+5211	Library and public archive technicians		4
+5212	Technical occupations related to museums and art galleries		4
+5221	Photographers		4
+5222	Film and video camera operators		4
+5223	Graphic arts technicians		4
+5224	Broadcast technicians		4
+5225	Audio and video recording technicians		4
+5226	Other technical and co-ordinating occupations in motion pictures, broadcasting and the performing arts		4
+5227	Support occupations in motion pictures, broadcasting, photography and the performing arts		4
+5231	Announcers and other broadcasters		4
+5232	Other performers, n.e.c.		4
+5241	Graphic designers and illustrators		4
+5242	Interior designers and interior decorators		4
+5243	Theatre, fashion, exhibit and other creative designers		4
+5244	Artisans and craftspersons		4
+5245	Patternmakers - textile, leather and fur products		4
+5251	Athletes		4
+5252	Coaches		4
+5253	Sports officials and referees		4
+5254	Program leaders and instructors in recreation, sport and fitness		4
+6211	Retail sales supervisors		4
+6221	Technical sales specialists - wholesale trade		4
+6222	Retail and wholesale buyers		4
+6231	Insurance agents and brokers		4
+6232	Real estate agents and salespersons		4
+6235	Financial sales representatives		4
+6311	Food service supervisors		4
+6312	Executive housekeepers		4
+6313	Accommodation, travel, tourism and related services supervisors		4
+6314	Customer and information services supervisors		4
+6315	Cleaning supervisors		4
+6316	Other services supervisors		4
+6321	Chefs		4
+6322	Cooks		4
+6331	Butchers, meat cutters and fishmongers - retail and wholesale		4
+6332	Bakers		4
+6341	Hairstylists and barbers		4
+6342	Tailors, dressmakers, furriers and milliners		4
+6343	Shoe repairers and shoemakers		4
+6344	Jewellers, jewellery and watch repairers and related occupations		4
+6345	Upholsterers		4
+6346	Funeral directors and embalmers		4
+6411	Sales and account representatives - wholesale trade (non-technical)		4
+6421	Retail salespersons		4
+6511	Maîtres d'hôtel and hosts/hostesses		4
+6512	Bartenders		4
+6513	Food and beverage servers		4
+6521	Travel counsellors		4
+6522	Pursers and flight attendants		4
+6523	Airline ticket and service agents		4
+6524	Ground and water transport ticket agents, cargo service representatives and related clerks		4
+6525	Hotel front desk clerks		4
+6531	Tour and travel guides		4
+6532	Outdoor sport and recreational guides		4
+6533	Casino occupations		4
+6541	Security guards and related security service occupations		4
+6551	Customer services representatives - financial institutions		4
+6552	Other customer and information services representatives		4
+6561	Image, social and other personal consultants		4
+6562	Estheticians, electrologists and related occupations		4
+6563	Pet groomers and animal care workers		4
+6564	Other personal service occupations		4
+6611	Cashiers		4
+6621	Service station attendants		4
+6622	Store shelf stockers, clerks and order fillers		4
+6623	Other sales related occupations		4
+6711	Food counter attendants, kitchen helpers and related support occupations		4
+6721	Support occupations in accommodation, travel and facilities set-up services		4
+6722	Operators and attendants in amusement, recreation and sport		4
+6731	Light duty cleaners		4
+6732	Specialized cleaners		4
+6733	Janitors, caretakers and building superintendents		4
+6741	Dry cleaning, laundry and related occupations		4
+6742	Other service support occupations, n.e.c.		4
+7201	Contractors and supervisors, machining, metal forming, shaping and erecting trades and related occupations		4
+7202	Contractors and supervisors, electrical trades and telecommunications occupations		4
+7203	Contractors and supervisors, pipefitting trades		4
+7204	Contractors and supervisors, carpentry trades		4
+7205	Contractors and supervisors, other construction trades, installers, repairers and servicers		4
+7231	Machinists and machining and tooling inspectors		4
+7232	Tool and die makers		4
+7233	Sheet metal workers		4
+7234	Boilermakers		4
+7235	Structural metal and platework fabricators and fitters		4
+7236	Ironworkers		4
+7237	Welders and related machine operators		4
+7241	Electricians (except industrial and power system)		4
+7242	Industrial electricians		4
+7243	Power system electricians		4
+7244	Electrical power line and cable workers		4
+7245	Telecommunications line and cable workers		4
+7246	Telecommunications installation and repair workers		4
+7247	Cable television service and maintenance technicians		4
+7251	Plumbers		4
+7252	Steamfitters, pipefitters and sprinkler system installers		4
+7253	Gas fitters		4
+7271	Carpenters		4
+7272	Cabinetmakers		4
+7281	Bricklayers		4
+7282	Concrete finishers		4
+7283	Tilesetters		4
+7284	Plasterers, drywall installers and finishers and lathers		4
+7291	Roofers and shinglers		4
+7292	Glaziers		4
+7293	Insulators		4
+7294	Painters and decorators (except interior decorators)		4
+7295	Floor covering installers		4
+7301	Contractors and supervisors, mechanic trades		4
+7302	Contractors and supervisors, heavy equipment operator crews		4
+7303	Supervisors, printing and related occupations		4
+7304	Supervisors, railway transport operations		4
+7305	Supervisors, motor transport and other ground transit operators		4
+7311	Construction millwrights and industrial mechanics		4
+7312	Heavy-duty equipment mechanics		4
+7313	Refrigeration and air conditioning mechanics		4
+7314	Railway carmen/women		4
+7315	Aircraft mechanics and aircraft inspectors		4
+7316	Machine fitters		4
+7318	Elevator constructors and mechanics		4
+7321	Automotive service technicians, truck and bus mechanics and mechanical repairers		4
+7322	Motor vehicle body repairers		4
+7331	Oil and solid fuel heating mechanics		4
+7332	Appliance servicers and repairers		4
+7333	Electrical mechanics		4
+7334	Motorcycle, all-terrain vehicle and other related mechanics		4
+7335	Other small engine and small equipment repairers		4
+7361	Railway and yard locomotive engineers		4
+7362	Railway conductors and brakemen/women		4
+7371	Crane operators		4
+7372	Drillers and blasters - surface mining, quarrying and construction		4
+7373	Water well drillers		4
+7381	Printing press operators		4
+7384	Other trades and related occupations, n.e.c.		4
+7441	Residential and commercial installers and servicers		4
+7442	Waterworks and gas maintenance workers		4
+7444	Pest controllers and fumigators		4
+7445	Other repairers and servicers		4
+7451	Longshore workers		4
+7452	Material handlers		4
+7511	Transport truck drivers		4
+7512	Bus drivers, subway operators and other transit operators		4
+7513	Taxi and limousine drivers and chauffeurs		4
+7514	Delivery and courier service drivers		4
+7521	Heavy equipment operators (except crane)		4
+7522	Public works maintenance equipment operators and related workers		4
+7531	Railway yard and track maintenance workers		4
+7532	Water transport deck and engine room crew		4
+7533	Boat and cable ferry operators and related occupations		4
+7534	Air transport ramp attendants		4
+7535	Other automotive mechanical installers and servicers		4
+7611	Construction trades helpers and labourers		4
+7612	Other trades helpers and labourers		4
+7621	Public works and maintenance labourers		4
+7622	Railway and motor transport labourers		4
+8211	Supervisors, logging and forestry		4
+8221	Supervisors, mining and quarrying		4
+8222	Contractors and supervisors, oil and gas drilling and services		4
+8231	Underground production and development miners		4
+8232	Oil and gas well drillers, servicers, testers and related workers		4
+8241	Logging machinery operators		4
+8252	Agricultural service contractors, farm supervisors and specialized livestock workers		4
+8255	Contractors and supervisors, landscaping, grounds maintenance and horticulture services		4
+8261	Fishing masters and officers		4
+8262	Fishermen/women		4
+8411	Underground mine service and support workers		4
+8412	Oil and gas well drilling and related workers and services operators		4
+8421	Chain saw and skidder operators		4
+8422	Silviculture and forestry workers		4
+8431	General farm workers		4
+8432	Nursery and greenhouse workers		4
+8441	Fishing vessel deckhands		4
+8442	Trappers and hunters		4
+8611	Harvesting labourers		4
+8612	Landscaping and grounds maintenance labourers		4
+8613	Aquaculture and marine harvest labourers		4
+8614	Mine labourers		4
+8615	Oil and gas drilling, servicing and related labourers		4
+8616	Logging and forestry labourers		4
+9211	Supervisors, mineral and metal processing		4
+9212	Supervisors, petroleum, gas and chemical processing and utilities		4
+9213	Supervisors, food, beverage and associated products processing		4
+9214	Supervisors, plastic and rubber products manufacturing		4
+9215	Supervisors, forest products processing		4
+9217	Supervisors, textile, fabric, fur and leather products processing and manufacturing		4
+9221	Supervisors, motor vehicle assembling		4
+9222	Supervisors, electronics manufacturing		4
+9223	Supervisors, electrical products manufacturing		4
+9224	Supervisors, furniture and fixtures manufacturing		4
+9226	Supervisors, other mechanical and metal products manufacturing		4
+9227	Supervisors, other products manufacturing and assembly		4
+9231	Central control and process operators, mineral and metal processing		4
+9232	Petroleum, gas and chemical process operators		4
+9235	Pulping, papermaking and coating control operators		4
+9241	Power engineers and power systems operators		4
+9243	Water and waste treatment plant operators		4
+9411	Machine operators, mineral and metal processing		4
+9412	Foundry workers		4
+9413	Glass forming and finishing machine operators and glass cutters		4
+9414	Concrete, clay and stone forming operators		4
+9415	Inspectors and testers, mineral and metal processing		4
+9416	Metalworking and forging machine operators		4
+9417	Machining tool operators		4
+9418	Other metal products machine operators		4
+9421	Chemical plant machine operators		4
+9422	Plastics processing machine operators		4
+9423	Rubber processing machine operators and related workers		4
+9431	Sawmill machine operators		4
+9432	Pulp mill machine operators		4
+9433	Papermaking and finishing machine operators		4
+9434	Other wood processing machine operators		4
+9435	Paper converting machine operators		4
+9436	Lumber graders and other wood processing inspectors and graders		4
+9437	Woodworking machine operators		4
+9441	Textile fibre and yarn, hide and pelt processing machine operators and workers		4
+9442	Weavers, knitters and other fabric making occupations		4
+9445	Fabric, fur and leather cutters		4
+9446	Industrial sewing machine operators		4
+9447	Inspectors and graders, textile, fabric, fur and leather products manufacturing		4
+9461	Process control and machine operators, food, beverage and associated products processing		4
+9462	Industrial butchers and meat cutters, poultry preparers and related workers		4
+9463	Fish and seafood plant workers		4
+9465	Testers and graders, food, beverage and associated products processing		4
+9471	Plateless printing equipment operators		4
+9472	Camera, platemaking and other prepress occupations		4
+9473	Binding and finishing machine operators		4
+9474	Photographic and film processors		4
+9521	Aircraft assemblers and aircraft assembly inspectors		4
+9522	Motor vehicle assemblers, inspectors and testers		4
+9523	Electronics assemblers, fabricators, inspectors and testers		4
+9524	Assemblers and inspectors, electrical appliance, apparatus and equipment manufacturing		4
+9525	Assemblers, fabricators and inspectors, industrial electrical motors and transformers		4
+9526	Mechanical assemblers and inspectors		4
+9527	Machine operators and inspectors, electrical apparatus manufacturing		4
+9531	Boat assemblers and inspectors		4
+9532	Furniture and fixture assemblers and inspectors		4
+9533	Other wood products assemblers and inspectors		4
+9534	Furniture finishers and refinishers		4
+9535	Plastic products assemblers, finishers and inspectors		4
+9536	Industrial painters, coaters and metal finishing process operators		4
+9537	Other products assemblers, finishers and inspectors		4
+9611	Labourers in mineral and metal processing		4
+9612	Labourers in metal fabrication		4
+9613	Labourers in chemical products processing and utilities		4
+9614	Labourers in wood, pulp and paper processing		4
+9615	Labourers in rubber and plastic products manufacturing		4
+9616	Labourers in textile processing		4
+9617	Labourers in food, beverage and associated products processing		4
+9618	Labourers in fish and seafood processing		4
+9619	Other labourers in processing, manufacturing and utilities		4
