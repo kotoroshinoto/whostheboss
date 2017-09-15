@@ -9,10 +9,10 @@ from canada_data.dataset import DataSet
 class SimpleModel:
     def __init__(self):
         self.parameters = {'vect__ngram_range': [(1, 1), (1, 2)],
-              'tfidf__use_idf': (True, False),
+              # 'tfidf__use_idf': (True, False),
               'clf__alpha': (1e-2, 1e-3)}
         self.clf_pipe = Pipeline([('vect', CountVectorizer(stop_words='english')),
-                 ('tfidf', TfidfTransformer()),
+                 # ('tfidf', TfidfTransformer()),
                  ('clf', MultinomialNB(alpha=1e-3))])
         self.clf = GridSearchCV(self.clf_pipe, self.parameters, n_jobs=-1)
 
