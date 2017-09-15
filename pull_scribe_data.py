@@ -1,32 +1,18 @@
-import sqlalchemy
-import sqlalchemy.orm
-import pandas as pd
-from kmodes import kmodes
-from kmodes import kprototypes
+#!/usr/bin/env python
+from scribe_data.dbhandler import DbHandler
+from scribe_data.dbhandler import DataFramePickler
+import click
 
-class DB_handler:
-    def __init__(self,user: str, password: str, url: str):
-        self.db = sqlalchemy.create_engine("postgresql://" + user + ":" + password + "@" + url)
-        self.sessionmkr = sqlalchemy.orm.sessionmaker(autoflush=False, bind=self.db)
 
-    def grab_usa_medium_tech_data(self):
-        querystr = "select * from email_list where \"companyCountry\" = 'United States' and \"industry\" in ('computer software','information technology and services,internet','marketing and advertising','internet') and \"employeeCount\" < 500 and \"emailError\" = False;"
-        sess = self.sessionmkr()
-        df = pd.read_sql_query(querystr, self.db)
-        return df
-
-    def grab_usa_data(self):
-        querystr = "select * from email_list where \"companyCountry\" = 'United States' and \"emailError\" = False;"
-        sess = self.sessionmkr()
-        df = pd.read_sql_query(querystr, self.db)
-        return df
+@click.command()
+@click.argument('url', type=click.STRING, required=True)
+@click.option('--user', type=click.STRING, prompt=True, hide_input=False, required=True)
+@click.option('--pwd', type=click.STRING, prompt=True, hide_input=True, required=True)
+def main(url, user, pwd):
+    dbh = DbHandler(url, user, pwd)
+    df = dbh.grab_usa_medium_tech_data()
+    DataFramePickler.save_as_pickle(df, './SavedScribeQueries/midsize_tech_usa.P')
 
 
 if __name__ == "__main__":
-    user = "mgooch"
-    pwd = "SSJ699Goku!"
-    dbstr = "localhost/scribe"
-    dbh = DB_handler(user, pwd, dbstr)
-    df = dbh.grab_usa_medium_tech_data()
-    print(df.shape)
-    print(df.columns)
+    main()

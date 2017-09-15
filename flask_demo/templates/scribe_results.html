@@ -1,0 +1,25 @@
+<html>
+ <head>
+    <title>Scribe Consulting Project</title>
+ </head>
+ <p>
+    <h1>Job Title Classification</h1><br>
+    <p style="font-size:20px"><a href="/">Back</a>
+    <h2><b>Class Assignments for subset of Scribe's Data</b></h2>
+    {{query_string}}
+    <table>
+        <tr>
+            <td>
+                <h2>Classified by Uncombined Text Model</h2><br>
+                <img src="{{url_for('static', filename='img/usa_midsize_tech_histogram.png')}}">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h2>Classified by Combined Text Model</h2><br>
+                <img src="{{url_for('static', filename='img/combined_usa_midsize_tech_histogram.png')}}">
+            </td>
+        </tr>
+    </table>
+ </body>
+</html>

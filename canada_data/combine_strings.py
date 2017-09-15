@@ -23,6 +23,13 @@ class TitleRecord:
         return " ".join(text)
 
 
+def append_empty_string_class(xvec, yvec, label='NA'):
+    num_to_add = int(len(xvec)/4)
+    for i in range(num_to_add):
+        xvec.append("")
+        yvec.append(label)
+
+
 def read_levels(filename) -> 'Dict[str, str]':
     levels = reader(open(filename), dialect='excel-tab')
     first_line = next(levels)
