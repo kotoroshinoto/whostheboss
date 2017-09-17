@@ -1,18 +1,16 @@
+import os
+
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import psycopg2
+import seaborn as sns
 from flask import render_template
 from flask import request
 from sqlalchemy import create_engine
+
 from canada_model import *
-from canada_data.combine_strings import *
 from flask_demo import app
-from flask_demo.a_Model import ModelIt
-import numpy as np
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import seaborn as sns
-import sys
-import os
 from scribe_data.dbhandler import DataFramePickler
 
 user = 'mgooch' #add your username here (same as previous postgreSQL)
@@ -59,23 +57,26 @@ class ClassificationReporter:
         return df
 
 
-model = SimpleModel.load_from_pickle('./TrainedModels/simple.P', is_path=True)  # type: SimpleModel
-valid = DataSet.load_from_pickle('./Validation_And_Test_Sets/simple.valid.set.P', is_path=True)  # type: DataSet
-test = DataSet.load_from_pickle('./Validation_And_Test_Sets/simple.test.set.P', is_path=True)  # type: DataSet
-valid_pred = model.clf.predict(valid.X)
-test_pred = model.clf.predict(test.X)
+force_img_generation = False
 
-valid_report = ClassificationReporter(valid.Y, valid_pred, valid.encoder.classes_)
-test_report = ClassificationReporter(test.Y, test_pred, test.encoder.classes_)
+
+model = SimpleModel.load_from_pickle('./TrainedModels/simple.P', is_path=True)  # type: SimpleModel
+valid = TitleSet.load_from_pickle('./Validation_And_Test_Sets/simple.valid.set.P', is_path=True)  # type: TitleSet
+test = TitleSet.load_from_pickle('./Validation_And_Test_Sets/simple.test.set.P', is_path=True)  # type: TitleSet
+valid_pred = model.clf.predict(valid.titles)
+test_pred = model.clf.predict(test.titles)
+
+valid_report = ClassificationReporter(valid.codes, valid_pred, valid.encoder.classes_)
+test_report = ClassificationReporter(test.codes, test_pred, test.encoder.classes_)
 
 combined_model = SimpleModel.load_from_pickle('./TrainedModels/simple.combined.P', is_path=True)  # type: SimpleModel
-combined_valid = DataSet.load_from_pickle('./Validation_And_Test_Sets/simple.valid.set.combined.P', is_path=True)  # type: DataSet
-combined_test = DataSet.load_from_pickle('./Validation_And_Test_Sets/simple.test.set.combined.P', is_path=True)  # type: DataSet
-combined_valid_pred = combined_model.clf.predict(combined_valid.X)
-combined_test_pred = combined_model.clf.predict(combined_test.X)
+combined_valid = TitleSet.load_from_pickle('./Validation_And_Test_Sets/simple.valid.set.combined.P', is_path=True)  # type: TitleSet
+combined_test = TitleSet.load_from_pickle('./Validation_And_Test_Sets/simple.test.set.combined.P', is_path=True)  # type: TitleSet
+combined_valid_pred = combined_model.clf.predict(combined_valid.titles)
+combined_test_pred = combined_model.clf.predict(combined_test.titles)
 
-combined_valid_report = ClassificationReporter(combined_valid.Y, combined_valid_pred, combined_valid.encoder.classes_)
-combined_test_report = ClassificationReporter(combined_test.Y, combined_test_pred, combined_test.encoder.classes_)
+combined_valid_report = ClassificationReporter(combined_valid.codes, combined_valid_pred, combined_valid.encoder.classes_)
+combined_test_report = ClassificationReporter(combined_test.codes, combined_test_pred, combined_test.encoder.classes_)
 
 code_table = read_levels('./TrainingData/training_sources/raw/NOC/all_codes')
 code_table['NA'] = "Not able to classify"
@@ -102,7 +103,7 @@ do_scribe_predicts(True, 'combined_class')
 def generate_canada_category_plot(output_fname, empty_class):
     code_file = './TrainingData/training_sources/raw/NOC/all_codes'
     example_file = './TrainingData/training_sources/raw/NOC/all_examples'
-    dataset = DataSet.from_files(code_file, example_file, 2, False, empty_class)
+    dataset = TitleSet.from_files(, example_file, 2, code_file, False, empty_class
     # print(dataset.encoder.classes_)
     df = pd.DataFrame()
     df['description'] = pd.Series(dataset.X)
@@ -129,10 +130,9 @@ def generate_scribe_category_plot(output_fname, label: str ='class'):
 def index():
     img_path = os.path.abspath('./flask_demo/static/img/canada_histogram.png')
     img_path_with_emptycat = os.path.abspath('./flask_demo/static/img/canada_histogram_emptycat.png')
-    force = True
-    if force or not os.path.exists(img_path):
+    if force_img_generation or not os.path.exists(img_path):
         generate_canada_category_plot(img_path, False)
-    if force or not os.path.exists(img_path_with_emptycat):
+    if force_img_generation or not os.path.exists(img_path_with_emptycat):
         generate_canada_category_plot(img_path_with_emptycat, True)
     return render_template("index.html",title = 'Home', user = { 'nickname': 'Miguel' },)
 
@@ -190,10 +190,9 @@ def scribe_results():
     query_string ="select * from email_list where \"companyCountry\" = 'United States' and \"industry\" in ('computer software','information technology and services,internet','marketing and advertising','internet') and \"employeeCount\" < 500 and \"emailError\" = False;"
     img_path = os.path.abspath('./flask_demo/static/img/usa_midsize_tech_histogram.png')
     combined_img_path = os.path.abspath('./flask_demo/static/img/combined_usa_midsize_tech_histogram.png')
-    force = True
-    if force or not os.path.exists(img_path):
+    if force_img_generation or not os.path.exists(img_path):
         generate_scribe_category_plot(img_path, 'class')
-    if force or not os.path.exists(combined_img_path):
+    if force_img_generation or not os.path.exists(combined_img_path):
         generate_scribe_category_plot(combined_img_path, 'combined_class')
     return render_template("scribe_results.html", query_string=query_string)
 

@@ -2,7 +2,7 @@
 import pickle
 import click
 from sklearn import metrics
-from canada_data.dataset import DataSet
+from canada_data.titles import TitleSet
 from canada_data.simple_model import SimpleModel
 
 
@@ -49,15 +49,15 @@ def simple(code_file, example_file, model_filepath, valid_filepath, test_filepat
 def test_simple(model_file, validation_file, test_file):
     """Run test on model with validation set and test set"""
     model = SimpleModel.load_from_pickle(model_file)  # type: SimpleModel
-    valid = DataSet.load_from_pickle(validation_file)  # type: DataSet
-    valid_pred = model.clf.predict(valid.X)
+    valid = TitleSet.load_from_pickle(validation_file)  # type: TitleSet
+    valid_pred = model.clf.predict(valid.titles)
     print("Validation Set:")
-    print(metrics.classification_report(valid.Y, valid_pred))
+    print(metrics.classification_report(valid.codes, valid_pred))
     # print(metrics.confusion_matrix(valid.Y, valid_pred))
-    test = DataSet.load_from_pickle(test_file)  # type: DataSet
-    test_pred = model.clf.predict(test.X)
+    test = TitleSet.load_from_pickle(test_file)  # type: TitleSet
+    test_pred = model.clf.predict(test.titles)
     print("Test Set:")
-    print(metrics.classification_report(test.Y, test_pred))
+    print(metrics.classification_report(test.codes, test_pred))
     # print(metrics.confusion_matrix(test.Y, test_pred))
 
 
