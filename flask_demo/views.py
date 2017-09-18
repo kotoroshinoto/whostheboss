@@ -69,12 +69,12 @@ all_codes.add_code(CodeRecord(code="NA", desc="Not able to classify"))
 classes.append("NA")
 
 #models
-simple_model = SimpleModel.load_from_pickle('./TrainedModels/simple.P', is_path=True)  # type: SimpleModel
-simple_combined_model = SimpleModel.load_from_pickle('./TrainedModels/simple.combined.P', is_path=True)  # type: SimpleModel
+simple_model = SimpleModel.load_from_pickle('./TrainedModels/simple.lvl2.P', is_path=True)  # type: SimpleModel
+simple_combined_model = SimpleModel.load_from_pickle('./TrainedModels/simple.combined.lvl2.P', is_path=True)  # type: SimpleModel
 
 #dataset
-valid = TitleSet.load_from_pickle('./Validation_And_Test_Sets/valid.set.P', is_path=True)  # type: TitleSet
-test = TitleSet.load_from_pickle('./Validation_And_Test_Sets/test.set.P', is_path=True)  # type: TitleSet
+valid = TitleSet.load_from_pickle('./Validation_And_Test_Sets/valid.set.lvl2.P', is_path=True)  # type: TitleSet
+test = TitleSet.load_from_pickle('./Validation_And_Test_Sets/test.set.lvl2.P', is_path=True)  # type: TitleSet
 combined_valid = valid.generate_combined(codes=all_codes, target_level=2)  # type: TitleSet
 combined_test = valid.generate_combined(codes=all_codes, target_level=2)  # type: TitleSet
 
