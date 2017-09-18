@@ -3,7 +3,8 @@
 #TODO both combined and uncombined versions to have a proper test of it
 
 echo "Processing DataSet"
-./canada_model.py gen_data \
+python \
+./main.py canada_model gen_data \
 --example_file ./TrainingData/training_sources/raw/NOC/all_examples \
 --train_filepath ./Validation_And_Test_Sets/train.set.P \
 --valid_filepath ./Validation_And_Test_Sets/valid.set.P \
@@ -17,7 +18,8 @@ echo "Finished Processing"
 
 
 echo "Starting Uncombined Train"
-./canada_model.py simple \
+python \
+./main.py canada_model simple \
 --target 2 \
 --train_filepath ./Validation_And_Test_Sets/train.set.P \
 --model_filepath ./TrainedModels/simple.P \
@@ -25,7 +27,8 @@ echo "Starting Uncombined Train"
 echo "Completed Uncombined Train"
 
 echo "Starting Combined Train"
-./canada_model.py simple \
+python \
+./main.py canada_model simple \
 --code_file ./TrainingData/training_sources/raw/NOC/all_codes \
 --target 2 \
 --train_filepath ./Validation_And_Test_Sets/train.set.P \
@@ -33,12 +36,15 @@ echo "Starting Combined Train"
  || { echo "Combined Train Failed"; return; }
 echo "Completed Combined Train"
 
-./canada_model.py test_simple TrainedModels/simple.P Validation_And_Test_Sets/valid.set.P Validation_And_Test_Sets/test.set.P 2
+python \
+./main.py canada_model test_simple TrainedModels/simple.P Validation_And_Test_Sets/valid.set.P Validation_And_Test_Sets/test.set.P 2
 
-./canada_model.py test_simple \
+python \
+./main.py canada_model test_simple \
 --code_file ./TrainingData/training_sources/raw/NOC/all_codes \
 TrainedModels/simple.combined.P Validation_And_Test_Sets/valid.set.P Validation_And_Test_Sets/test.set.P 2
 
-./canada_model.py test_simple --no-test_combine \
+python \
+./main.py canada_model test_simple --no-test_combine \
 --code_file ./TrainingData/training_sources/raw/NOC/all_codes \
 TrainedModels/simple.combined.P Validation_And_Test_Sets/valid.set.P Validation_And_Test_Sets/test.set.P 2

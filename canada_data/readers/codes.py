@@ -38,11 +38,33 @@ class AllCodes:
         else:
             raise ("unparseable label detected: %s" % code_text)
 
-    def add_codes_from_file(self, filename):
+    def add_codes_from_file(self, filename, toss_first_line=False):
         levels = reader(open(filename), dialect='excel-tab')
-        first_line = next(levels)
+        if toss_first_line:
+            first_line = next(levels)
         for entry in levels:
             codes = AllCodes._parse_code_column(entry[0])
             for code in codes:
                 coderecord = CodeRecord(code, entry[1])
                 self.add_code(coderecord)
+
+    def get_codes_for_level(self, target_level=1):
+        codes = list()
+        for code_key in self.codes:  # type: CodeRecord
+            code = self.codes[code_key]
+            if code.get_level() == target_level:
+                codes.append(code.code)
+        return codes
+
+    def get_codes_for_fitting_multi_level(self, target_level=1) -> 'Dict[int, List[str]]':
+        codes_by_level = dict()  # type: Dict[int, List[str]]
+        codes_by_level[0] = [""]
+        for code_key in self.codes:  # type: CodeRecord
+            code = self.codes[code_key]
+            code_level = code.get_level()
+            if code_level < target_level:
+                # print("code_key: %s" % code_key)
+                if code_level not in codes_by_level:
+                    codes_by_level[code_level] = list()
+                codes_by_level[code_level].append(code.code)
+        return codes_by_level

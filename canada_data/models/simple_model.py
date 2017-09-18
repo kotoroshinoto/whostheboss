@@ -4,7 +4,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 from canada_data.readers.codes import AllCodes
-from canada_data.readers.titles import TitleSet
+from canada_data.readers.titles import TitleSet, TitleRecord
 from typing import Tuple
 
 
@@ -44,6 +44,9 @@ class SimpleModel:
 
     def predict(self, title_set: 'TitleSet'):
         return self.clf.predict(title_set.get_title_vec())
+
+    def predict_one(self, title_record: 'TitleRecord') -> str:
+        return self.clf.predict([title_record.title])[0]
 
     @classmethod
     def new_from_files(cls, code_file, example_file, target_level=2, combine=False, append_empty_class=False,

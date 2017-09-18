@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from typing import List,Dict
+from typing import List, Dict
 import sys
 import os
 import os.path
@@ -78,11 +78,11 @@ def generate_training_set(tsetmap, sourcehandle, outhandle):
 
 
 @click.group()
-def main():
+def training_set_cli():
     pass
 
 
-@main.group()
+@training_set_cli.group()
 def generate():
     pass
 
@@ -114,4 +114,4 @@ def generate_from_file(deffile, output, source):
 
 
 if __name__ == "__main__":
-    main()
+    training_set_cli()

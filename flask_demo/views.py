@@ -64,7 +64,9 @@ scribe_query_df = DataFramePickler.load_from_pickle('./SavedScribeQueries/midsiz
 
 all_codes = AllCodes()
 all_codes.add_codes_from_file('./TrainingData/training_sources/raw/NOC/all_codes')
+classes = all_codes.get_codes_for_level(target_level=2)
 all_codes.add_code(CodeRecord(code="NA", desc="Not able to classify"))
+classes.append("NA")
 
 #models
 simple_model = SimpleModel.load_from_pickle('./TrainedModels/simple.P', is_path=True)  # type: SimpleModel
@@ -84,10 +86,10 @@ combined_valid_pred = simple_combined_model.predict(combined_valid)
 combined_test_pred = simple_combined_model.predict(combined_test)
 
 #generate reports
-valid_report = ClassificationReporter(valid.get_code_vec(target_level=2), valid_pred)
-test_report = ClassificationReporter(test.get_code_vec(target_level=2), test_pred)
-combined_valid_report = ClassificationReporter(combined_valid.get_code_vec(target_level=2), combined_valid_pred)
-combined_test_report = ClassificationReporter(combined_test.get_code_vec(target_level=2), combined_test_pred)
+valid_report = ClassificationReporter(valid.get_code_vec(target_level=2), valid_pred, classes=classes)
+test_report = ClassificationReporter(test.get_code_vec(target_level=2), test_pred, classes=classes)
+combined_valid_report = ClassificationReporter(combined_valid.get_code_vec(target_level=2), combined_valid_pred, classes=classes)
+combined_test_report = ClassificationReporter(combined_test.get_code_vec(target_level=2), combined_test_pred, classes=classes)
 
 
 def do_scribe_predicts(combined: bool, label='class'):
@@ -206,6 +208,7 @@ def scribe_results():
 def classify_text_output():
     test_text = request.form['job_title_test']
     test_pred = simple_model.clf.predict([test_text])
-    pred_descript = all_codes.codes[test_pred[0]]
+    code_record = all_codes.codes[test_pred[0]]  # type: CodeRecord
+    pred_descript = code_record.desc
     # print(test_pred[0])
     return render_template("output.html", test_text=test_text, class_id=test_pred[0], class_text=pred_descript)

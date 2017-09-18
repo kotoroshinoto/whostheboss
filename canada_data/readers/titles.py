@@ -4,7 +4,7 @@ import sys
 from csv import reader
 from typing import List, Dict, Tuple
 from sklearn.model_selection import train_test_split
-from canada_data.readers.codes import AllCodes
+from canada_data.readers.codes import AllCodes,CodeRecord
 import pandas as pd
 
 
@@ -56,6 +56,9 @@ class TitleSet:
             else:
                 counts[code] += 1
         return counts
+
+    def add_title(self, title_record):
+        self.records.append(title_record)
 
     def add_titles_from_file(self, filename):
         titles = reader(open(filename, 'r'), dialect='excel-tab')
@@ -181,3 +184,31 @@ class TitleSet:
                                                                                     target_level=target_level))
             new_set.records.append(new_trecord)
         return new_set
+
+    def get_sets_for_fitting_multi_level(self, all_codes: 'AllCodes', target_level=1) -> 'Dict[str, TitleSet]':
+        """
+        This function will assemble the target codes for fitting title_set for classifier at various levels
+         and with given parent code. Indexable by parent_code
+        """
+        sets_for_codes = dict()  # type: Dict[str, TitleSet]
+        # empty string for no parent (first level)
+        sets_for_codes[""] = TitleSet()
+        for code_key in all_codes.codes:  # type: CodeRecord
+            code = all_codes.codes[code_key]
+            code_level = code.get_level()
+            if code_level < target_level:
+                # print("code_key: %s" % code_key)
+                sets_for_codes[code.code] = TitleSet()
+
+        for title_record in self.records:
+        # for each record
+            for previous_level in range(target_level):
+                # for each level
+                parent_code = title_record.get_code(previous_level)
+                if len(title_record.title) == 0:
+                    target_code = title_record.code
+                else:
+                    target_code = title_record.get_code(previous_level + 1)
+                # print("%s\t%s" % (parent_code, target_code))
+                sets_for_codes[parent_code].add_title(title_record)
+        return sets_for_codes

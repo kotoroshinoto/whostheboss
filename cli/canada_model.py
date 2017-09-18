@@ -7,11 +7,12 @@ from canada_data.readers.codes import AllCodes, CodeRecord
 
 
 @click.group()
-def main():
+def canada_model_cli():
+    """Tools for working with Canadian JobTitle Database"""
     pass
 
 
-@main.command(name="gen_data")
+@canada_model_cli.command(name="gen_data")
 @click.option('--target', type=click.IntRange(1, 4), default=2, help="train against this code abstraction level")
 @click.option('--example_file', type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True), required=True, help="This file should contain all examples with their level 4 coding in tab-separated format")
 @click.option('--train_filepath', type=click.File('wb'), default=None, help="Location where training set will be saved in pickle format")
@@ -21,6 +22,7 @@ def main():
 @click.option('--test_prop', type=click.FLOAT, default= 0.20, help="value between 0.0 and 1.0 designation proportion to be used for test set")
 @click.option('--emptyset/--no-emptyset', default=False, help="Add Empty String Dataset labeled 'Unknown'")
 def generate_data_set(target, example_file, train_filepath, valid_filepath, test_filepath, valid_prop, test_prop, emptyset):
+    """Generate Train/Validate/Test Sets"""
     all_titles = TitleSet()
     # print("Reading Titles")
     all_titles.add_titles_from_file(filename=example_file)
@@ -46,7 +48,7 @@ def generate_data_set(target, example_file, train_filepath, valid_filepath, test
     test.save_as_pickle(file=test_filepath, is_path=False)
 
 
-@main.command()
+@canada_model_cli.command()
 @click.option('--code_file', type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True), default=None, help="This file should contain all codes and descriptions in tab-separated format. If provided, descriptions will be combined against corresponding titles")
 @click.option('--model_filepath', type=click.File('wb'), default=None, help="Location where model will be saved in pickle format")
 @click.option('--train_filepath', type=click.File('rb'), default=None, help="Location where training set will be read in pickle format")
@@ -65,7 +67,7 @@ def simple(code_file, model_filepath, train_filepath, target):
     mdl.save_as_pickle(file=model_filepath, is_path=False)
 
 
-@main.command()
+@canada_model_cli.command()
 @click.option('--code_file', type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True), default=None, help="This file should contain all codes and descriptions in tab-separated format. If provided, descriptions will be combined against corresponding titles")
 @click.option('--test_combine/--no-test_combine', default=True, help="Sets whether to combine codes into the test set or not")
 @click.argument('model_file', type=click.File('rb'), required=True)
@@ -100,7 +102,7 @@ def test_simple(code_file, test_combine, model_file, validation_file, test_file,
     # print(metrics.confusion_matrix(test.Y, test_pred))
 
 
-@main.command(name='multi')
+@canada_model_cli.command(name='multi')
 @click.option('--code_file', type=click.File('r'), required=True, help="This file should contain all codes and descriptions in tab-separated format")
 @click.option('--example_file', type=click.File('r'), required=True, help="This file should contain all examples with their level 4 coding in tab-separated format")
 @click.option('--model_filepath', type=click.File('wb'), default='./TrainedModels/multi.P', help="Location where model will be saved in pickle format")
@@ -111,4 +113,4 @@ def multi_step(code_file, example_file, model_filepath):
 
 
 if __name__ == "__main__":
-    main()
+    canada_model_cli()
