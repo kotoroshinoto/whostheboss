@@ -70,10 +70,10 @@ class MultiStepModel:
             target_level=self.target_level
         )
         for setkey in sets_for_codes:
-            print(setkey)
+            # print(setkey)
             code_set = sets_for_codes[setkey]
-            print(sorted(list(set(code_set.get_code_vec()))))
-            print("model believes its target level is: %d" % self.models[setkey].target_level)
+            # print(sorted(list(set(code_set.get_code_vec()))))
+            # print("model believes its target level is: %d" % self.models[setkey].target_level)
             self.models[setkey].fit(code_set)
 
     def predict(self, title_set: 'TitleSet') -> 'MultiStepPreds':

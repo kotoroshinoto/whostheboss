@@ -52,10 +52,13 @@ def simple():
 @click.option('--train_filepath', type=click.File('rb'), required=True, help="Location where training set will be read in pickle format")
 @click.option('--target_level', type=click.IntRange(1, 4), default=1, help="train against this code abstraction level")
 @click.option('--emptyset', type=click.STRING, default=None, help="Add Empty String Dataset with given label to training set before fitting, if you provide an empty string label, default 'NA' will be used instead")
-def generate_simple_model(model_filepath, train_filepath, target_level, emptyset):
+@click.option('--oversample/--no-oversample', default=False, help="toggle random oversampling")
+def generate_simple_model(model_filepath, train_filepath, target_level, emptyset, oversample):
     """Use Simple Model, predict one specific category level all at once"""
     train = TitleSet.load_from_pickle(train_filepath)
     mdl = SimpleModel(target_level=target_level, emptyset_label=emptyset)
+    if oversample:
+        train = train.copy_and_oversample_to_flatten_stratification()
     mdl.fit(title_set=train)
     if model_filepath is None:
         model_filepath=open('./pickles/TrainedModels/simple.P', 'wb')
@@ -105,10 +108,13 @@ def multi():
 @click.option('--model_filepath', type=click.File('wb'), required=True, help="Location where model will be saved in pickle format")
 @click.option('--train_filepath', type=click.File('rb'), required=True, help="Location where training set will be read in pickle format")
 @click.option('--emptyset', type=click.STRING, default=None, help="Add Empty String Dataset with given label to training set before fitting, if you provide an empty string label, default 'NA' will be used instead")
-def generate_multi_step_model(code_file, train_filepath, model_filepath, emptyset, target_level):
+@click.option('--oversample/--no-oversample', default=False, help="toggle random oversampling")
+def generate_multi_step_model(code_file, train_filepath, model_filepath, emptyset, target_level, oversample):
     """Use Multi-Step Model, Predicts one layer of granularity at a time\n
     It will train multiple sub-models to discriminate among the subclasses of the upper category level"""
     train_titleset = TitleSet.load_from_pickle(file=train_filepath, is_path=False)
+    if oversample:
+        train_titleset = train_titleset.copy_and_oversample_to_flatten_stratification()
     msm = MultiStepModel(target_level=target_level, all_codes_filename=code_file, emptyset_label=emptyset)
     msm.fit(title_set=train_titleset)
     msm.save_as_pickle(model_filepath, is_path=False)

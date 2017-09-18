@@ -48,8 +48,9 @@ class SimpleModel:
         return smdl
 
     def fit(self, title_set: 'TitleSet'):
+        class_counts = title_set.count_classes()
         if self.emptyset_label is not None:
-            working_title_set = title_set.copy_and_append_empty_string_class(label=self.emptyset_label)
+            working_title_set = title_set.copy_and_append_empty_string_class(label=self.emptyset_label, prop_records = 1.0 / len(class_counts))
         else:
             working_title_set = title_set
         X, Y = working_title_set.split_into_title_and_code_vecs(target_level=self.target_level)

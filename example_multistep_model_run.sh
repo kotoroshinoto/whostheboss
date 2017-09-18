@@ -28,6 +28,7 @@ python ./main.py canada_model multi train \
 --train_filepath ./source_data/pickles/canada/test_sets/train.set.lvl3.P \
 --target_level 2 \
 --emptyset NA
+#--oversample
 
 python ./main.py canada_model multi train \
 --code_file ./source_data/processed/NOC/all_codes \
@@ -35,6 +36,7 @@ python ./main.py canada_model multi train \
 --train_filepath ./source_data/pickles/canada/test_sets/train.set.lvl3.P \
 --target_level 3 \
 --emptyset NA
+#--oversample
 
 #test model
 python ./main.py canada_model multi test --emptyset NA \

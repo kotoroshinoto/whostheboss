@@ -4,6 +4,9 @@ from typing import List, Dict, Tuple
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from .codes import AllCodes, CodeRecord
+from imblearn.over_sampling import RandomOverSampler
+from sklearn.preprocessing import LabelEncoder
+import numpy as np
 
 
 class TitleRecord:
@@ -188,3 +191,50 @@ class TitleSet:
                 # print("%s\t%s" % (parent_code, target_code))
                 sets_for_codes[parent_code].add_title(title_record)
         return sets_for_codes
+
+    def copy_and_oversample_to_flatten_stratification(self) -> 'TitleSet':
+        # counts = self.count_classes(target_level=4)
+        # max_count = -1
+        # max_code = None
+        # for code in counts:
+        #     if counts[code] > max_count:
+        #         max_count = counts[code]
+        #         max_code = code
+        # target_count = max_count * 10
+        # ratio_dict = dict()
+        # for code in counts:
+        #     ratio_dict[code] = target_count - counts[code]
+        # ros = RandomOverSampler(ratio=ratio_dict)
+        title_enc = LabelEncoder()
+        code_enc = LabelEncoder()
+        ros = RandomOverSampler()
+
+        title_vec=self.get_title_vec()
+        title_vec_encoded = title_enc.fit_transform(title_vec)
+
+        code_vec = self.get_code_vec(target_level=4)
+        code_vec_encoded = code_enc.fit_transform(code_vec)
+
+        X = np.array(title_vec_encoded, dtype=np.int).reshape(-1, 1)
+        Y = np.array(code_vec_encoded, dtype=np.int)
+
+        X_resamp, Y_resamp = ros.fit_sample(X=X, y=Y)
+
+        new_set = self.__class__()  # type: TitleSet
+        for trecord in self.records:
+            new_set.add_title(title_record=TitleRecord(
+                code=trecord.code,
+                title=trecord.title,
+                is_emptyset=trecord.is_emptyset)
+            )
+
+        x_rs_vec = list(title_enc.inverse_transform(X_resamp.flatten()))
+        y_rs_vec = list(code_enc.inverse_transform(Y_resamp))
+        # x_rs_vec = list()
+        # for row in x_rs_vec_2D:
+        #     for item in row:
+        #         x_rs_vec.append(item)
+        # print(x_rs_vec)
+        # print(y_rs_vec)
+        new_set.add_titles_from_vecs(title_vec=x_rs_vec, code_vec=y_rs_vec)
+        return new_set

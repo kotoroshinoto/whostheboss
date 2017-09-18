@@ -38,6 +38,7 @@ python \
 --model_filepath ./source_data/pickles/canada/trained_models/simple.lvl1.P \
 --target_level 1 \
 --emptyset NA
+#--oversample
 
 python \
 ./main.py canada_model simple train \
@@ -45,6 +46,7 @@ python \
 --model_filepath ./source_data/pickles/canada/trained_models/simple.lvl2.P \
 --target_level 2 \
 --emptyset NA
+#--oversample
 
 python \
 ./main.py canada_model simple train \
@@ -52,6 +54,7 @@ python \
 --model_filepath ./source_data/pickles/canada/trained_models/simple.lvl3.P \
 --target_level 3 \
 --emptyset NA
+#--oversample
 
 #getting prediction metrics
 python ./main.py canada_model simple test --emptyset NA ./source_data/pickles/canada/trained_models/simple.lvl1.P ./source_data/pickles/canada/test_sets/valid.set.lvl1.P ./source_data/pickles/canada/test_sets/test.set.lvl1.P 1
