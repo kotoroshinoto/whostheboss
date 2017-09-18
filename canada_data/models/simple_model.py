@@ -14,10 +14,14 @@ class SimpleModel:
         self.target_level = target_level
         self.parameters = {
             'vect__ngram_range': [(1, 1), (1, 3)],
-            'clf__alpha': (1e-2, 1e-3)}
+            'clf__alpha': (1e-2, 1e-4),
+            'clf__max_iter': (1000, 2000),
+            'clf__tol': (1e-3, 1e-4)
+        }
+
         self.clf_pipe = Pipeline([
             ('vect', CountVectorizer(stop_words='english')),
-            ('clf', SGDClassifier(alpha=1e-3))
+            ('clf', SGDClassifier(alpha=1e-4, max_iter=1000, tol=1e-4))
             # ('clf', MultinomialNB(alpha=1e-3))
         ])
         self.clf = GridSearchCV(self.clf_pipe, self.parameters, n_jobs=-1)
