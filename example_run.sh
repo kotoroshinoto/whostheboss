@@ -2,34 +2,43 @@
 #TODO need a way to pre-split the dataset so I can use the same validation/test sets on
 #TODO both combined and uncombined versions to have a proper test of it
 
-echo "Starting Uncombined Train"
-./canada_model.py simple \
---code_file ./TrainingData/training_sources/raw/NOC/all_codes \
+echo "Processing DataSet"
+./canada_model.py gen_data \
 --example_file ./TrainingData/training_sources/raw/NOC/all_examples \
---target 2 \
+--train_filepath ./Validation_And_Test_Sets/train.set.P \
+--valid_filepath ./Validation_And_Test_Sets/valid.set.P \
+--test_filepath ./Validation_And_Test_Sets/test.set.P \
 --valid_prop 0.20 \
 --test_prop 0.20 \
---no-combine \
+--target 2 \
+--emptyset \
+ || { echo "Processing Failed"; return; }
+echo "Finished Processing"
+
+
+echo "Starting Uncombined Train"
+./canada_model.py simple \
+--target 2 \
+--train_filepath ./Validation_And_Test_Sets/train.set.P \
 --model_filepath ./TrainedModels/simple.P \
---valid_filepath ./Validation_And_Test_Sets/simple.valid.set.P \
---test_filepath ./Validation_And_Test_Sets/simple.test.set.P \
---emptyset
+ || { echo "Train Failed"; return; }
 echo "Completed Uncombined Train"
 
 echo "Starting Combined Train"
 ./canada_model.py simple \
 --code_file ./TrainingData/training_sources/raw/NOC/all_codes \
---example_file ./TrainingData/training_sources/raw/NOC/all_examples \
 --target 2 \
---valid_prop 0.20 \
---test_prop 0.20 \
---combine \
+--train_filepath ./Validation_And_Test_Sets/train.set.P \
 --model_filepath ./TrainedModels/simple.combined.P \
---valid_filepath ./Validation_And_Test_Sets/simple.valid.set.combined.P \
---test_filepath ./Validation_And_Test_Sets/simple.test.set.combined.P \
---emptyset
+ || { echo "Combined Train Failed"; return; }
 echo "Completed Combined Train"
 
-./canada_model.py test_simple TrainedModels/simple.P Validation_And_Test_Sets/simple.valid.set.P Validation_And_Test_Sets/simple.test.set.P
-./canada_model.py test_simple TrainedModels/simple.combined.P Validation_And_Test_Sets/simple.valid.set.combined.P Validation_And_Test_Sets/simple.test.set.combined.P
+./canada_model.py test_simple TrainedModels/simple.P Validation_And_Test_Sets/valid.set.P Validation_And_Test_Sets/test.set.P 2
 
+./canada_model.py test_simple \
+--code_file ./TrainingData/training_sources/raw/NOC/all_codes \
+TrainedModels/simple.combined.P Validation_And_Test_Sets/valid.set.P Validation_And_Test_Sets/test.set.P 2
+
+./canada_model.py test_simple --no-test_combine \
+--code_file ./TrainingData/training_sources/raw/NOC/all_codes \
+TrainedModels/simple.combined.P Validation_And_Test_Sets/valid.set.P Validation_And_Test_Sets/test.set.P 2

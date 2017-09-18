@@ -1,13 +1,16 @@
 import pickle
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import GridSearchCV
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
-from canada_data.titles import TitleSet
+from canada_data.readers.codes import AllCodes
+from canada_data.readers.titles import TitleSet
+from typing import Tuple
 
 
 class SimpleModel:
-    def __init__(self):
+    def __init__(self, target_level=1):
+        self.target_level = target_level
         self.parameters = {
             'vect__ngram_range': [(1, 1), (1, 3)],
             'clf__alpha': (1e-2, 1e-3)}
@@ -35,22 +38,29 @@ class SimpleModel:
         handle.close()
         return smdl
 
-    def fit(self, dset: 'TitleSet'):
-        self.clf.fit(dset.titles, dset.codes)
+    def fit(self, title_set: 'TitleSet'):
+        X, Y = title_set.split_into_title_and_code_vecs(target_level=self.target_level)
+        self.clf.fit(X, Y)
 
-    def predict(self, dset: 'TitleSet'):
-        return self.clf.predict(dset.titles)
+    def predict(self, title_set: 'TitleSet'):
+        return self.clf.predict(title_set.get_title_vec())
 
     @classmethod
-    def new_from_files(cls, code_file, example_file, target_level=2, combine=False, append_empty_class=False, test_split=0.20, valid_split=0.20) -> 'Tuple[SimpleModel, TitleSet, TitleSet]':
+    def new_from_files(cls, code_file, example_file, target_level=2, combine=False, append_empty_class=False,
+                       test_split=0.20, valid_split=0.20) -> 'Tuple[SimpleModel, TitleSet, TitleSet]':
         """Will return the SimpleModel, a validation set, and a test set in a tuple"""
-        dataset = TitleSet.from_files(, example_file, target_level, code_file, combine, append_empty_class
-        # cat_counts = dataset.count_classes()
-        # for cat in cat_counts:
-        #     print("%s\t%d" % (cat, cat_counts[cat]))
+        dataset = TitleSet()
+        dataset.add_titles_from_file(filename=example_file)
+        if combine:
+            all_codes = AllCodes()
+            all_codes.add_codes_from_file(filename=code_file)
+            dataset=dataset.generate_combined(codes=all_codes)
+        if append_empty_class:
+            dataset.append_empty_string_class()
         train, valid, test = dataset.split_data_valid_train_test(test_split=test_split, valid_split=valid_split)
+        train_x, train_y = train.split_into_title_and_code_vecs(target_level=target_level)
         simple_mdl = cls()
-        simple_mdl.clf.fit(train.X, train.Y)
+        simple_mdl.clf.fit(train_x, train_y)
         return simple_mdl, valid, test
 
 

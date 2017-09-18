@@ -100,10 +100,13 @@ do_scribe_predicts(False, 'class')
 do_scribe_predicts(True, 'combined_class')
 
 
-def generate_canada_category_plot(output_fname, empty_class):
+def generate_canada_category_plot(output_fname, add_empty_class):
     code_file = './TrainingData/training_sources/raw/NOC/all_codes'
     example_file = './TrainingData/training_sources/raw/NOC/all_examples'
-    dataset = TitleSet.from_files(, example_file, 2, code_file, False, empty_class
+    dataset = TitleSet()
+    if add_empty_class:
+        dataset.append_empty_string_class()
+    dataset = TitleSet.from_files(, example_file, 2, code_file, False, add_empty_class
     # print(dataset.encoder.classes_)
     df = pd.DataFrame()
     df['description'] = pd.Series(dataset.X)
