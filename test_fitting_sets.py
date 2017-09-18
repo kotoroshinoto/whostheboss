@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-from canada_data.readers.titles import TitleSet
-from canada_data.readers.codes import AllCodes
-from canada_data.models.multi_model import MultiStepModel
 import pandas as pd
+from scribe_classifier.data.canada.NOCdb.readers.titles import TitleSet
 from sklearn import metrics
+
+from scribe_classifier.data.canada.NOCdb.models import MultiStepModel
 
 target_level = 3
 

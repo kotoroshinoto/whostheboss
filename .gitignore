@@ -1,5 +1,5 @@
-data/
-notes/
+source_data/raw/scribe/entiredb/
+planning_docs/notes/
 SavedScribeQueries/
 
 # Created by .ignore support plugin (hsz.mobi)
