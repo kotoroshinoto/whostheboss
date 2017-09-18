@@ -9,11 +9,6 @@ class CodeRecord:
     def get_level(self):
         return len(self.code)
 
-    # def is_compatible(self, other_code: str, target_level: int):
-    #     if self.get_level() < target_level:
-    #         return False
-    #     return self.code[0:target_level] == other_code[0:target_level]
-
 
 class AllCodes:
     def __init__(self):

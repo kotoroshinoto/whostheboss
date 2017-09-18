@@ -1,5 +1,4 @@
 import os
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -8,17 +7,19 @@ import seaborn as sns
 from flask import render_template
 from flask import request
 from sqlalchemy import create_engine
-
-from canada_model import *
 from flask_demo import app
 from scribe_data.dbhandler import DataFramePickler
+from sklearn import metrics
+from canada_data.models.simple_model import SimpleModel
+from canada_data.readers.titles import TitleSet
+from canada_data.readers.codes import AllCodes, CodeRecord
 
-user = 'mgooch' #add your username here (same as previous postgreSQL)
-host = 'localhost'
-dbname = 'scribe'
-db = create_engine('postgres://%s@%s/%s'%(user, host, dbname))
-con = None
-con = psycopg2.connect(database = dbname, user = user)
+# user = 'mgooch' #add your username here (same as previous postgreSQL)
+# host = 'localhost'
+# dbname = 'scribe'
+# db = create_engine('postgres://%s@%s/%s'%(user, host, dbname))
+# con = None
+# con = psycopg2.connect(database = dbname, user = user)
 
 
 class ClassificationReporter:
@@ -59,29 +60,34 @@ class ClassificationReporter:
 
 force_img_generation = False
 
-
-model = SimpleModel.load_from_pickle('./TrainedModels/simple.P', is_path=True)  # type: SimpleModel
-valid = TitleSet.load_from_pickle('./Validation_And_Test_Sets/simple.valid.set.P', is_path=True)  # type: TitleSet
-test = TitleSet.load_from_pickle('./Validation_And_Test_Sets/simple.test.set.P', is_path=True)  # type: TitleSet
-valid_pred = model.clf.predict(valid.titles)
-test_pred = model.clf.predict(test.titles)
-
-valid_report = ClassificationReporter(valid.codes, valid_pred, valid.encoder.classes_)
-test_report = ClassificationReporter(test.codes, test_pred, test.encoder.classes_)
-
-combined_model = SimpleModel.load_from_pickle('./TrainedModels/simple.combined.P', is_path=True)  # type: SimpleModel
-combined_valid = TitleSet.load_from_pickle('./Validation_And_Test_Sets/simple.valid.set.combined.P', is_path=True)  # type: TitleSet
-combined_test = TitleSet.load_from_pickle('./Validation_And_Test_Sets/simple.test.set.combined.P', is_path=True)  # type: TitleSet
-combined_valid_pred = combined_model.clf.predict(combined_valid.titles)
-combined_test_pred = combined_model.clf.predict(combined_test.titles)
-
-combined_valid_report = ClassificationReporter(combined_valid.codes, combined_valid_pred, combined_valid.encoder.classes_)
-combined_test_report = ClassificationReporter(combined_test.codes, combined_test_pred, combined_test.encoder.classes_)
-
-code_table = read_levels('./TrainingData/training_sources/raw/NOC/all_codes')
-code_table['NA'] = "Not able to classify"
-
 scribe_query_df = DataFramePickler.load_from_pickle('./SavedScribeQueries/midsize_tech_usa.P')
+
+all_codes = AllCodes()
+all_codes.add_codes_from_file('./TrainingData/training_sources/raw/NOC/all_codes')
+all_codes.add_code(CodeRecord(code="NA", desc="Not able to classify"))
+
+#models
+simple_model = SimpleModel.load_from_pickle('./TrainedModels/simple.P', is_path=True)  # type: SimpleModel
+simple_combined_model = SimpleModel.load_from_pickle('./TrainedModels/simple.combined.P', is_path=True)  # type: SimpleModel
+
+#dataset
+valid = TitleSet.load_from_pickle('./Validation_And_Test_Sets/valid.set.P', is_path=True)  # type: TitleSet
+test = TitleSet.load_from_pickle('./Validation_And_Test_Sets/test.set.P', is_path=True)  # type: TitleSet
+combined_valid = valid.generate_combined(codes=all_codes, target_level=2)  # type: TitleSet
+combined_test = valid.generate_combined(codes=all_codes, target_level=2)  # type: TitleSet
+
+
+#predictions
+valid_pred = simple_model.predict(valid)
+test_pred = simple_model.predict(test)
+combined_valid_pred = simple_combined_model.predict(combined_valid)
+combined_test_pred = simple_combined_model.predict(combined_test)
+
+#generate reports
+valid_report = ClassificationReporter(valid.get_code_vec(target_level=2), valid_pred)
+test_report = ClassificationReporter(test.get_code_vec(target_level=2), test_pred)
+combined_valid_report = ClassificationReporter(combined_valid.get_code_vec(target_level=2), combined_valid_pred)
+combined_test_report = ClassificationReporter(combined_test.get_code_vec(target_level=2), combined_test_pred)
 
 
 def do_scribe_predicts(combined: bool, label='class'):
@@ -89,9 +95,9 @@ def do_scribe_predicts(combined: bool, label='class'):
     titles.fillna(value="", inplace=True)
     # print(titles)
     if combined:
-        titles_pred = combined_model.clf.predict(titles)
+        titles_pred = simple_combined_model.clf.predict(titles)
     else:
-        titles_pred = model.clf.predict(titles)
+        titles_pred = simple_model.clf.predict(titles)
     # print(titles_pred)
     scribe_query_df[label] = pd.Series(titles_pred)
 
@@ -104,14 +110,10 @@ def generate_canada_category_plot(output_fname, add_empty_class):
     code_file = './TrainingData/training_sources/raw/NOC/all_codes'
     example_file = './TrainingData/training_sources/raw/NOC/all_examples'
     dataset = TitleSet()
+    dataset.add_titles_from_file(filename=example_file)
     if add_empty_class:
         dataset.append_empty_string_class()
-    dataset = TitleSet.from_files(, example_file, 2, code_file, False, add_empty_class
-    # print(dataset.encoder.classes_)
-    df = pd.DataFrame()
-    df['description'] = pd.Series(dataset.X)
-    df['class'] = pd.Series(dataset.Y)
-    # print(dataset.Y)
+    df = dataset.to_dataframe(target_level=2)
     fig, ax = plt.subplots()
     fig.set_size_inches(14, 9)
     sns.countplot(data=df, x='class', ax=ax)
@@ -203,7 +205,7 @@ def scribe_results():
 @app.route('/output', methods=['POST'])
 def classify_text_output():
     test_text = request.form['job_title_test']
-    test_pred = model.clf.predict([test_text])
-    pred_descript = code_table[test_pred[0]]
+    test_pred = simple_model.clf.predict([test_text])
+    pred_descript = all_codes.codes[test_pred[0]]
     # print(test_pred[0])
     return render_template("output.html", test_text=test_text, class_id=test_pred[0], class_text=pred_descript)

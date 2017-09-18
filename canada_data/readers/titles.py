@@ -5,6 +5,7 @@ from csv import reader
 from typing import List, Dict, Tuple
 from sklearn.model_selection import train_test_split
 from canada_data.readers.codes import AllCodes
+import pandas as pd
 
 
 class TitleRecord:
@@ -36,6 +37,15 @@ class TitleRecord:
 class TitleSet:
     def __init__(self):
         self.records = list()  # type: List[TitleRecord]
+
+    def to_dataframe(self, target_level=1) -> 'pd.DataFrame':
+        titles, codes = self.split_into_title_and_code_vecs(target_level=target_level)
+        title_series = pd.Series(titles)
+        code_series = pd.Series(codes)
+        df = pd.DataFrame()
+        df['codes'] = code_series
+        df['titles'] = title_series
+        return df
 
     def count_classes(self, target_level=1)->'Dict[str, int]':
         counts = dict()
@@ -171,21 +181,3 @@ class TitleSet:
                                                                                     target_level=target_level))
             new_set.records.append(new_trecord)
         return new_set
-
-
-def generate_combined(level_codes: 'Dict[str, str]', title_records: 'List[TitleRecord]', target_level) -> 'Tuple[List[str], List[str]]':
-    x_list = []
-    y_list = []
-    for trecord in title_records:
-        y_list.append(trecord.get_code(target_level))
-        x_list.append(trecord.combine_text(all_codes=level_codes, target_level=target_level))
-    return x_list, y_list
-
-
-def generate_uncombined_text_for_target_level(title_records: 'List[TitleRecord]', target_level) -> 'Tuple[List[str], List[str]]':
-    x_list = []
-    y_list = []
-    for trecord in title_records:
-        y_list.append(trecord.get_code(target_level))
-        x_list.append(trecord.title)
-    return x_list, y_list
