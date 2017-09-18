@@ -1,6 +1,6 @@
 import pickle
 from typing import Tuple
-from scribe_classifier.data.canada.NOCdb.readers.titles import TitleSet, TitleRecord
+from scribe_classifier.data.canada import TitleSet, TitleRecord
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import GridSearchCV
@@ -8,12 +8,12 @@ from sklearn.pipeline import Pipeline
 
 
 class SimpleModel:
-    def __init__(self, target_level=1):
+    def __init__(self, target_level=1, emptyset_label: str=None):
         self.target_level = target_level
         self.parameters = {
-            'vect__ngram_range': [(1, 1), (1, 3)],
-            'clf__alpha': (1e-2, 1e-4),
-            'clf__max_iter': (1000, 2000),
+            'vect__ngram_range': [(1, 1), (2, 4)],
+            'clf__alpha': (1e-2, 1e-5),
+            'clf__max_iter': (1000, 3000),
             'clf__tol': (1e-3, 1e-4)
         }
 
@@ -23,6 +23,11 @@ class SimpleModel:
             # ('clf', MultinomialNB(alpha=1e-3))
         ])
         self.clf = GridSearchCV(self.clf_pipe, self.parameters, n_jobs=-1)
+        if emptyset_label is not None:
+            if emptyset_label == "":
+                self.emptyset_label = "NA"
+            else:
+                self.emptyset_label = emptyset_label
 
     def save_as_pickle(self, file, is_path=False):
         if is_path:
@@ -43,7 +48,11 @@ class SimpleModel:
         return smdl
 
     def fit(self, title_set: 'TitleSet'):
-        X, Y = title_set.split_into_title_and_code_vecs(target_level=self.target_level)
+        if self.emptyset_label is not None:
+            working_title_set = title_set.copy_and_append_empty_string_class(label=self.emptyset_label)
+        else:
+            working_title_set = title_set
+        X, Y = working_title_set.split_into_title_and_code_vecs(target_level=self.target_level)
         self.clf.fit(X, Y)
 
     def predict(self, title_set: 'TitleSet'):
@@ -59,7 +68,7 @@ class SimpleModel:
         dataset = TitleSet()
         dataset.add_titles_from_file(filename=example_file)
         if append_empty_class:
-            dataset.append_empty_string_class()
+            dataset.copy_and_append_empty_string_class()
         train, valid, test = dataset.split_data_valid_train_test(test_split=test_split, valid_split=valid_split)
         train_x, train_y = train.split_into_title_and_code_vecs(target_level=target_level)
         simple_mdl = cls()

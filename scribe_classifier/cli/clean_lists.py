@@ -2,6 +2,8 @@ import re
 import sys
 import os
 import click
+
+
 list_extractor = re.compile("^unique (.+):\[(.+)\]$")
 split_point = re.compile(", u['\"]")
 

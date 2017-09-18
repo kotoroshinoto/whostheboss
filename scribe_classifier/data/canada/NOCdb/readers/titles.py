@@ -3,7 +3,7 @@ from csv import reader
 from typing import List, Dict, Tuple
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from scribe_classifier.data.canada.NOCdb.readers import AllCodes, CodeRecord
+from .codes import AllCodes, CodeRecord
 
 
 class TitleRecord:
@@ -144,10 +144,15 @@ class TitleSet:
         handle.close()
         return ds
 
-    def append_empty_string_class(self, label='NA'):
-        num_to_add = int(len(self.records)/4)
+    def copy_and_append_empty_string_class(self, label='NA', prop_records=0.25) -> 'TitleSet':
+        if label is not None and label == "":
+            label = "NA"
+        new_copy = self.__class__()
+        new_copy.records = list(self.records)
+        num_to_add = int(len(self.records) * prop_records)
         for i in range(num_to_add):
-            self.records.append(TitleRecord(title="", code=label))
+            new_copy.records.append(TitleRecord(title="", code=label))
+        return new_copy
 
     def get_sets_for_fitting_multi_level(self, all_codes: 'AllCodes', target_level=1) -> 'Dict[str, TitleSet]':
         """

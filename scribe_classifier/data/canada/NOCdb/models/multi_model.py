@@ -1,9 +1,6 @@
 # predict 0-9 & Unknown @ first level, then internal classes at next level
 from typing import Dict, List
-
-from NOCdb.readers.titles import TitleSet
-
-from scribe_classifier.data.canada.NOCdb.readers import AllCodes
+from scribe_classifier.data.canada import TitleSet, AllCodes, TitleRecord
 from .simple_model import SimpleModel
 
 
@@ -25,11 +22,18 @@ class OneClassFakeModel:
 
 
 class MultiStepModel:
-    def __init__(self, all_codes_filename, target_level=1):
+    def __init__(self, all_codes_filename, target_level=1, emptyset_label: str=None):
         self.target_level = target_level
         self.all_codes = AllCodes()
         self.all_codes.add_codes_from_file(filename=all_codes_filename)
         self.models = dict()  # type: Dict['str', SimpleModel]
+        # add fakemodel for emptyclasses if needed, this will allow "NA" results to iteratively receive "NA" again
+        if emptyset_label is not None:
+            if emptyset_label == "":
+                self.emptyset_label = "NA"
+            else:
+                self.emptyset_label = emptyset_label
+            self.models[self.emptyset_label] = OneClassFakeModel(target_level=0, class_label=self.emptyset_label)
         self.codes_by_level = self.all_codes.get_codes_for_fitting_multi_level(target_level=4)
         for i in range(self.target_level):
             # print("%d" % i)
@@ -37,8 +41,9 @@ class MultiStepModel:
                 numchild = self.all_codes.get_num_children(code)
                 # print("\t'%s \t %d'" % (code, numchild))
                 if numchild > 1:
-                    self.models[code] = SimpleModel(target_level=(i+1))
+                    self.models[code] = SimpleModel(target_level=(i+1), emptyset_label=self.emptyset_label)
                 else:
+                    #there is nothing to predict if there is only one child class, use Fake Model
                     self.models[code] = OneClassFakeModel(target_level=(i+1), class_label=self.all_codes.get_children(code)[0])
 
     def fit(self, title_set: 'TitleSet'):

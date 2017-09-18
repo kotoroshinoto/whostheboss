@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import click
-from scribe_classifier.data.scribe import DataFramePickler
-from scribe_classifier.data.scribe import DbHandler
+from scribe_classifier.data.scribe import DataFramePickler, DbHandler
 
 
 @click.command()

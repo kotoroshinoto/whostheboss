@@ -115,7 +115,7 @@ def generate_canada_category_plot(output_fname, add_empty_class):
     dataset = TitleSet()
     dataset.add_titles_from_file(filename=example_file)
     if add_empty_class:
-        dataset.append_empty_string_class()
+        dataset.copy_and_append_empty_string_class()
     df = dataset.to_dataframe(target_level=2)
     fig, ax = plt.subplots()
     fig.set_size_inches(14, 9)
