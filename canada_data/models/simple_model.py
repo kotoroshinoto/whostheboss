@@ -5,6 +5,7 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 from canada_data.readers.codes import AllCodes
 from canada_data.readers.titles import TitleSet, TitleRecord
+from sklearn.linear_model import SGDClassifier
 from typing import Tuple
 
 
@@ -16,7 +17,8 @@ class SimpleModel:
             'clf__alpha': (1e-2, 1e-3)}
         self.clf_pipe = Pipeline([
             ('vect', CountVectorizer(stop_words='english')),
-            ('clf', MultinomialNB(alpha=1e-3))
+            ('clf', SGDClassifier(alpha=1e-3))
+            # ('clf', MultinomialNB(alpha=1e-3))
         ])
         self.clf = GridSearchCV(self.clf_pipe, self.parameters, n_jobs=-1)
 
