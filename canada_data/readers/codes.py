@@ -14,6 +14,30 @@ class AllCodes:
     def __init__(self):
         self.codes = dict()  # type: Dict[str, CodeRecord]
 
+    def get_num_children(self, code: str):
+        numchild = 0
+        level = len(code)
+        for code_key in self.codes:
+            if len(code_key) != level + 1:
+                continue
+            short_code = code_key[0:level]
+            if short_code == code:
+                numchild += 1
+        return numchild
+
+    def get_children(self, code: str):
+        children = []
+        level = len(code)
+        for code_key in self.codes:
+            if len(code_key) != level + 1:
+                continue
+            short_code = code_key[0:level]
+            if short_code == code:
+                children.append(code_key)
+        return children
+
+
+
     def add_code(self, coderecord: 'CodeRecord'):
         if coderecord.code not in self.codes:
             self.codes[coderecord.code] = coderecord
