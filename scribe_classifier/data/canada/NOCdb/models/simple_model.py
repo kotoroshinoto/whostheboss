@@ -1,6 +1,6 @@
 import pickle
 from typing import Tuple
-from scribe_classifier.data.canada import TitleSet, TitleRecord
+from ..readers import TitleSet, TitleRecord
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import GridSearchCV

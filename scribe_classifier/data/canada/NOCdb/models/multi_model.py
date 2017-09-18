@@ -1,7 +1,24 @@
 # predict 0-9 & Unknown @ first level, then internal classes at next level
+import pickle
 from typing import Dict, List
-from scribe_classifier.data.canada import TitleSet, AllCodes, TitleRecord
+from ..readers import TitleSet, AllCodes, TitleRecord
 from .simple_model import SimpleModel
+
+
+class MultiStepPreds:
+    def __init__(self):
+        self.preds = list()  # type: List[List[str]]
+
+    def add_preds(self, preds: 'List[str]'):
+        self.preds.append(preds)
+
+    def add_pred(self, target_level: int, pred: str):
+        while target_level > len(self.preds):
+            self.add_preds(list())
+        self.preds[target_level-1].append(pred)
+
+    def get_preds(self, target_level: int):
+        return self.preds[target_level-1]
 
 
 class OneClassFakeModel:
@@ -16,6 +33,7 @@ class OneClassFakeModel:
         preds = []
         for item in title_set.records:
             preds.append(self.oneclass)
+        return preds
 
     def predict_one(self, title_record: 'TitleRecord') -> str:
         return self.oneclass
@@ -58,15 +76,36 @@ class MultiStepModel:
             print("model believes its target level is: %d" % self.models[setkey].target_level)
             self.models[setkey].fit(code_set)
 
-    def predict(self, title_set: 'TitleSet') -> List[str]:
-        preds = []
+    def predict(self, title_set: 'TitleSet') -> 'MultiStepPreds':
+        all_preds = MultiStepPreds()
+        for i in range(self.target_level):
+            all_preds.add_preds(list())
+
         for title_record in title_set.records:
             model = self.models[""]
             pred = model.predict_one(title_record=title_record)
             for i in range(1, self.target_level):
+                all_preds.add_pred(target_level=i, pred=pred)
                 model = self.models[pred]  # type: SimpleModel
                 pred = model.predict_one(title_record=title_record)
-            preds.append(pred)
-        print(preds)
-        return preds
+            all_preds.add_pred(target_level=self.target_level, pred=pred)
+        return all_preds
+
+    def save_as_pickle(self, file, is_path=False):
+        if is_path:
+            handle = open(file, 'wb')
+        else:
+            handle = file
+        pickle.dump(self, handle)
+        handle.close()
+
+    @staticmethod
+    def load_from_pickle(file, is_path=False) -> 'MultiStepModel':
+        if is_path:
+            handle = open(file, 'rb')
+        else:
+            handle = file
+        smdl = pickle.load(handle)
+        handle.close()
+        return smdl
 

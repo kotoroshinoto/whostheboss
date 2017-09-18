@@ -7,12 +7,16 @@ from .codes import AllCodes, CodeRecord
 
 
 class TitleRecord:
-    def __init__(self, code: str, title: str):
+    def __init__(self, code: str, title: str, is_emptyset=False):
         self.code = code  # type: str
         self.title = title  # type: str
+        self.is_emptyset = is_emptyset
 
     def get_code(self, target_level: int):
-        return self.code[0:target_level]
+        if self.is_emptyset:
+            return self.code
+        else:
+            return self.code[0:target_level]
 
     def generate_compatibility_codes(self, target_level: int) -> 'List[str]':
         comp_codes = list()
@@ -24,6 +28,7 @@ class TitleRecord:
 class TitleSet:
     def __init__(self):
         self.records = list()  # type: List[TitleRecord]
+        self.emptyset = None
 
     def to_dataframe(self, target_level=1) -> 'pd.DataFrame':
         titles, codes = self.split_into_title_and_code_vecs(target_level=target_level)
@@ -72,6 +77,7 @@ class TitleSet:
         vec = list()
         for record in self.records:
             vec.append(record.get_code(target_level))
+
         return vec
 
     def split_into_title_and_code_vecs(self, target_level=4):
@@ -147,11 +153,12 @@ class TitleSet:
     def copy_and_append_empty_string_class(self, label='NA', prop_records=0.25) -> 'TitleSet':
         if label is not None and label == "":
             label = "NA"
-        new_copy = self.__class__()
+        new_copy = self.__class__()  # type: TitleSet
         new_copy.records = list(self.records)
         num_to_add = int(len(self.records) * prop_records)
         for i in range(num_to_add):
-            new_copy.records.append(TitleRecord(title="", code=label))
+            new_copy.records.append(TitleRecord(title="", code=label, is_emptyset=True))
+        new_copy.emptyset = label
         return new_copy
 
     def get_sets_for_fitting_multi_level(self, all_codes: 'AllCodes', target_level=1) -> 'Dict[str, TitleSet]':

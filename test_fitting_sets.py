@@ -7,12 +7,9 @@ from scribe_classifier.data.canada.NOCdb.models import MultiStepModel
 
 target_level = 3
 
-titles = TitleSet()
-titles.add_titles_from_file(filename="./TrainingData/training_sources/raw/NOC/all_examples")
 
-msm = MultiStepModel(all_codes_filename="./TrainingData/training_sources/raw/NOC/all_codes", target_level=target_level)
-# exit()
-msm.fit(title_set=titles)
+
+
 preds = msm.predict(title_set=titles)
 
 df = titles.to_dataframe(target_level=4)
