@@ -63,34 +63,27 @@ force_img_generation = False
 
 scribe_query_df = DataFramePickler.load_from_pickle('./SavedScribeQueries/midsize_tech_usa.P')
 
-all_codes = AllCodes()
-all_codes.add_codes_from_file('./TrainingData/training_sources/raw/NOC/all_codes')
+all_codes = AllCodes.load_from_pickle('./source_data/pickles/canada/tidy_sets/all_codes.P', is_path=True)
 classes = all_codes.get_codes_for_level(target_level=2)
 all_codes.add_code(CodeRecord(code="NA", desc="Not able to classify"))
 classes.append("NA")
 
 #models
-simple_model = SimpleModel.load_from_pickle('./TrainedModels/simple.lvl2.P', is_path=True)  # type: SimpleModel
-simple_combined_model = SimpleModel.load_from_pickle('./TrainedModels/simple.combined.lvl2.P', is_path=True)  # type: SimpleModel
+simple_model = SimpleModel.load_from_pickle('./source_data/pickles/canada/trained_models/simple.lvl2.P', is_path=True)  # type: SimpleModel
 
 #dataset
-valid = TitleSet.load_from_pickle('./Validation_And_Test_Sets/valid.set.lvl2.P', is_path=True)  # type: TitleSet
-test = TitleSet.load_from_pickle('./Validation_And_Test_Sets/test.set.lvl2.P', is_path=True)  # type: TitleSet
-combined_valid = valid.generate_combined(codes=all_codes, target_level=2)  # type: TitleSet
-combined_test = valid.generate_combined(codes=all_codes, target_level=2)  # type: TitleSet
+valid = TitleSet.load_from_pickle('./source_data/pickles/canada/test_sets/valid.set.lvl2.P', is_path=True)  # type: TitleSet
+test = TitleSet.load_from_pickle('./source_data/pickles/canada/test_sets/test.set.lvl2.P', is_path=True)  # type: TitleSet
+
 
 
 #predictions
 valid_pred = simple_model.predict_titleset(valid)
 test_pred = simple_model.predict_titleset(test)
-combined_valid_pred = simple_combined_model.predict_titleset(combined_valid)
-combined_test_pred = simple_combined_model.predict_titleset(combined_test)
 
 #generate reports
 valid_report = ClassificationReporter(valid.get_code_vec(target_level=2), valid_pred, classes=classes)
 test_report = ClassificationReporter(test.get_code_vec(target_level=2), test_pred, classes=classes)
-combined_valid_report = ClassificationReporter(combined_valid.get_code_vec(target_level=2), combined_valid_pred, classes=classes)
-combined_test_report = ClassificationReporter(combined_test.get_code_vec(target_level=2), combined_test_pred, classes=classes)
 
 
 def do_scribe_predicts(combined: bool, label='class'):
@@ -154,15 +147,6 @@ def uncombined_validation_results_page():
                            dataframe=valid_report.get_report_dataframe().to_html(index=False))
 
 
-@app.route('/model_combined_validate')
-def combined_validation_results_page():
-    return render_template('model_validate.html',
-                           switch_link_url="/model_combined_test",
-                           switch_link_text="Combined Test Set Classification Metrics",
-                           model_type="Validation Set: Category Descriptions Combined With Job Title Text",
-                           dataframe=combined_valid_report.get_report_dataframe().to_html(index=False))
-
-
 @app.route('/model_uncombined_test')
 def uncombined_test_results_page():
     return render_template('model_validate.html',
@@ -170,15 +154,6 @@ def uncombined_test_results_page():
                            switch_link_text="Uncombined Validation Set Classification Metrics",
                            model_type="Test Set: Uncombined Job Title Text",
                            dataframe=test_report.get_report_dataframe().to_html(index=False))
-
-
-@app.route('/model_combined_test')
-def combined_test_results_page():
-    return render_template('model_validate.html',
-                           switch_link_url="model_combined_validate",
-                           switch_link_text="Combined Validation Set Classification Metrics",
-                           model_type="Test Set: Category Descriptions Combined With Job Title Text ",
-                           dataframe=combined_test_report.get_report_dataframe().to_html(index=False))
 
 
 @app.route('/input')
