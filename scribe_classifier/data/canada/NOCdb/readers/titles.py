@@ -1,12 +1,18 @@
 import pickle
+import re
 from csv import reader
 from typing import List, Dict, Tuple
 import pandas as pd
+from sklearn.feature_extraction.stop_words import ENGLISH_STOP_WORDS
 from sklearn.model_selection import train_test_split
+from slugify import slugify
+
 from .codes import AllCodes, CodeRecord
 from imblearn.over_sampling import RandomOverSampler
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
+from gensim.models.phrases import Phraser
+import pickle
 
 
 class TitleRecord:
@@ -238,3 +244,110 @@ class TitleSet:
         # print(y_rs_vec)
         new_set.add_titles_from_vecs(title_vec=x_rs_vec, code_vec=y_rs_vec)
         return new_set
+
+
+class TitlePreprocessor:
+    male_titles = [
+        'man', 'master', 'actor', 'host', 'waiter', 'headwaiter', 'lord', 'boy', 'brother', 'men'
+    ]
+    female_titles = [
+        'woman', 'mistress', 'actress', 'hostess', 'waitress', 'headwaitress', 'lady', 'girl', 'sister', 'women'
+    ]
+    gender_re1 = re.compile("(.*)(\S*)(%s)[/](%s)(.*)" % ("|".join(male_titles), "|".join(female_titles)))
+    gender_re2 = re.compile("(.*)(\S*)(%s)[/](%s)(.*)" % ("|".join(female_titles), "|".join(male_titles)))
+    prefix_re = re.compile("(^|.*\s)(co)[-](\S+)(.*)")
+    chief_officer_re1 = re.compile("(.*)c[ef]o \(chief (executive|financial) officer\)(.*)")
+    chief_officer_re2 = re.compile("(.*)chief (executive|financial) officer \(c[ef]o\)(.*)")
+
+    @classmethod
+    def preprocess_title_split_chief_officer(cls, t: str) -> 'List[str]':
+        pass
+
+    @classmethod
+    def preprocess_titleset_split_chief_officer(cls, tset: 'TitleSet') -> 'TitleSet':
+        pass
+
+    @classmethod
+    def preprocess_title_split_genders(cls, t: 'str') -> 'List[str]':
+        match_obj = cls.gender_re1.match(t)
+        if match_obj:
+            mog = match_obj.groups()
+            title_m = "%s%s%s%s" % (mog[0], mog[1], mog[2], mog[4])
+            title_f = "%s%s%s%s" % (mog[0], mog[1], mog[3], mog[4])
+            return [title_m, title_f]
+        match_obj = cls.gender_re2.match(t)
+        if match_obj:
+            mog = match_obj.groups()
+            title_f = "%s%s%s%s" % (mog[0], mog[1], mog[2], mog[4])
+            title_m = "%s%s%s%s" % (mog[0], mog[1], mog[3], mog[4])
+            return [title_m, title_f]
+        return [t]
+
+    @classmethod
+    def preprocess_titleset_split_genders(cls, tset: 'TitleSet') -> 'TitleSet':
+        new_tset = TitleSet()
+        for trecord in tset.records:  # type: 'TitleRecord'
+            split_result = cls.preprocess_title_split_genders(trecord.title)
+            new_tset.add_title(TitleRecord(code=trecord.code,
+                                           title=split_result[0],
+                                           is_emptyset=trecord.is_emptyset))
+            if len(split_result) == 2:
+                new_tset.add_title(TitleRecord(code=trecord.code,
+                                               title=split_result[1],
+                                               is_emptyset=trecord.is_emptyset))
+        return new_tset
+
+    @classmethod
+    def preprocess_title_prefixes(cls, t: 'str') -> 'str':
+        match_obj = cls.prefix_re.match(t)
+        # squash the text by removing the dash
+        if match_obj:
+            mog = match_obj.groups()
+            return "".join(mog)
+        else:
+            return t
+
+    @classmethod
+    def preprocess_titleset_prefixes(cls, tset: 'TitleSet') -> 'TitleSet':
+        #co-ordinator
+        new_tset = TitleSet()
+        for trecord in tset.records:  # type: 'TitleRecord'
+            new_title = cls.preprocess_title_prefixes(trecord.title)
+            new_tset.add_title(TitleRecord(code=trecord.code,
+                                           title=new_title,
+                                           is_emptyset=trecord.is_emptyset))
+        return new_tset
+
+    @staticmethod
+    def preprocess_slugify(s: str)->str:
+        s = slugify(text=s, separator=" ")
+        return s
+
+    @classmethod
+    def preprocess_slugify_titleset(cls, tset: 'TitleSet') -> 'TitleSet':
+        new_tset = TitleSet()
+        for trecord in tset.records:
+            new_tset.add_title(TitleRecord(code=trecord.code,
+                                           title=cls.preprocess_slugify(trecord.title),
+                                           is_emptyset=trecord.is_emptyset))
+        return new_tset
+
+    @staticmethod
+    def tokenize_title(t: str, remove_stopwords=True)-> 'List[str]':
+        toks = t.split()
+        if remove_stopwords:
+            new_toks = []
+            for tok in toks:
+                if tok.lower() not in ENGLISH_STOP_WORDS:
+                    new_toks.append(tok)
+            return new_toks
+        else:
+            return toks
+
+    @classmethod
+    def tokenize_titleset(cls, tset: 'TitleSet', remove_stopwords=True) ->'List[List[str]]':
+        tvec = tset.get_title_vec()
+        toks = []
+        for t in tvec:
+            toks.append(cls.tokenize_title(t))
+        return toks

@@ -1,10 +1,12 @@
 import pickle
 from typing import Tuple
-from ..readers import TitleSet, TitleRecord
-from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import SGDClassifier
+from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
+from ..readers import TitleSet, TitleRecord
+from ..util import FeatureEngineer
+from scribe_classifier.data.canada.NOCdb.readers.titles import TitlePreprocessor
 
 
 class SimpleModel:
@@ -18,7 +20,7 @@ class SimpleModel:
         }
 
         self.clf_pipe = Pipeline([
-            ('vect', CountVectorizer(stop_words='english')),
+            ('vect', CountVectorizer(stop_words='english', preprocessor=TitlePreprocessor.preprocess_slugify)),
             ('clf', SGDClassifier(alpha=1e-4, max_iter=1000, tol=1e-4))
             # ('clf', MultinomialNB(alpha=1e-3))
         ])

@@ -1,2 +1,2 @@
 from .codes import CodeRecord, AllCodes
-from .titles import TitleRecord, TitleSet
+from .titles import TitleRecord, TitleSet, TitlePreprocessor

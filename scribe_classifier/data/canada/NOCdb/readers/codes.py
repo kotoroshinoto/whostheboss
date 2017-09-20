@@ -1,4 +1,5 @@
-from _csv import reader
+from csv import reader
+import pickle
 
 
 class CodeRecord:
@@ -90,3 +91,21 @@ class AllCodes:
                     codes_by_level[code_level] = list()
                 codes_by_level[code_level].append(code.code)
         return codes_by_level
+
+    def save_as_pickle(self, file, is_path=False):
+        if is_path:
+            handle = open(file, 'wb')
+        else:
+            handle = file
+        pickle.dump(self, handle)
+        handle.close()
+
+    @staticmethod
+    def load_from_pickle(file, is_path=False) -> 'AllCodes':
+        if is_path:
+            handle = open(file, 'rb')
+        else:
+            handle = file
+        ds = pickle.load(handle)
+        handle.close()
+        return ds
