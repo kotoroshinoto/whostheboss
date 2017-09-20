@@ -90,7 +90,7 @@ def do_scribe_predicts(label='class'):
     titles = scribe_query_df['title']
     titles.fillna(value="", inplace=True)
     # print(titles)
-    titles_pred = simple_model.predict_titleset(titles)
+    titles_pred = simple_model.predict(titles)
     # print(titles_pred)
     scribe_query_df[label] = pd.Series(titles_pred)
 
