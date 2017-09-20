@@ -183,7 +183,7 @@ def scribe_results():
 @app.route('/output', methods=['POST'])
 def classify_text_output():
     test_text = request.form['job_title_test']
-    test_pred = simple_model.clf.predict_titleset([test_text])
+    test_pred = simple_model.predict_titlerecord(test_text)
     code_record = all_codes.codes[test_pred[0]]  # type: CodeRecord
     pred_descript = code_record.desc
     # print(test_pred[0])
