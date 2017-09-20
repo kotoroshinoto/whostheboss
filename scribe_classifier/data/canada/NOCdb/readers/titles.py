@@ -6,12 +6,10 @@ import pandas as pd
 from sklearn.feature_extraction.stop_words import ENGLISH_STOP_WORDS
 from sklearn.model_selection import train_test_split
 from slugify import slugify
-
 from .codes import AllCodes, CodeRecord
 from imblearn.over_sampling import RandomOverSampler
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
-from gensim.models.phrases import Phraser
 import pickle
 
 
@@ -253,8 +251,11 @@ class TitlePreprocessor:
     female_titles = [
         'woman', 'mistress', 'actress', 'hostess', 'waitress', 'headwaitress', 'lady', 'girl', 'sister', 'women'
     ]
-    gender_re1 = re.compile("(.*)(\S*)(%s)[/](%s)(.*)" % ("|".join(male_titles), "|".join(female_titles)))
-    gender_re2 = re.compile("(.*)(\S*)(%s)[/](%s)(.*)" % ("|".join(female_titles), "|".join(male_titles)))
+    central_gender_re_str = "(%s)[/](%s)" % ("|".join(male_titles), "|".join(female_titles))
+    reverse_central_gender_re_str = "(%s)[/](%s)" % ("|".join(female_titles),"|".join(male_titles))
+    gender_re = re.compile("(.*)(\S*)%s(.*)" % central_gender_re_str)
+    reverse_gender_re = re.compile("(.*)(\S*)%s(.*)" % central_gender_re_str)
+    double_gender_re = re.compile("(.*)(\S*)%s(.*)(\S*)%s(.*)" % (central_gender_re_str, central_gender_re_str))
     prefix_re = re.compile("(^|.*\s)(co)[-](\S+)(.*)")
     chief_officer_re1 = re.compile("(.*)c[ef]o \(chief (executive|financial) officer\)(.*)")
     chief_officer_re2 = re.compile("(.*)chief (executive|financial) officer \(c[ef]o\)(.*)")
@@ -269,18 +270,27 @@ class TitlePreprocessor:
 
     @classmethod
     def preprocess_title_split_genders(cls, t: 'str') -> 'List[str]':
-        match_obj = cls.gender_re1.match(t)
+        match_obj = cls.double_gender_re.match(t)
+        if match_obj:
+            mog = match_obj.groups()
+            title_m = "".join([mog[0], mog[1], mog[2], mog[4], mog[5], mog[6], mog[8]])
+            title_f = "".join([mog[0], mog[1], mog[3], mog[4], mog[5], mog[7], mog[8]])
+            return [title_m, title_f]
+
+        match_obj = cls.gender_re.match(t)
         if match_obj:
             mog = match_obj.groups()
             title_m = "%s%s%s%s" % (mog[0], mog[1], mog[2], mog[4])
             title_f = "%s%s%s%s" % (mog[0], mog[1], mog[3], mog[4])
             return [title_m, title_f]
-        match_obj = cls.gender_re2.match(t)
+
+        match_obj = cls.reverse_gender_re.match(t)
         if match_obj:
             mog = match_obj.groups()
             title_f = "%s%s%s%s" % (mog[0], mog[1], mog[2], mog[4])
             title_m = "%s%s%s%s" % (mog[0], mog[1], mog[3], mog[4])
             return [title_m, title_f]
+
         return [t]
 
     @classmethod

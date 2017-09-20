@@ -12785,8 +12785,7 @@
 4217	salvation army captain
 4217	salvation army field worker
 4217	salvation army worker
-4217	brother religion
-4217	sister religion
+4217	sister brother religion
 4311	bodyguard police
 4311	cadet police
 4311	canadian security intelligence service csis investigator
@@ -19382,8 +19381,6 @@
 7245	construction technician telecommunications
 7245	fibre optic cable splicer
 7245	journeyman lineman telecommunications
-7245	journeywoman lineman telecommunications
-7245	journeyman linewoman telecommunications
 7245	journeywoman linewoman telecommunications
 7245	line inspector telecommunications
 7245	line installer telecommunications
@@ -20857,8 +20854,6 @@
 7302	foreman longshore workers
 7302	forewoman longshore workers
 7302	foreman longshoremen stevedores and freight handlers
-7302	forewoman longshoremen stevedores and freight handlers
-7302	foreman longshorewomen stevedores and freight handlers
 7302	forewoman longshorewomen stevedores and freight handlers
 7302	foreman oil field construction
 7302	forewoman oil field construction
@@ -20941,8 +20936,6 @@
 7302	longshore workers foreman
 7302	longshore workers forewoman
 7302	longshoremen stevedores and freight handlers foreman
-7302	longshorewomen stevedores and freight handlers foreman
-7302	longshoremen stevedores and freight handlers forewoman
 7302	longshorewomen stevedores and freight handlers forewoman
 7302	maintenance of way foreman
 7302	maintenance of way forewoman
@@ -20974,8 +20967,6 @@
 7302	railway track maintenance forewoman
 7302	railway track section boss
 7302	railwaymen foreman
-7302	railwaywomen foreman
-7302	railwaymen forewoman
 7302	railwaywomen forewoman
 7302	road boss highway and bridge maintenance
 7302	road boss paving gang
@@ -21131,8 +21122,6 @@
 7303	foreman rotogravure press operators printing
 7303	forewoman rotogravure press operators printing
 7303	foreman rotogravure pressmen printing
-7303	forewoman rotogravure pressmen printing
-7303	foreman rotogravure presswomen printing
 7303	forewoman rotogravure presswomen printing
 7303	foreman stereotypists and electroplaters
 7303	forewoman stereotypists and electroplaters
@@ -21195,8 +21184,6 @@
 7303	rotogravure press operators foreman printing
 7303	rotogravure press operators forewoman printing
 7303	rotogravure pressmen foreman printing
-7303	rotogravure presswomen foreman printing
-7303	rotogravure pressmen forewoman printing
 7303	rotogravure presswomen forewoman printing
 7303	stereotypists and electroplaters foreman
 7303	stereotypists and electroplaters forewoman
@@ -24795,10 +24782,10 @@
 8221	forewoman fill underground mining
 8221	foreman mine
 8221	forewoman mine
-8221	foreman woman motormen and dinkeymen except rail transport
-8221	foreman woman motorwomen and dinkeymen except rail transport
-8221	foreman woman motormen and dinkeywomen except rail transport
-8221	foreman woman motorwomen and dinkeywomen except rail transport
+8221	foreman motormen and dinkeymen except rail transport
+8221	forewoman motormen and dinkeymen except rail transport
+8221	foreman motorwomen and dinkeywomen except rail transport
+8221	forewoman motorwomen and dinkeywomen except rail transport
 8221	foreman production mining and quarrying
 8221	forewoman production mining and quarrying
 8221	foreman quarry
@@ -24823,10 +24810,10 @@
 8221	mine foreman
 8221	mine forewoman
 8221	mine supervisor
-8221	motormen women and dinkeymen foreman except rail transport
-8221	motormen women and dinkeywomen foreman except rail transport
-8221	motormen women and dinkeymen forewoman except rail transport
-8221	motormen women and dinkeywomen forewoman except rail transport
+8221	motormen and dinkeymen foreman except rail transport
+8221	motorwomen and dinkeymen foreman except rail transport
+8221	motormen and dinkeywomen forewoman except rail transport
+8221	motorwomen and dinkeywomen forewoman except rail transport
 8221	open pit mine supervisor
 8221	production foreman mining and quarrying
 8221	production forewoman mining and quarrying

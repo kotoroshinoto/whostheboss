@@ -44,7 +44,7 @@ class AllCodes:
             raise ValueError("This code is already added")
 
     @staticmethod
-    def _parse_code_column(code_text) -> 'List[str]':
+    def parse_code_column(code_text) -> 'List[str]':
         codes = code_text.split('-')  # type: List[str]
         if len(codes) == 1:
             return codes
@@ -66,7 +66,7 @@ class AllCodes:
         if toss_first_line:
             first_line = next(levels)
         for entry in levels:
-            codes = AllCodes._parse_code_column(entry[0])
+            codes = AllCodes.parse_code_column(entry[0])
             for code in codes:
                 coderecord = CodeRecord(code, entry[1])
                 self.add_code(coderecord)

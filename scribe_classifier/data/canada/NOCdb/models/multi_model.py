@@ -74,7 +74,7 @@ class MultiStepModel:
             code_set = sets_for_codes[setkey]
             # print(sorted(list(set(code_set.get_code_vec()))))
             # print("model believes its target level is: %d" % self.models[setkey].target_level)
-            self.models[setkey].fit(code_set)
+            self.models[setkey].fit_titleset(code_set)
 
     def predict(self, title_set: 'TitleSet') -> 'MultiStepPreds':
         all_preds = MultiStepPreds()
@@ -83,11 +83,11 @@ class MultiStepModel:
 
         for title_record in title_set.records:
             model = self.models[""]
-            pred = model.predict_one(title_record=title_record)
+            pred = model.predict_titlerecord(title_record=title_record)
             for i in range(1, self.target_level):
                 all_preds.add_pred(target_level=i, pred=pred)
                 model = self.models[pred]  # type: SimpleModel
-                pred = model.predict_one(title_record=title_record)
+                pred = model.predict_titlerecord(title_record=title_record)
             all_preds.add_pred(target_level=self.target_level, pred=pred)
         return all_preds
 

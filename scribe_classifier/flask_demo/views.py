@@ -81,10 +81,10 @@ combined_test = valid.generate_combined(codes=all_codes, target_level=2)  # type
 
 
 #predictions
-valid_pred = simple_model.predict(valid)
-test_pred = simple_model.predict(test)
-combined_valid_pred = simple_combined_model.predict(combined_valid)
-combined_test_pred = simple_combined_model.predict(combined_test)
+valid_pred = simple_model.predict_titleset(valid)
+test_pred = simple_model.predict_titleset(test)
+combined_valid_pred = simple_combined_model.predict_titleset(combined_valid)
+combined_test_pred = simple_combined_model.predict_titleset(combined_test)
 
 #generate reports
 valid_report = ClassificationReporter(valid.get_code_vec(target_level=2), valid_pred, classes=classes)
@@ -98,9 +98,9 @@ def do_scribe_predicts(combined: bool, label='class'):
     titles.fillna(value="", inplace=True)
     # print(titles)
     if combined:
-        titles_pred = simple_combined_model.clf.predict(titles)
+        titles_pred = simple_combined_model.clf.predict_titleset(titles)
     else:
-        titles_pred = simple_model.clf.predict(titles)
+        titles_pred = simple_model.clf.predict_titleset(titles)
     # print(titles_pred)
     scribe_query_df[label] = pd.Series(titles_pred)
 
@@ -208,7 +208,7 @@ def scribe_results():
 @app.route('/output', methods=['POST'])
 def classify_text_output():
     test_text = request.form['job_title_test']
-    test_pred = simple_model.clf.predict([test_text])
+    test_pred = simple_model.clf.predict_titleset([test_text])
     code_record = all_codes.codes[test_pred[0]]  # type: CodeRecord
     pred_descript = code_record.desc
     # print(test_pred[0])

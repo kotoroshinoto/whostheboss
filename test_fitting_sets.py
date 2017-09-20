@@ -10,7 +10,7 @@ target_level = 3
 
 
 
-preds = msm.predict(title_set=titles)
+preds = msm.predict_titleset(title_set=titles)
 
 df = titles.to_dataframe(target_level=4)
 df['preds'] = pd.Series(preds)

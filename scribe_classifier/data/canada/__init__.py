@@ -1,1 +1,3 @@
-from .NOCdb import OneClassFakeModel, MultiStepModel, SimpleModel, AllCodes, CodeRecord, TitleSet, TitleRecord, TitlePreprocessor
+from .NOCdb import OneClassFakeModel, MultiStepModel, SimpleModel, \
+    AllCodes, CodeRecord, TitleSet, TitleRecord, TitlePreprocessor, \
+    CombinedModels

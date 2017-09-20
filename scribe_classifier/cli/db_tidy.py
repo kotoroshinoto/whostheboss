@@ -4,7 +4,7 @@ from csv import reader
 from scribe_classifier.data.canada import TitleRecord, TitleSet, CodeRecord, AllCodes, TitlePreprocessor
 import sys
 import os
-
+from scribe_classifier.data.canada import AllCodes
 
 @click.group()
 def db_tidy_main_cli():
@@ -26,10 +26,12 @@ def clean_codes(infile, outfile, pickle):
     for entry in rdr:
         if entry[1].rstrip().lstrip() == "":
             continue
-        kept_values = [entry[0], entry[1], entry[3], entry[5]]
-        if pickle is not None:
-            all_codes.add_code(CodeRecord(code=entry[0], desc=entry[1]))
-        print("\t".join(kept_values), file=outfile)
+        code_l = AllCodes.parse_code_column(entry[0])
+        for code_s in code_l:
+            kept_values = [code_s, entry[1], entry[3], entry[5]]
+            if pickle is not None:
+                all_codes.add_code(CodeRecord(code=code_s, desc=entry[1]))
+            print("\t".join(kept_values), file=outfile)
     if pickle is not None:
         all_codes.save_as_pickle(file=pickle, is_path=False)
 
