@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from data.canada.NOCdb.readers.codes import AllCodes, CodeRecord
-from data.canada.NOCdb.readers.titles import TitleSet
-from data.scribe.dbhandler import DataFramePickler
+from scribe_classifier.data.canada.NOCdb.readers.codes import AllCodes, CodeRecord
+from scribe_classifier.data.canada.NOCdb.readers.titles import TitleSet
+from scribe_classifier.data.scribe import DataFramePickler
 from flask import render_template
 from flask import request
 from sklearn import metrics
