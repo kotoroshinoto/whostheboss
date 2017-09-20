@@ -86,20 +86,17 @@ valid_report = ClassificationReporter(valid.get_code_vec(target_level=2), valid_
 test_report = ClassificationReporter(test.get_code_vec(target_level=2), test_pred, classes=classes)
 
 
-def do_scribe_predicts(combined: bool, label='class'):
+def do_scribe_predicts(label='class'):
     titles = scribe_query_df['title']
     titles.fillna(value="", inplace=True)
     # print(titles)
-    if combined:
-        titles_pred = simple_combined_model.clf.predict_titleset(titles)
-    else:
-        titles_pred = simple_model.clf.predict_titleset(titles)
+    titles_pred = simple_model.predict_titleset(titles)
     # print(titles_pred)
     scribe_query_df[label] = pd.Series(titles_pred)
 
 
-do_scribe_predicts(False, 'class')
-do_scribe_predicts(True, 'combined_class')
+do_scribe_predicts('class')
+do_scribe_predicts('combined_class')
 
 
 def generate_canada_category_plot(output_fname, add_empty_class):
