@@ -200,19 +200,19 @@ def classify_text_output():
 
 
 @app.route('/input_multi')
-def classify_text_input():
+def classify_text_input_multi():
     return render_template("input_multi.html")
 
 
 @app.route('/output_multi', methods=['POST'])
-def classify_text_output():
+def classify_text_output_multi():
     test_text = request.form['job_title_test']
-    test_pred1 = simple_model1.predict([test_text])[0]
-    test_pred2 = simple_model2.predict([test_text])[0]
-    test_pred3 = simple_model3.predict([test_text])[0]
-    pred_descript1 = all_codes.codes[test_pred1].desc
-    pred_descript2 = all_codes.codes[test_pred2].desc
-    pred_descript3 = all_codes.codes[test_pred3].desc
+    # test_pred1 = simple_model1.predict([test_text])[0]
+    # test_pred2 = simple_model2.predict([test_text])[0]
+    # test_pred3 = simple_model3.predict([test_text])[0]
+    # pred_descript1 = all_codes.codes[test_pred1].desc
+    # pred_descript2 = all_codes.codes[test_pred2].desc
+    # pred_descript3 = all_codes.codes[test_pred3].desc
     # print(test_pred[0])
     return render_template("output_multi.html",
                            test_text_html=test_text,
