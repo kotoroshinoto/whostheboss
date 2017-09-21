@@ -18,7 +18,7 @@ class SimpleModel(BaseEstimator, ClassifierMixin):
         if use_bayes:
             # self.prop_records = 1.0/8.0
             self.parameters = {
-                'vect__ngram_range': [(1, 1), (2, 4)],
+                'vect__ngram_range': [(1, 2), (1, 8)],
                 'clf__alpha': (1e-2, 1e-5)
             }
             self.clf_pipe = Pipeline([
@@ -28,7 +28,7 @@ class SimpleModel(BaseEstimator, ClassifierMixin):
         else:
             # self.prop_records = 1.0
             self.parameters = {
-                'vect__ngram_range': [(1, 1), (2, 4)],
+                'vect__ngram_range': [(1, 2), (1, 8)],
                 'clf__alpha': (1e-2, 1e-5),
                 'clf__max_iter': (1000, 3000),
                 'clf__tol': (1e-3, 1e-4)
