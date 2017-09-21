@@ -239,5 +239,5 @@ def classify_text_output_multi():
     df['Level2_Description'] = out_col2
     df['Level3_Code'] = out_code3
     df['Level3_Description'] = out_col3
-    return render_template("multi_output.html", dataframe=df.to_html())
+    return render_template("multi_output.html", dataframe=df.to_html(index=False))
 
