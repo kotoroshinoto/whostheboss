@@ -126,11 +126,9 @@ def test_simple_model(emptyset, model_file, validation_file, test_file, target_l
 
     print("Validation Set:")
     print(metrics.classification_report(valid_target_codes, valid_pred))
-    # print(metrics.confusion_matrix(valid.Y, valid_pred))
 
     print("Test Set:")
     print(metrics.classification_report(test_target_codes, test_pred))
-    # print(metrics.confusion_matrix(test.Y, test_pred))
 
 
 @canada_model_cli.group()
