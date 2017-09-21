@@ -17,12 +17,13 @@ from ..readers import AllCodes
 class CombinedModels(BaseEstimator, ClassifierMixin):
     def __init__(self, trained_simple_sgd: 'SimpleModel', trained_simple_multinom_nb: 'SimpleModel', all_codes: 'AllCodes', target_level=1, emptyset_label: str=None):
         self.target_level = target_level
+        # print("combined model target_level: %d" % self.target_level)
         self.code_vec = sorted(all_codes.get_codes_for_level(target_level=self.target_level))
         self.emptyset_label=emptyset_label
         if self.emptyset_label is not None:
             self.code_vec.append(emptyset_label)
         self.label_encoder = LabelEncoder()
-        print("training encoder on: %s" % ", ".join(self.code_vec))
+        # print("training encoder on: %s" % ", ".join(self.code_vec))
         self.label_encoder.fit(self.code_vec)
         self.trained_simple_sgd = trained_simple_sgd  # type: SimpleModel
         self.trained_simple_multinom_nb = trained_simple_multinom_nb  # type: SimpleModel
@@ -64,13 +65,14 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
 
     def fit(self, X, y, **fit_params):
         #feed features to final sgd
+        # print("classes fit on: %s" % ", ".join(y))
         self.final_clf.fit(X=self.assemble_features(X=X), y=y)
         return self
 
-    def fit_titleset(self, tset: 'TitleSet', target_level=1):
+    def fit_titleset(self, tset: 'TitleSet'):
         set_with_empty = self.handle_emptyset_trans(tset)
         tvec = set_with_empty.get_title_vec()
-        cvec = set_with_empty.get_code_vec(target_level=target_level)
+        cvec = set_with_empty.get_code_vec(target_level=self.target_level)
         return self.fit(X=tvec, y=cvec)
 
     def predict(self, X):

@@ -100,10 +100,10 @@ do_scribe_predicts('combined_class')
 
 
 def generate_canada_category_plot(output_fname, add_empty_class):
-    code_file = './TrainingData/training_sources/raw/NOC/all_codes'
-    example_file = './TrainingData/training_sources/raw/NOC/all_examples'
+    code_file = './source_data/pickles/canada/tidy_sets/all_codes.P'
+    example_file = './source_data/pickles/canada/tidy_sets/all_titles.P'
     dataset = TitleSet()
-    dataset.add_titles_from_file(filename=example_file)
+    dataset =TitleSet.load_from_pickle(filename=example_file)
     if add_empty_class:
         dataset.copy_and_append_empty_string_class()
     df = dataset.to_dataframe(target_level=2)
@@ -126,8 +126,8 @@ def generate_scribe_category_plot(output_fname, label: str ='class'):
 @app.route('/')
 @app.route('/index')
 def index():
-    img_path = os.path.abspath('./flask_demo/static/img/canada_histogram.png')
-    img_path_with_emptycat = os.path.abspath('./flask_demo/static/img/canada_histogram_emptycat.png')
+    img_path = os.path.abspath('./scribe_classifier/flask_demo/static/img/canada_histogram.png')
+    img_path_with_emptycat = os.path.abspath('./scribe_classifier/flask_demo/static/img/canada_histogram_emptycat.png')
     if force_img_generation or not os.path.exists(img_path):
         generate_canada_category_plot(img_path, False)
     if force_img_generation or not os.path.exists(img_path_with_emptycat):
@@ -168,8 +168,8 @@ def scribe_results():
     #Index(['id', 'email', 'firstName', 'lastName', 'company', 'industry', 'title',
     # 'companyCity', 'companyCountry', 'employeeCount', 'emailError', 'emailvalidity']
     query_string ="select * from email_list where \"companyCountry\" = 'United States' and \"industry\" in ('computer software','information technology and services,internet','marketing and advertising','internet') and \"employeeCount\" < 500 and \"emailError\" = False;"
-    img_path = os.path.abspath('./flask_demo/static/img/usa_midsize_tech_histogram.png')
-    combined_img_path = os.path.abspath('./flask_demo/static/img/combined_usa_midsize_tech_histogram.png')
+    img_path = os.path.abspath('./scribe_classifier/flask_demo/static/img/usa_midsize_tech_histogram.png')
+    combined_img_path = os.path.abspath('./scribe_classifier/flask_demo/static/img/combined_usa_midsize_tech_histogram.png')
     if force_img_generation or not os.path.exists(img_path):
         generate_scribe_category_plot(img_path, 'class')
     if force_img_generation or not os.path.exists(combined_img_path):
