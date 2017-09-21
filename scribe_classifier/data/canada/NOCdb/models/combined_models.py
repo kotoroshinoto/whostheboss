@@ -13,10 +13,6 @@ from scipy import sparse
 from sklearn.preprocessing import LabelEncoder
 from ..readers import AllCodes
 from sklearn.neural_network import MLPClassifier
-import tensorflow.contrib.learn as skflow
-
-
-skflow.DNNClassifier()
 
 
 class CombinedModels(BaseEstimator, ClassifierMixin):
@@ -34,16 +30,21 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
         self.trained_simple_multinom_nb = trained_simple_multinom_nb  # type: SimpleModel
         self.sgdvect = self.trained_simple_sgd.clf.best_estimator_.named_steps.vect  # type: CountVectorizer
         self.nbvect = self.trained_simple_multinom_nb.clf.best_estimator_.named_steps.vect   # type: CountVectorizer
-        self.parameters = {
-            'clf__alpha': (1e-2, 1e-5),
-            'clf__max_iter': (1000, 3000),
-            'clf__tol': (1e-3, 1e-4)
-        }
-        self.final_nn = MLPClassifier(activation='logistic', solver='lbfgs', alpha=1e-4, max_iter=1000, tol=1e-4)
-        self.clf_pipe = Pipeline([
-            ('clf', self.final_nn)
-        ])
-        self.final_clf = GridSearchCV(self.clf_pipe, self.parameters, n_jobs=-1)
+        # self.parameters = {
+        #     'clf__alpha': (1e-2, 1e-5),
+        #     'clf__max_iter': (1000, 3000),
+        #     'clf__tol': (1e-3, 1e-4)
+        # }
+        self.final_nn = MLPClassifier(activation='logistic',
+                                      solver='lbfgs',
+                                      alpha=1e-4,
+                                      max_iter=1000,
+                                      tol=1e-4,
+                                      verbose=True)
+        # self.clf_pipe = Pipeline([
+        #     ('clf', self.final_nn)
+        # ])
+        # self.final_clf = GridSearchCV(self.clf_pipe, self.parameters, n_jobs=-1)
 
     def handle_emptyset_trans(self, tset: 'TitleSet'):
         class_counts = tset.count_classes()
@@ -71,7 +72,7 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
     def fit(self, X, y, **fit_params):
         #feed features to final sgd
         # print("classes fit on: %s" % ", ".join(y))
-        self.final_clf.fit(X=self.assemble_features(X=X), y=y)
+        self.final_nn.fit(X=self.assemble_features(X=X), y=y)
         return self
 
     def fit_titleset(self, tset: 'TitleSet'):
@@ -81,7 +82,7 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
         return self.fit(X=tvec, y=cvec)
 
     def predict(self, X):
-        return self.final_clf.predict(X=self.assemble_features(X=X))
+        return self.final_nn.predict(X=self.assemble_features(X=X))
 
     def predict_titleset(self, tset: 'TitleSet'):
         tvec = tset.get_title_vec()

@@ -86,6 +86,7 @@ class SimpleModel(BaseEstimator, ClassifierMixin):
         return self.clf.predict(title_vec)
 
     def predict_titlerecord(self, title_record: 'TitleRecord') -> str:
+        print(type(title_record))
         return self.clf.predict([title_record.title])[0]
 
     def fit(self, X, y, **fit_params):
