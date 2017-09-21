@@ -50,7 +50,7 @@ class ClassificationReporter:
         df['Support'] = pd.Series(data=self.support).append(pd.Series([self.total]))
 
         cats = np.ndarray.copy(self.cats)  # type: np.ndarray
-        cats = np.append(cats, ["Avg / Total"])
+        cats = np.append(cats, np.ndarray(["Avg / Total"]))
         df['Category'] = cats
         df.index = pd.RangeIndex(len(df.index))
         cols = df.columns.tolist()
