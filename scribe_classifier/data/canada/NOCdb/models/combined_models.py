@@ -12,6 +12,11 @@ import numpy as np
 from scipy import sparse
 from sklearn.preprocessing import LabelEncoder
 from ..readers import AllCodes
+from sklearn.neural_network import MLPClassifier
+import tensorflow.contrib.learn as skflow
+
+
+skflow.DNNClassifier()
 
 
 class CombinedModels(BaseEstimator, ClassifierMixin):
@@ -34,9 +39,9 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
             'clf__max_iter': (1000, 3000),
             'clf__tol': (1e-3, 1e-4)
         }
-        self.final_sgd = SGDClassifier(alpha=1e-4, max_iter=1000, tol=1e-4)
+        self.final_nn = MLPClassifier(activation='logistic', solver='lbfgs', alpha=1e-4, max_iter=1000, tol=1e-4)
         self.clf_pipe = Pipeline([
-            ('clf', SGDClassifier(alpha=1e-4, max_iter=1000, tol=1e-4))
+            ('clf', self.final_nn)
         ])
         self.final_clf = GridSearchCV(self.clf_pipe, self.parameters, n_jobs=-1)
 
