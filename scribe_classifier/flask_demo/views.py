@@ -207,7 +207,7 @@ def classify_text_input_multi():
 @app.route('/multi_output', methods=['POST'])
 def classify_text_output_multi():
     test_text = request.form['job_title_test']
-    print(type(test_text))
+    print(test_text.find("\n"))
     # test_pred1 = simple_model1.predict([test_text])[0]
     # test_pred2 = simple_model2.predict([test_text])[0]
     # test_pred3 = simple_model3.predict([test_text])[0]
