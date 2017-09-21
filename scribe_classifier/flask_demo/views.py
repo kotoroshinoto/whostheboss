@@ -22,6 +22,8 @@ import io
 # con = None
 # con = psycopg2.connect(database = dbname, user = user)
 
+pd.set_option('display.max_colwidth', -1)
+
 
 class ClassificationReporter:
     def __init__(self, y, y_pred, classes):
@@ -48,9 +50,8 @@ class ClassificationReporter:
         df['Recall'] = pd.Series(data=self.recall).append(pd.Series([self.avg_recall]))
         df['F1-Score'] = pd.Series(data=self.fbeta_score).append(pd.Series([self.avg_fbeta_score]))
         df['Support'] = pd.Series(data=self.support).append(pd.Series([self.total]))
-
-        cats = np.ndarray.copy(self.cats)  # type: np.ndarray
-        cats = np.append(cats, np.ndarray(["Avg / Total"]))
+        cats = list(self.cats)
+        cats.append("Avg / Total")
         df['Category'] = cats
         df.index = pd.RangeIndex(len(df.index))
         cols = df.columns.tolist()
@@ -141,18 +142,18 @@ def index():
 def uncombined_validation_results_page():
     return render_template('model_validate.html',
                            switch_link_url="/model_uncombined_test",
-                           switch_link_text="Uncombined Test Set Classification Metrics",
-                           model_type="Validation Set: Uncombined Job Title Text",
-                           dataframe=valid_report.get_report_dataframe().to_html(index=False))
+                           switch_link_text="Classification Metrics",
+                           model_type="Validation Set:",
+                           dataframe=valid_report.get_report_dataframe().to_html(index=False, classes=["table", "table-bordered", "table-striped"]))
 
 
 @app.route('/model_uncombined_test')
 def uncombined_test_results_page():
     return render_template('model_validate.html',
                            switch_link_url="/model_uncombined_validate",
-                           switch_link_text="Uncombined Validation Set Classification Metrics",
-                           model_type="Test Set: Uncombined Job Title Text",
-                           dataframe=test_report.get_report_dataframe().to_html(index=False))
+                           switch_link_text="Classification Metrics",
+                           model_type="Test Set:",
+                           dataframe=test_report.get_report_dataframe().to_html(index=False, classes=["table", "table-bordered", "table-striped"]))
 
 
 @app.route('/future_plans')
@@ -172,6 +173,7 @@ def scribe_results():
     if force_img_generation or not os.path.exists(combined_img_path):
         generate_scribe_category_plot(combined_img_path, 'combined_class')
     return render_template("scribe_results.html", query_string=query_string)
+
 
 @app.route('/input')
 def classify_text_input():
@@ -239,5 +241,5 @@ def classify_text_output_multi():
     df['Level2_Description'] = out_col2
     df['Level3_Code'] = out_code3
     df['Level3_Description'] = out_col3
-    return render_template("multi_output.html", dataframe=df.to_html(index=False))
+    return render_template("multi_output.html", dataframe=df.to_html(index=False, classes=["table", "table-bordered"]))
 
