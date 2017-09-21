@@ -13,7 +13,7 @@ from sklearn import metrics
 
 from scribe_classifier.data.canada.NOCdb.models import SimpleModel
 from scribe_classifier.flask_demo import app
-
+import StringIO
 
 # user = 'mgooch' #add your username here (same as previous postgreSQL)
 # host = 'localhost'
@@ -207,16 +207,37 @@ def classify_text_input_multi():
 @app.route('/multi_output', methods=['POST'])
 def classify_text_output_multi():
     test_text = request.form['job_title_test']
-    print(test_text.find("\r"))
-    # test_pred1 = simple_model1.predict([test_text])[0]
-    # test_pred2 = simple_model2.predict([test_text])[0]
-    # test_pred3 = simple_model3.predict([test_text])[0]
-    # pred_descript1 = all_codes.codes[test_pred1].desc
-    # pred_descript2 = all_codes.codes[test_pred2].desc
-    # pred_descript3 = all_codes.codes[test_pred3].desc
-    # print(test_pred[0])
-    return render_template("multi_output.html",
-                           test_text_html=test_text,
-                           pred_results_html="DERP"
-                           )
+    ss = StringIO(test_text)
+    df = pd.DataFrame()
+    in_rows = []
+    out_code1 = []
+    out_col1 = []
+    out_code2 = []
+    out_col2 = []
+    out_code3 = []
+    out_col3 = []
+    for line in ss:  # type: str
+        line = line.rstrip().lstrip()
+        in_rows.append(line)
+        test_pred1 = simple_model1.predict([line])[0]
+        out_code1.append(test_pred1)
+        test_pred2 = simple_model2.predict([line])[0]
+        out_code2.append(test_pred2)
+        test_pred3 = simple_model3.predict([line])[0]
+        out_code3.append(test_pred3)
+        pred_descript1 = all_codes.codes[test_pred1].desc
+        out_col1.append(pred_descript1)
+        pred_descript2 = all_codes.codes[test_pred2].desc
+        out_col2.append(pred_descript2)
+        pred_descript3 = all_codes.codes[test_pred3].desc
+        out_col3.append(pred_descript3)
+
+    df['Input'] = in_rows
+    df['Level1_Code'] = out_code1
+    df['Level1_Description'] = out_col1
+    df['Level2_Code'] = out_code2
+    df['Level2_Description'] = out_col2
+    df['Level3_Code'] = out_code3
+    df['Level3_Description'] = out_col3
+    return render_template("multi_output.html", dataframe=df.to_html())
 
