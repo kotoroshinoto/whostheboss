@@ -155,11 +155,6 @@ def uncombined_test_results_page():
                            dataframe=test_report.get_report_dataframe().to_html(index=False))
 
 
-@app.route('/input')
-def classify_text_input():
-    return render_template("input.html")
-
-
 @app.route('/future_plans')
 def future_plans():
     return render_template("future_plans.html")
@@ -177,6 +172,10 @@ def scribe_results():
     if force_img_generation or not os.path.exists(combined_img_path):
         generate_scribe_category_plot(combined_img_path, 'combined_class')
     return render_template("scribe_results.html", query_string=query_string)
+
+@app.route('/input')
+def classify_text_input():
+    return render_template("input.html")
 
 
 @app.route('/output', methods=['POST'])
@@ -198,3 +197,25 @@ def classify_text_output():
                            class_id3=test_pred3,
                            class_text3=pred_descript3
                            )
+
+
+@app.route('/input_multi')
+def classify_text_input():
+    return render_template("input_multi.html")
+
+
+@app.route('/output_multi', methods=['POST'])
+def classify_text_output():
+    test_text = request.form['job_title_test']
+    test_pred1 = simple_model1.predict([test_text])[0]
+    test_pred2 = simple_model2.predict([test_text])[0]
+    test_pred3 = simple_model3.predict([test_text])[0]
+    pred_descript1 = all_codes.codes[test_pred1].desc
+    pred_descript2 = all_codes.codes[test_pred2].desc
+    pred_descript3 = all_codes.codes[test_pred3].desc
+    # print(test_pred[0])
+    return render_template("output_multi.html",
+                           test_text_html=test_text,
+                           pred_results_html="DERP"
+                           )
+
