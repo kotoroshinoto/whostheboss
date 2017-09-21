@@ -199,12 +199,12 @@ def classify_text_output():
                            )
 
 
-@app.route('/input_multi')
+@app.route('/multi_input')
 def classify_text_input_multi():
-    return render_template("input_multi.html")
+    return render_template("multi_input.html")
 
 
-@app.route('/output_multi', methods=['POST'])
+@app.route('/multi_output', methods=['POST'])
 def classify_text_output_multi():
     test_text = request.form['job_title_test']
     # test_pred1 = simple_model1.predict([test_text])[0]
@@ -214,7 +214,7 @@ def classify_text_output_multi():
     # pred_descript2 = all_codes.codes[test_pred2].desc
     # pred_descript3 = all_codes.codes[test_pred3].desc
     # print(test_pred[0])
-    return render_template("output_multi.html",
+    return render_template("multi_output.html",
                            test_text_html=test_text,
                            pred_results_html="DERP"
                            )
