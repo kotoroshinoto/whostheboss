@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+pkill gunicorn
+gunicorn run_flask_demo:app -D

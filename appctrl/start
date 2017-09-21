@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+gunicorn run_flask_demo:app -D
