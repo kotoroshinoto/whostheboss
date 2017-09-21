@@ -13,7 +13,7 @@ from sklearn import metrics
 
 from scribe_classifier.data.canada.NOCdb.models import SimpleModel
 from scribe_classifier.flask_demo import app
-import StringIO
+import io.StringIO
 
 # user = 'mgooch' #add your username here (same as previous postgreSQL)
 # host = 'localhost'
