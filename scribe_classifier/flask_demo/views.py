@@ -181,7 +181,7 @@ def scribe_results():
 def classify_text_output():
     test_text = request.form['job_title_test']
     test_pred = simple_model.predict([test_text])[0]
-    code_record = all_codes.codes[test_pred[0]]  # type: CodeRecord
+    code_record = all_codes.codes[test_pred]  # type: CodeRecord
     pred_descript = code_record.desc
     # print(test_pred[0])
     return render_template("output.html", test_text=test_text, class_id=test_pred[0], class_text=pred_descript)
