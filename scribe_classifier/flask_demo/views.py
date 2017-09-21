@@ -13,7 +13,7 @@ from sklearn import metrics
 
 from scribe_classifier.data.canada.NOCdb.models import SimpleModel
 from scribe_classifier.flask_demo import app
-import io.StringIO
+import io
 
 # user = 'mgooch' #add your username here (same as previous postgreSQL)
 # host = 'localhost'
@@ -207,7 +207,7 @@ def classify_text_input_multi():
 @app.route('/multi_output', methods=['POST'])
 def classify_text_output_multi():
     test_text = request.form['job_title_test']
-    ss = StringIO(test_text)
+    ss = io.StringIO(test_text)
     df = pd.DataFrame()
     in_rows = []
     out_code1 = []
