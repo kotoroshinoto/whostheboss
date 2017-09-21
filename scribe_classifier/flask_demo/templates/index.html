@@ -1,24 +1,6 @@
-<html>
- <head>
-    <title>Scribe Consulting Project</title>
- </head>
+{% extends "layout.html" %}
+{% block body %}
  <p>
-    <h1>Job Title Classification</h1><br>
-    <table border="0">
-        <tr>
-            <td><a href="/model_uncombined_validate">Uncombined Validation Set Classification Metrics</a></td>
-            <td><a href="/model_uncombined_test">Uncombined Test Set Classification Metrics</a></td>
-        </tr>
-        <tr>
-            <td><a href="/input">Live Classification Demo Single Term</a></td>
-            <td><a href="/multi_input">Live Classification Demo Multi Term</a></td>
-
-        </tr>
-        <tr>
-            <td colspan="2"><a href="/scribe_results">Sample Results With Scribe Data</a></td>
-{#            <td><a href="/future_plans">Future Plans</a></td>#}
-        </tr>
-     </table>
     <br>
     <h2><b>Canadian Government Job Title Classes (level 2)</b></h2>
     <table>
@@ -35,5 +17,4 @@
             </td>
         </tr>
     </table>
- </body>
-</html>
+{% endblock %}
