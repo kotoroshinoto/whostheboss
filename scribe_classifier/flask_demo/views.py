@@ -69,7 +69,9 @@ all_codes.add_code(CodeRecord(code="NA", desc="Not able to classify"))
 classes.append("NA")
 
 #models
-simple_model = SimpleModel.load_from_pickle('./source_data/pickles/canada/trained_models/simple.lvl2.P', is_path=True)  # type: SimpleModel
+simple_model1 = SimpleModel.load_from_pickle('./source_data/pickles/canada/trained_models/simple.lvl1.P', is_path=True)  # type: SimpleModel
+simple_model2 = SimpleModel.load_from_pickle('./source_data/pickles/canada/trained_models/simple.lvl2.P', is_path=True)  # type: SimpleModel
+simple_model3 = SimpleModel.load_from_pickle('./source_data/pickles/canada/trained_models/simple.lvl3.P', is_path=True)  # type: SimpleModel
 
 #dataset
 valid = TitleSet.load_from_pickle('./source_data/pickles/canada/test_sets/valid.set.lvl2.P', is_path=True)  # type: TitleSet
@@ -78,8 +80,8 @@ test = TitleSet.load_from_pickle('./source_data/pickles/canada/test_sets/test.se
 
 
 #predictions
-valid_pred = simple_model.predict_titleset(valid)
-test_pred = simple_model.predict_titleset(test)
+valid_pred = simple_model2.predict_titleset(valid)
+test_pred = simple_model2.predict_titleset(test)
 
 #generate reports
 valid_report = ClassificationReporter(valid.get_code_vec(target_level=2), valid_pred, classes=classes)
@@ -90,7 +92,7 @@ def do_scribe_predicts(label='class'):
     titles = scribe_query_df['title']
     titles.fillna(value="", inplace=True)
     # print(titles)
-    titles_pred = simple_model.predict(titles)
+    titles_pred = simple_model2.predict(titles)
     # print(titles_pred)
     scribe_query_df[label] = pd.Series(titles_pred)
 
@@ -180,8 +182,19 @@ def scribe_results():
 @app.route('/output', methods=['POST'])
 def classify_text_output():
     test_text = request.form['job_title_test']
-    test_pred = simple_model.predict([test_text])[0]
-    code_record = all_codes.codes[test_pred]  # type: CodeRecord
-    pred_descript = code_record.desc
+    test_pred1 = simple_model1.predict([test_text])[0]
+    test_pred2 = simple_model2.predict([test_text])[0]
+    test_pred3 = simple_model3.predict([test_text])[0]
+    pred_descript1 = all_codes.codes[test_pred1].desc
+    pred_descript2 = all_codes.codes[test_pred2].desc
+    pred_descript3 = all_codes.codes[test_pred3].desc
     # print(test_pred[0])
-    return render_template("output.html", test_text=test_text, class_id=test_pred[0], class_text=pred_descript)
+    return render_template("output.html",
+                           test_text=test_text,
+                           class_id1=test_pred1,
+                           class_text1=pred_descript1,
+                           class_id2=test_pred2,
+                           class_text2=pred_descript2,
+                           class_id3=test_pred3,
+                           class_text3=pred_descript3
+                           )
