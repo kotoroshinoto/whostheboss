@@ -77,7 +77,8 @@ simple_model3 = SimpleModel.load_from_pickle('./source_data/pickles/canada/train
 #dataset
 valid = TitleSet.load_from_pickle('./source_data/pickles/canada/test_sets/valid.set.lvl2.P', is_path=True)  # type: TitleSet
 test = TitleSet.load_from_pickle('./source_data/pickles/canada/test_sets/test.set.lvl2.P', is_path=True)  # type: TitleSet
-
+valid = valid.copy_and_append_empty_string_class("NA")
+test = test.copy_and_append_empty_string_class("NA")
 
 
 #predictions
