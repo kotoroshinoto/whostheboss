@@ -1,5 +1,7 @@
 source_data/raw/scribe/entiredb/
 planning_docs/notes/
+source_data/wiki_glove/
+nnmodels/
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template

@@ -12,33 +12,28 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 
 
 class SimpleModel(BaseEstimator, ClassifierMixin):
-    def __init__(self, target_level=1, emptyset_label: str=None, use_bayes=False):
+    def __init__(self, target_level=1, emptyset_label: str=None, use_bayes=False, cv=None, ngram_start=1, ngram_stop=5, ngram_step=2):
         self.target_level = target_level
         self.use_bayes = use_bayes
+        self.parameters = dict()
+        self.parameters['vect__ngram_range'] = [(1, x) for x in range(ngram_start, ngram_stop + ngram_step, ngram_step)]
+        self.parameters['clf__alpha'] = (1e-3, 1e-4, 1e-5, 1e-6)
         if use_bayes:
             # self.prop_records = 1.0/8.0
-            self.parameters = {
-                'vect__ngram_range': [(1, 2), (1, 3)],
-                'clf__alpha': (1e-2, 1e-5)
-            }
             self.clf_pipe = Pipeline([
                 ('vect', CountVectorizer(stop_words='english')),
                 ('clf', MultinomialNB(alpha=1e-4))
             ])
         else:
             # self.prop_records = 1.0
-            self.parameters = {
-                'vect__ngram_range': [(1, 2), (1, 3)],
-                'clf__alpha': (1e-2, 1e-5),
-                'clf__max_iter': (1000, 3000),
-                'clf__tol': (1e-3, 1e-4)
-            }
+            self.parameters['clf__max_iter'] = range(1000, 10000, 3000)
+            self.parameters['clf__tol'] = (1e-3, 1e-4)
             self.clf_pipe = Pipeline([
                 ('vect', CountVectorizer(stop_words='english')),
                 ('clf', SGDClassifier(alpha=1e-4, max_iter=1000, tol=1e-4))
             ])
 
-        self.clf = GridSearchCV(self.clf_pipe, self.parameters, n_jobs=-1)
+        self.clf = GridSearchCV(self.clf_pipe, self.parameters, n_jobs=-1, cv=cv, scoring='accuracy')
         if emptyset_label is not None:
             if emptyset_label == "":
                 self.emptyset_label = "NA"

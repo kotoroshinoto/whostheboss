@@ -35,6 +35,27 @@ class FeatureEngineer(BaseEstimator, TransformerMixin):
         self.last_used_tfidf_feature_names_ = None
         self.last_used_lda_ = None  # type: LatentDirichletAllocation
         self.last_used_nmf_ = None  # type: NMF
+        self.embeddings_index = {}
+        self.MAX_NB_WORDS = 0
+
+    def load_wiki_data(self,MAX_NB_WORDS, filepath):
+        # BASE_DIR = '.'
+        # GLOVE_DIR = BASE_DIR + './source_data/wiki_glove/glove.6B.100d.txt'
+        print('Indexing word vectors.')
+        self.embeddings_index = {}
+        self.MAX_NB_WORDS = MAX_NB_WORDS
+        f = open(filepath)
+        for line in f:
+            values = line.split()
+            word = values[0]
+            coefs = np.asarray(values[1:], dtype='float32')
+            self.embeddings_index[word] = coefs
+        f.close()
+
+        print('Found %s word vectors.' % len(self.embeddings_index))
+
+    def translate_words_to_embeddings(self, words):
+        pass
 
     def fit(self, X, y=None, **fit_params):
         self.fit_transform(X=X, y=y, fit_params=fit_params)
