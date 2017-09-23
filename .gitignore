@@ -2,6 +2,7 @@ source_data/raw/scribe/entiredb/
 planning_docs/notes/
 source_data/wiki_glove/
 nnmodels/
+source_data/20_newsgroup/
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template
