@@ -21,20 +21,18 @@ import sys
 import click
 
 
-class KerasClassifier:
+class ANNclassifier:
     def __init__(self, 
                  epochs=10,
                  target_level: int=1,
                  max_words: int=20000,
                  batch_size: int=64,
-                 layer_size: int=2048,
-                 num_layers = 1):
+                 layer_def=((512, 1, True)),
+                 first_layer_size=512):
         self.epochs = epochs
         self.target_level = target_level
         self.max_words = max_words
         self.batch_size = batch_size
-        self.layer_size = layer_size
-        self.num_layers = num_layers
         self.model = None  # type: Sequential
         self.history = None
         self.codes = None
@@ -42,18 +40,21 @@ class KerasClassifier:
         self.lbl_bin = None  # type: LabelBinarizer
         self.cvect = None  # type: CountVectorizer
         self.num_classes = None  # type: int
+        self.layer_def = layer_def
+        self.first_layer_size = first_layer_size
 
     def _load_assets(self):
         print('Loading data...')
         self.codes = AllCodes.load_from_pickle('source_data/pickles/canada/tidy_sets/all_codes.P', is_path=True)
-        self.codes.add_code(CodeRecord(code="NA", desc="Unknown"))
-        self.titles = TitleSet.load_from_pickle('source_data/pickles/canada/tidy_sets/all_titles.P', is_path=True)
+        self.codes.add_emptyset()
+        self.titles = TitleSet.load_from_pickle('source_data/pickles/canada/tidy_sets/all_titles.P', is_path=True).copy_and_append_empty_string_class()
 
     def _setup_for_fit(self):
         self._load_assets()
         self.cvect = CountVectorizer(ngram_range=(1, 6), stop_words='english', max_features=self.max_words)
         self.lbl_bin = LabelBinarizer()
         ac_vec = self.codes.get_codes_for_level(target_level=self.target_level)
+        print("classes: ", ac_vec)
         all_texts = self.titles.get_title_vec()
         all_title_codes = self.titles.get_code_vec(target_level=self.target_level)
         self.lbl_bin.fit(ac_vec)
@@ -72,6 +73,7 @@ class KerasClassifier:
         Y = self.lbl_bin.transform(y)
         vY = self.lbl_bin.transform(validation_data[1])
         print('y shape:', Y.shape, " type: ", type(y))
+        print(self.model.summary())
         if validation_data is not None:
             self.history = self.model.fit(X, Y,
                                 batch_size=self.batch_size,
@@ -93,17 +95,21 @@ class KerasClassifier:
         return self.lbl_bin.inverse_transform(self.model.predict(X))
 
     def _assemble_model(self):
-        print('Building model for %d classes and %d inputs ... with layer size: %d' %
-              (self.num_classes, self.max_words, self.layer_size)
+        print('Building model for %d classes and %d inputs ... with layers: %s' %
+              (self.num_classes, self.max_words, self.layer_def)
               )
         model = Sequential()
         #input layer
-        model.add(Dense(self.layer_size, input_shape=(self.max_words,), activation='tanh'))
-        for i in range(self.num_layers):
-            model.add(Dense(self.layer_size, activation='tanh', kernel_initializer='RandomUniform', bias_initializer='random_uniform'))
-            model.add(Dropout(0.5))
+        model.add(Dense(self.first_layer_size, input_shape=(self.max_words,), activation='tanh'))
+        for ldef in self.layer_def:
+            layer_size = ldef[0]
+            num_layers = ldef[1]
+            put_drops = ldef[2]
+            for i in range(num_layers):
+                model.add(Dense(layer_size, activation='tanh', kernel_initializer='RandomUniform', bias_initializer='random_uniform'))
+                if put_drops:
+                    model.add(Dropout(0.5))
         #output layer
-        model.add(Dense(self.layer_size, activation='tanh', kernel_initializer='RandomUniform', bias_initializer='random_uniform'))
         model.add(Dense(self.num_classes, activation='softmax'))
         model.compile(loss='categorical_crossentropy',
                       optimizer='adam',
@@ -158,7 +164,7 @@ class KerasClassifier:
         fh = open(filepath, 'rb')
         if not os.path.exists(filepath) or os.path.isdir(filepath):
             return None
-        kc = pickle.load(fh)  # type: KerasClassifier
+        kc = pickle.load(fh)  # type: ANNclassifier
         if os.path.exists(filepath + '.mdl') and not os.path.isdir(filepath + '.mdl'):
             kc.model = load_model(filepath + '.mdl')
         kc._load_assets()
@@ -173,11 +179,11 @@ def keras_classifier_main():
 @keras_classifier_main.command(name='train')
 @click.argument('target_level', type=click.INT)
 @click.option('--epoch', type=click.INT, default=10, help="# of epochs to use when training")
-@click.option('--layers', type=click.INT,default=5, help="# of hidden layers in neural net")
-@click.option('--layer_size', type=click.INT,default=512, help="Size of hidden layers")
+@click.option('--first_layer_size', type=click.INT, default=512, help="Size of Input Layer")
+@click.option('--layer', type=(click.INT, click.INT, click.BOOL), default=(512, 1, False), multiple=True, help="triplet of values, # of neurons in layer, and # of layers, 3rd value is a bool, for whether to put a dropout layer after")
 @click.option('--max_features', type=click.INT, default=10000, help="max features from count vectorizer")
 @click.option('--batch_size', type=click.INT, default=64, help="batch size for tensorflow")
-def keras_classifier_train(target_level, epoch, layers, layer_size, max_features, batch_size):
+def keras_classifier_train(target_level, epoch, layer, max_features, first_layer_size, batch_size):
     train = TitleSet.load_from_pickle('source_data/pickles/canada/test_sets/train.set.lvl%d.P' % target_level,
                                       is_path=True).copy_and_append_empty_string_class()
     test = TitleSet.load_from_pickle('source_data/pickles/canada/test_sets/test.set.lvl%d.P' % target_level,
@@ -193,7 +199,14 @@ def keras_classifier_train(target_level, epoch, layers, layer_size, max_features
 
     print(len(x_train), 'train sequences')
     print(len(x_test), 'test sequences')
-    mdl = KerasClassifier(target_level=target_level, epochs=epoch, max_words=max_features, num_layers=layers, layer_size=layer_size)
+    # print(y_train)
+    # print(y_test)
+    mdl = ANNclassifier(target_level=target_level,
+                        epochs=epoch,
+                        max_words=max_features,
+                        layer_def=layer,
+                        first_layer_size=first_layer_size,
+                        batch_size=batch_size)
     mdl.fit(x=x_train, y=y_train, validation_data=(x_test, y_test))
 
     mdl.evaluation_metrics(x_test=x_test, y_test=y_test, x_valid=x_train, y_valid=y_train)

@@ -14,11 +14,21 @@ class CodeRecord:
 class AllCodes:
     def __init__(self):
         self.codes = dict()  # type: Dict[str, CodeRecord]
+        self.emptyset_label = None
+
+    def add_emptyset(self, emptyset_label: str ='NA', desc:str='Unknown'):
+        if self.emptyset_label is not None:
+            raise ValueError("Already have an emptyset: ", self.emptyset_label)
+        self.emptyset_label = emptyset_label
+        self.codes[self.emptyset_label] = CodeRecord(code=emptyset_label, desc=desc)
 
     def get_num_children(self, code: str):
         numchild = 0
         level = len(code)
         for code_key in self.codes:
+            if code_key == self.emptyset_label:
+                numchild += 1
+                continue
             if len(code_key) != level + 1:
                 continue
             short_code = code_key[0:level]
@@ -30,6 +40,8 @@ class AllCodes:
         children = []
         level = len(code)
         for code_key in self.codes:
+            if code_key == self.emptyset_label:
+                children.append(self.codes[self.self.emptyset_label])
             if len(code_key) != level + 1:
                 continue
             short_code = code_key[0:level]
@@ -75,7 +87,9 @@ class AllCodes:
         codes = list()
         for code_key in self.codes:  # type: CodeRecord
             code = self.codes[code_key]
-            if code.get_level() == target_level:
+            if code_key == self.emptyset_label:
+                codes.append(code.code)
+            elif code.get_level() == target_level:
                 codes.append(code.code)
         return codes
 

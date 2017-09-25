@@ -82,9 +82,11 @@ class TitleSet:
 
     def get_code_vec(self, target_level=4 ) -> 'List[str]':
         vec = list()
-        for record in self.records:
-            vec.append(record.get_code(target_level))
-
+        for record in self.records:  # type: TitleRecord
+            if record.code == self.emptyset:
+                vec.append(record.code)
+            else:
+                vec.append(record.get_code(target_level))
         return vec
 
     def split_into_title_and_code_vecs(self, target_level=4):
@@ -158,6 +160,8 @@ class TitleSet:
         return ds
 
     def copy_and_append_empty_string_class(self, label='NA', prop_records=0.25) -> 'TitleSet':
+        if self.emptyset is not None:
+            raise ValueError("Already has an empty_set")
         if label is not None and label == "":
             label = "NA"
         new_copy = self.__class__()  # type: TitleSet

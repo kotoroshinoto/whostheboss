@@ -7,7 +7,7 @@ python \
 --model_filepath ./source_data/pickles/canada/trained_models/simple.lvl1.bayes.P \
 --target_level 1 \
 --emptyset NA \
---bayes
+--model_type 'bayes'
 
 python \
 -m scribe_classifier.main canada_model simple train \
@@ -15,7 +15,7 @@ python \
 --model_filepath ./source_data/pickles/canada/trained_models/simple.lvl2.bayes.P \
 --target_level 2 \
 --emptyset NA \
---bayes
+--model_type 'bayes'
 
 python \
 -m scribe_classifier.main canada_model simple train \
@@ -23,4 +23,4 @@ python \
 --model_filepath ./source_data/pickles/canada/trained_models/simple.lvl3.bayes.P \
 --target_level 3 \
 --emptyset NA \
---bayes
+--model_type 'bayes'

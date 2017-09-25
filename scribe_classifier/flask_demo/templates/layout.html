@@ -1,7 +1,7 @@
 <!doctype html>
 <head>
     <title>Insight Consulting Project (Scribe)</title>
-    <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+    <link href={{url_for('static', filename='css/bootstrap.min.css')}}, rel="stylesheet">
     <link href="starter-template.css" rel="stylesheet">
 </head>
   <body>
@@ -22,6 +22,8 @@
             <td><a href="/">Main Page</a></td>
         </tr>
      </table>
+      <br>
+      <a href={{ url_for('static', filename='pdf/' }}>SLIDES</a>
   </strong>
     {% block body %}
     {% endblock %}

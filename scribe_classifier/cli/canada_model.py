@@ -85,14 +85,14 @@ def simple():
 @click.option('--target_level', type=click.IntRange(1, 4), default=1, help="train against this code abstraction level")
 @click.option('--emptyset', type=click.STRING, default=None, help="Add Empty String Dataset with given label to training set before fitting, if you provide an empty string label, default 'NA' will be used instead")
 @click.option('--oversample/--no-oversample', default=False, help="toggle random oversampling, will use MultinomialNB model in this mode instead of SGDClassifier")
-@click.option('--bayes/--no-bayes', default=False, help='Use MultinomialNB instead of SGDClassifier')
-def generate_simple_model(model_filepath, train_filepath, target_level, emptyset, oversample, bayes):
+@click.option('--model_type', type=click.STRING, default='sgdsv', help="specify model type, one of ['sgdsv', 'bayes', 'gauss']")
+def generate_simple_model(model_filepath, train_filepath, target_level, emptyset, oversample, model_type):
     """Use Simple Model, predict one specific category level all at once, using SGDClassifier"""
     train = TitleSet.load_from_pickle(train_filepath)
-    if oversample or bayes:
-        mdl = SimpleModel(target_level=target_level, emptyset_label=emptyset, use_bayes=True)
+    if oversample or model_type=='bayes':
+        mdl = SimpleModel(target_level=target_level, emptyset_label=emptyset, model_type='bayes')
     else:
-        mdl = SimpleModel(target_level=target_level, emptyset_label=emptyset)
+        mdl = SimpleModel(target_level=target_level, emptyset_label=emptyset, model_type=model_type)
     if oversample:
         # print("oversampling")
         train = train.copy_and_oversample_to_flatten_stratification()

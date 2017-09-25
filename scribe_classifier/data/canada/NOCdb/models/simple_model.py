@@ -9,31 +9,31 @@ from ..util import FeatureEngineer
 from scribe_classifier.data.canada.NOCdb.readers.titles import TitlePreprocessor
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.base import BaseEstimator, ClassifierMixin
+from sklearn.gaussian_process import GaussianProcessClassifier
+import numpy as np
 
 
 class SimpleModel(BaseEstimator, ClassifierMixin):
-    def __init__(self, target_level=1, emptyset_label: str=None, use_bayes=False, cv=None, ngram_start=1, ngram_stop=5, ngram_step=2):
+    def __init__(self, target_level=1, emptyset_label: str=None, cv=None, ngram_start=1, ngram_stop=5, model_type='sgdsv'):
         self.target_level = target_level
-        self.use_bayes = use_bayes
+        self.model_type = model_type
         self.parameters = dict()
-        self.parameters['vect__ngram_range'] = [(1, x) for x in range(ngram_start, ngram_stop + ngram_step, ngram_step)]
-        self.parameters['clf__alpha'] = (1e-3, 1e-4, 1e-5, 1e-6)
-        if use_bayes:
-            # self.prop_records = 1.0/8.0
-            self.clf_pipe = Pipeline([
-                ('vect', CountVectorizer(stop_words='english')),
-                ('clf', MultinomialNB(alpha=1e-4))
-            ])
-        else:
-            # self.prop_records = 1.0
-            self.parameters['clf__max_iter'] = range(1000, 10000, 3000)
-            self.parameters['clf__tol'] = (1e-3, 1e-4)
-            self.clf_pipe = Pipeline([
-                ('vect', CountVectorizer(stop_words='english')),
-                ('clf', SGDClassifier(alpha=1e-4, max_iter=1000, tol=1e-4))
-            ])
+        self.vect = CountVectorizer(stop_words='english', ngram_range=(ngram_start, ngram_stop))
+        # self.parameters['vect__ngram_range'] = [(1, x) for x in range(ngram_start, ngram_stop + ngram_step, ngram_step)]
 
-        self.clf = GridSearchCV(self.clf_pipe, self.parameters, n_jobs=-1, cv=cv, scoring='accuracy')
+        if self.model_type == 'bayes':
+            self.parameters['alpha'] = (1e-3, 1e-4, 1e-5, 1e-6)
+            # self.prop_records = 1.0/8.0
+            self.ml_clf = MultinomialNB(alpha=1e-4)
+        elif self.model_type == 'sgdsv':
+            self.parameters['alpha'] = (1e-3, 1e-4, 1e-5, 1e-6)
+            self.parameters['max_iter'] = range(1000, 10000+1, 3000)
+            self.parameters['tol'] = (1e-3, 1e-4)
+            self.ml_clf = SGDClassifier(alpha=1e-4, max_iter=1000, tol=1e-4, n_jobs=-1)
+        else:
+            raise ValueError("Unrecognized model type")
+
+        self.clf = GridSearchCV(self.ml_clf, self.parameters, n_jobs=-1, cv=cv, scoring='accuracy')
         if emptyset_label is not None:
             if emptyset_label == "":
                 self.emptyset_label = "NA"
@@ -61,8 +61,7 @@ class SimpleModel(BaseEstimator, ClassifierMixin):
     def fit_titleset(self, title_set: 'TitleSet'):
         class_counts = title_set.count_classes()
         if self.emptyset_label is not None:
-            # if not self.use_bayes:
-            if self.use_bayes:
+            if self.model_type == 'bayes':
                 prop_records = 0.25
             else:
                 prop_records = 1.0 / float(len(class_counts))
@@ -72,25 +71,27 @@ class SimpleModel(BaseEstimator, ClassifierMixin):
         else:
             working_title_set = title_set
         X, Y = working_title_set.split_into_title_and_code_vecs(target_level=self.target_level)
-        self.clf.fit(X, Y)
+        return self.fit(X, Y)
 
     def predict_titleset(self, title_set: 'TitleSet') -> 'List[str]':
-        return self.clf.predict(title_set.get_title_vec())
+        return self.predict(title_set.get_title_vec())
 
     def predict_titlevec(self, title_vec: 'List[TitleRecord]') -> 'List[str]':
-        return self.clf.predict(title_vec)
+        return self.predict(title_vec)
 
     def predict_titlerecord(self, title_record: 'TitleRecord') -> str:
         print(type(title_record))
-        return self.clf.predict([title_record.title])[0]
+        return self.predict([title_record.title])[0]
 
     def fit(self, X, y, **fit_params):
-        tset = TitleSet()
-        tset.add_titles_from_vecs(title_vec=X, code_vec=y)
-        self.fit_titleset(title_set=tset)
+        bag = self.vect.fit_transform(X, y)
+        self.clf.fit(bag, y)
+        return self
 
     def predict(self, X):
-        return self.predict_titlevec(X)
+        bag = self.vect.transform(X)
+        return self.clf.predict(bag)
+
 
 
 
