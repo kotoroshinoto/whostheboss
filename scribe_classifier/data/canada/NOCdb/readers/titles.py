@@ -35,7 +35,7 @@ class TitleRecord:
 class TitleSet:
     def __init__(self):
         self.records = list()  # type: List[TitleRecord]
-        self.emptyset = None
+        self.emptyset_label = None
 
     def to_dataframe(self, target_level=1) -> 'pd.DataFrame':
         titles, codes = self.split_into_title_and_code_vecs(target_level=target_level)
@@ -83,7 +83,7 @@ class TitleSet:
     def get_code_vec(self, target_level=4 ) -> 'List[str]':
         vec = list()
         for record in self.records:  # type: TitleRecord
-            if record.code == self.emptyset:
+            if record.code == self.emptyset_label:
                 vec.append(record.code)
             else:
                 vec.append(record.get_code(target_level))
@@ -160,7 +160,7 @@ class TitleSet:
         return ds
 
     def copy_and_append_empty_string_class(self, label='NA', prop_records=0.25) -> 'TitleSet':
-        if self.emptyset is not None:
+        if self.emptyset_label is not None:
             raise ValueError("Already has an empty_set")
         if label is not None and label == "":
             label = "NA"
@@ -169,7 +169,7 @@ class TitleSet:
         num_to_add = int(len(self.records) * prop_records)
         for i in range(num_to_add):
             new_copy.records.append(TitleRecord(title="", code=label, is_emptyset=True))
-        new_copy.emptyset = label
+        new_copy.emptyset_label = label
         return new_copy
 
     def get_sets_for_fitting_multi_level(self, all_codes: 'AllCodes', target_level=1) -> 'Dict[str, TitleSet]':
@@ -203,21 +203,21 @@ class TitleSet:
     def copy_and_oversample_to_flatten_stratification(self) -> 'TitleSet':
         # counts = self.count_classes(target_level=4)
         # max_count = -1
-        # max_code = None
         # for code in counts:
         #     if counts[code] > max_count:
         #         max_count = counts[code]
-        #         max_code = code
-        # target_count = max_count * 10
+        # target_count = max_count * 100
         # ratio_dict = dict()
         # for code in counts:
         #     ratio_dict[code] = target_count - counts[code]
+        # print(ratio_dict)
+        # exit()
         # ros = RandomOverSampler(ratio=ratio_dict)
         title_enc = LabelEncoder()
         code_enc = LabelEncoder()
-        ros = RandomOverSampler()
+        ros = RandomOverSampler(ratio='all')
 
-        title_vec=self.get_title_vec()
+        title_vec = self.get_title_vec()
         title_vec_encoded = title_enc.fit_transform(title_vec)
 
         code_vec = self.get_code_vec(target_level=4)
@@ -229,6 +229,7 @@ class TitleSet:
         X_resamp, Y_resamp = ros.fit_sample(X=X, y=Y)
 
         new_set = self.__class__()  # type: TitleSet
+        new_set.emptyset_label = self.emptyset_label
         for trecord in self.records:
             new_set.add_title(title_record=TitleRecord(
                 code=trecord.code,

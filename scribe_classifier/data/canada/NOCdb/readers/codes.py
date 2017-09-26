@@ -23,6 +23,8 @@ class AllCodes:
         self.codes[self.emptyset_label] = CodeRecord(code=emptyset_label, desc=desc)
 
     def get_num_children(self, code: str):
+        if code == self.emptyset_label:
+            return 0
         numchild = 0
         level = len(code)
         for code_key in self.codes:
@@ -37,11 +39,13 @@ class AllCodes:
         return numchild
 
     def get_children(self, code: str):
+        if code == self.emptyset_label:
+            return []
         children = []
         level = len(code)
         for code_key in self.codes:
             if code_key == self.emptyset_label:
-                children.append(self.codes[self.self.emptyset_label])
+                children.append(self.codes[self.emptyset_label])
             if len(code_key) != level + 1:
                 continue
             short_code = code_key[0:level]
@@ -86,7 +90,7 @@ class AllCodes:
     def get_codes_for_level(self, target_level=1):
         codes = list()
         for code_key in self.codes:  # type: CodeRecord
-            code = self.codes[code_key]
+            code = self.codes[code_key]  # type: CodeRecord
             if code_key == self.emptyset_label:
                 codes.append(code.code)
             elif code.get_level() == target_level:

@@ -27,9 +27,8 @@ class SimpleModel(BaseEstimator, ClassifierMixin):
             self.ml_clf = MultinomialNB(alpha=1e-4)
         elif self.model_type == 'sgdsv':
             self.parameters['alpha'] = (1e-3, 1e-4, 1e-5, 1e-6)
-            self.parameters['max_iter'] = range(1000, 10000+1, 3000)
-            self.parameters['tol'] = (1e-3, 1e-4)
-            self.ml_clf = SGDClassifier(alpha=1e-4, max_iter=1000, tol=1e-4, n_jobs=-1)
+            self.parameters['tol'] = (1e-3, 1e-4, 1e-5, 1e-6)
+            self.ml_clf = SGDClassifier(alpha=1e-4, max_iter=3000, tol=1e-4, n_jobs=-1)
         else:
             raise ValueError("Unrecognized model type")
 
