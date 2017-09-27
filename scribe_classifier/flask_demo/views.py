@@ -129,14 +129,20 @@ def generate_scribe_category_plot(output_fname, label: str ='class'):
 
 @app.route('/')
 @app.route('/index')
-def index():
+@app.route('/slides')
+def slide_page():
+    return render_template("slides.html")
+
+
+@app.route('/classes')
+def imbalanced_classes_page():
     img_path = os.path.abspath('./scribe_classifier/flask_demo/static/img/canada_histogram.png')
     img_path_with_emptycat = os.path.abspath('./scribe_classifier/flask_demo/static/img/canada_histogram_emptycat.png')
     if force_img_generation or not os.path.exists(img_path):
         generate_canada_category_plot(img_path, False)
     if force_img_generation or not os.path.exists(img_path_with_emptycat):
         generate_canada_category_plot(img_path_with_emptycat, True)
-    return render_template("index.html")
+    return render_template("imbalanced_classes.html")
 
 
 @app.route('/model_uncombined_validate')
@@ -245,6 +251,3 @@ def classify_text_output_multi():
     return render_template("multi_output.html", dataframe=df.to_html(index=False, classes=["table", "table-bordered"]))
 
 
-@app.route('/slides')
-def slide_page():
-    return render_template("slides.html")
