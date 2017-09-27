@@ -6,6 +6,7 @@ from scribe_classifier.cli import training_set_cli
 from scribe_classifier.cli import pull_scribe_data_cli
 from scribe_classifier.cli import keras_classifier_cli
 
+
 @click.group()
 def main():
     pass

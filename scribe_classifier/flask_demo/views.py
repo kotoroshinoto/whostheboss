@@ -145,19 +145,19 @@ def imbalanced_classes_page():
     return render_template("imbalanced_classes.html")
 
 
-@app.route('/model_uncombined_validate')
-def uncombined_validation_results_page():
+@app.route('/model_validate')
+def validation_results_page():
     return render_template('model_validate.html',
-                           switch_link_url="/model_uncombined_test",
+                           switch_link_url="/model_test",
                            switch_link_text="Classification Metrics",
                            model_type="Validation Set:",
                            dataframe=valid_report.get_report_dataframe().to_html(index=False, classes=["table", "table-bordered", "table-striped"]))
 
 
-@app.route('/model_uncombined_test')
-def uncombined_test_results_page():
+@app.route('/model_test')
+def test_results_page():
     return render_template('model_validate.html',
-                           switch_link_url="/model_uncombined_validate",
+                           switch_link_url="/model_validate",
                            switch_link_text="Classification Metrics",
                            model_type="Test Set:",
                            dataframe=test_report.get_report_dataframe().to_html(index=False, classes=["table", "table-bordered", "table-striped"]))
