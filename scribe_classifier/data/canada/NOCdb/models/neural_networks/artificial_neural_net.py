@@ -34,6 +34,13 @@ class ANNclassifier:
         self.num_classes = None  # type: int
         self.layer_def = layer_def
         self.first_layer_size = first_layer_size
+        self.warmstart = False
+
+    def set_warm_start(self, state=None):
+        if state is None:
+            self.warmstart = not self.warmstart
+        else:
+            self.warmstart = state
 
     def _load_assets(self):
         print('Loading data...')
@@ -54,7 +61,8 @@ class ANNclassifier:
         self.num_classes = len(ac_vec)
         print(self.num_classes, 'classes')
         self.cvect.fit(all_texts, y=all_title_codes)
-        self._assemble_model()
+        if self.model is None or not self.warmstart:
+            self._assemble_model()
 
     def fit(self, x, y, validation_data: 'Tuple[List[str], List[str]]'=None):
         self._setup_for_fit()
