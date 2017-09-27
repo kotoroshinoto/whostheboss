@@ -244,3 +244,7 @@ def classify_text_output_multi():
     df['Level3_Description'] = out_col3
     return render_template("multi_output.html", dataframe=df.to_html(index=False, classes=["table", "table-bordered"]))
 
+
+@app.route('/slides')
+def slide_page():
+    return render_template("slides.html")
