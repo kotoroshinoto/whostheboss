@@ -136,7 +136,7 @@ def index():
         generate_canada_category_plot(img_path, False)
     if force_img_generation or not os.path.exists(img_path_with_emptycat):
         generate_canada_category_plot(img_path_with_emptycat, True)
-    return render_template("index.html", title ='Home', user = {'nickname': 'Miguel'}, )
+    return render_template("index.html")
 
 
 @app.route('/model_uncombined_validate')
