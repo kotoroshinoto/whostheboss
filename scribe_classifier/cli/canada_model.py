@@ -130,6 +130,9 @@ def test_simple_model(emptyset, model_file, validation_file, test_file, target_l
     print("Test Set:")
     print(metrics.classification_report(test_target_codes, test_pred))
 
+    print("Val  Acc: ", metrics.accuracy_score(valid_target_codes, valid_pred),
+          "Test Acc", metrics.accuracy_score(test_target_codes, test_pred))
+
 
 @canada_model_cli.group()
 def multi():
@@ -181,11 +184,11 @@ def test_multi_step_model(emptyset, model_file, validation_file, test_file, targ
         test_level_pred = test_pred.get_preds(target_level=i)
         print("Validation Set:")
         print(metrics.classification_report(valid_target_codes, valid_level_pred))
-        # print(metrics.confusion_matrix(valid.Y, valid_pred))
-
         print("Test Set:")
         print(metrics.classification_report(test_target_codes, test_level_pred))
-        # print(metrics.confusion_matrix(test.Y, test_pred))
+
+        print("Val  Acc: ", metrics.accuracy_score(valid_target_codes, valid_pred),
+              "Test Acc", metrics.accuracy_score(test_target_codes, test_pred))
 
 
 if __name__ == "__main__":

@@ -4,6 +4,8 @@ on the Reuters newswire topic classification task.
 import click
 from scribe_classifier.data.canada import TitleSet
 from scribe_classifier.data.canada.NOCdb.models.neural_networks.artificial_neural_net import ANNclassifier
+from sklearn import metrics
+
 
 ann_filepath = '/home/mgooch/PycharmProjects/insight/nnmodels/ANN/neural_net_level%d.P'
 
@@ -78,6 +80,8 @@ def test_model(target_level):
     print(mdl.model.summary())
     mdl.set_warm_start(state=False)
     mdl.evaluation_metrics(x_test=x_test, y_test=y_test, x_valid=x_train, y_valid=y_train)
+    test_pred = mdl.predict(x_test)
+    train_pred = mdl.predict(x_train)
 
 
 if __name__ == "__main__":

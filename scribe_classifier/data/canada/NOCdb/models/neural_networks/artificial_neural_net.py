@@ -4,7 +4,7 @@ import pickle
 from keras.layers import Dense, Dropout
 from keras.models import Sequential, load_model
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, accuracy_score
 from sklearn.preprocessing import LabelBinarizer
 from scribe_classifier.data.canada import AllCodes, CodeRecord, TitleSet
 from typing import Tuple, List, Dict
@@ -141,10 +141,18 @@ class ANNclassifier:
         print(classification_report(y_true=self.lbl_bin.inverse_transform(y), y_pred=self.lbl_bin.inverse_transform(preds)))
 
     def evaluation_metrics(self, x_test, y_test, x_valid, y_valid):
+        valid_pred = self.predict(x_valid)
+        test_pred = self.predict(x_test)
         xtv = self.cvect.transform(x_test).todense()
         xvv = self.cvect.transform(x_valid).todense()
         ytv = self.lbl_bin.transform(y_test)
         yvv = self.lbl_bin.transform(y_valid)
+
+        print("Validation Set Report", classification_report(y_valid, valid_pred))
+        print("Test Set Report", classification_report(y_test, test_pred))
+        print("Val  Acc: ", accuracy_score(y_valid, valid_pred),
+              "Test Acc", accuracy_score(y_test, test_pred))
+
         print("validation set:")
         self._evaluate_metrics_pair(x=xvv, y=yvv, label="_valid")
         print("test set:")
