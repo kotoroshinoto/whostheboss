@@ -70,9 +70,9 @@ all_codes.add_code(CodeRecord(code="NA", desc="Not able to classify"))
 classes.append("NA")
 
 #models
-simple_model1 = SimpleModel.load_from_pickle('./source_data/pickles/canada/trained_models/simple.lvl1.P', is_path=True)  # type: SimpleModel
-simple_model2 = SimpleModel.load_from_pickle('./source_data/pickles/canada/trained_models/simple.lvl2.P', is_path=True)  # type: SimpleModel
-simple_model3 = SimpleModel.load_from_pickle('./source_data/pickles/canada/trained_models/simple.lvl3.P', is_path=True)  # type: SimpleModel
+simple_model1 = SimpleModel.load_from_pickle('./source_data/pickles/canada/trained_models/simple.lvl1.sgdsv.P', is_path=True)  # type: SimpleModel
+simple_model2 = SimpleModel.load_from_pickle('./source_data/pickles/canada/trained_models/simple.lvl2.sgdsv.P', is_path=True)  # type: SimpleModel
+simple_model3 = SimpleModel.load_from_pickle('./source_data/pickles/canada/trained_models/simple.lvl3.sgdsv.P', is_path=True)  # type: SimpleModel
 
 #dataset
 valid = TitleSet.load_from_pickle('./source_data/pickles/canada/test_sets/valid.set.lvl2.P', is_path=True)  # type: TitleSet

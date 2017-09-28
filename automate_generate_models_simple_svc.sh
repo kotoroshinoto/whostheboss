@@ -4,25 +4,25 @@
 python \
 -m scribe_classifier.simple_main canada_model simple train \
 --train_filepath ./source_data/pickles/canada/test_sets/train.set.lvl1.P \
---model_filepath ./source_data/pickles/canada/trained_models/simple.lvl1.sgdsv.P \
+--model_filepath ./source_data/pickles/canada/trained_models/simple.lvl1.svc.P \
 --target_level 1 \
 --emptyset NA \
---model_type 'sgdsv'
+--model_type 'svc'
 
 python \
 -m scribe_classifier.simple_main canada_model simple train \
 --train_filepath ./source_data/pickles/canada/test_sets/train.set.lvl2.P \
---model_filepath ./source_data/pickles/canada/trained_models/simple.lvl2.sgdsv.P \
+--model_filepath ./source_data/pickles/canada/trained_models/simple.lvl2.svc.P \
 --target_level 2 \
 --emptyset NA \
---model_type 'sgdsv'
+--model_type 'svc'
 
 python \
 -m scribe_classifier.simple_main canada_model simple train \
 --train_filepath ./source_data/pickles/canada/test_sets/train.set.lvl3.P \
---model_filepath ./source_data/pickles/canada/trained_models/simple.lvl3.sgdsv.P \
+--model_filepath ./source_data/pickles/canada/trained_models/simple.lvl3.svc.P \
 --target_level 3 \
 --emptyset NA \
---model_type 'sgdsv'
+--model_type 'svc'
 
 

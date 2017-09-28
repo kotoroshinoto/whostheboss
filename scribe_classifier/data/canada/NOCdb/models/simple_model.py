@@ -1,6 +1,7 @@
 import pickle
 from typing import Tuple, List
 from sklearn.linear_model import SGDClassifier
+from sklearn.svm import SVC
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
@@ -28,7 +29,9 @@ class SimpleModel(BaseEstimator, ClassifierMixin):
         elif self.model_type == 'sgdsv':
             self.parameters['alpha'] = (1e-3, 1e-4, 1e-5, 1e-6)
             self.parameters['tol'] = (1e-3, 1e-4, 1e-5, 1e-6)
-            self.ml_clf = SGDClassifier(alpha=1e-4, max_iter=3000, tol=1e-4, n_jobs=-1)
+            self.ml_clf = SGDClassifier(alpha=1e-4, max_iter=3000, tol=1e-4, n_jobs=-1, loss='log')
+        elif self.model_type == 'svc':
+            self.ml_clf = SVC(kernel='linear', probability=True)
         else:
             raise ValueError("Unrecognized model type")
 

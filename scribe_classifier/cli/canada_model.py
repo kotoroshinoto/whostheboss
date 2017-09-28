@@ -89,7 +89,7 @@ def simple():
 def generate_simple_model(model_filepath, train_filepath, target_level, emptyset, oversample, model_type):
     """Use Simple Model, predict one specific category level all at once, using SGDClassifier"""
     train = TitleSet.load_from_pickle(train_filepath)
-    if oversample or model_type=='bayes':
+    if oversample or model_type == 'bayes':
         mdl = SimpleModel(target_level=target_level, emptyset_label=emptyset, model_type='bayes')
     else:
         mdl = SimpleModel(target_level=target_level, emptyset_label=emptyset, model_type=model_type)
@@ -98,7 +98,10 @@ def generate_simple_model(model_filepath, train_filepath, target_level, emptyset
         train = train.copy_and_oversample_to_flatten_stratification()
     mdl.fit_titleset(title_set=train)
     if model_filepath is None:
-        model_filepath=open('./pickles/TrainedModels/simple.P', 'wb')
+        if oversample:
+            model_filepath = open('./pickles/TrainedModels/simple.lvl%d.%s.%s.P' % (target_level, 'oversample','bayes'), 'wb')
+        else:
+            model_filepath=open('./pickles/TrainedModels/simple.lvl%d.%s.P' % (target_level, model_type0), 'wb')
     mdl.save_as_pickle(file=model_filepath, is_path=False)
 
 

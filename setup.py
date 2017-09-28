@@ -29,7 +29,8 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'classify-jobtitles = scribe_classifier.main:main'
+            'classify-jobtitles = scribe_classifier.main:main',
+            'classify-jobtitles-nn = scribe_classifier.nn_main:nn_main:'
         ]
     }
 )
