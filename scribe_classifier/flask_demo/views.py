@@ -1,18 +1,19 @@
+import io
 import os
+from typing import Dict
+
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import seaborn as sns
-from scribe_classifier.data.canada.NOCdb.readers.codes import AllCodes, CodeRecord
-from scribe_classifier.data.canada.NOCdb.readers.titles import TitleSet
-from scribe_classifier.data.scribe import DataFramePickler
 from flask import render_template
 from flask import request
-from sklearn import metrics
-from scribe_classifier.data.canada.NOCdb.models import SimpleModel
-from scribe_classifier.flask_demo import app
-import io
+
+from preconstruct_eval_dataframes_for_flask import ClassificationReporter, scribe_query_df, do_scribe_predicts
 from scribe_classifier.data.canada.NOCdb.models.neural_networks.combined_models import CombinedModels
+from scribe_classifier.data.canada.NOCdb.readers.codes import AllCodes, CodeRecord
+from scribe_classifier.data.canada.NOCdb.readers.titles import TitleSet
+from scribe_classifier.flask_demo import app
+
 # user = 'mgooch' #add your username here (same as previous postgreSQL)
 # host = 'localhost'
 # dbname = 'scribe'
@@ -22,45 +23,7 @@ from scribe_classifier.data.canada.NOCdb.models.neural_networks.combined_models 
 
 pd.set_option('display.max_colwidth', -1)
 
-
-class ClassificationReporter:
-    def __init__(self, y, y_pred, classes):
-        retvals =[]
-        for retval in metrics.precision_recall_fscore_support(y, y_pred, average='weighted'):
-            retvals.append(retval)
-        self.avg_precision = retvals[0]
-        self.avg_recall = retvals[1]
-        self.avg_fbeta_score = retvals[2]
-        self.total = len(y)
-        retvals = []
-        for retval in metrics.precision_recall_fscore_support(y, y_pred):
-            retvals.append(retval)
-        self.precision = retvals[0]
-        self.recall = retvals[1]
-        self.fbeta_score = retvals[2]
-        self.support = retvals[3]
-        self.conf_matrix = metrics.confusion_matrix(y, y_pred)
-        self.cats = classes
-
-    def get_report_dataframe(self):
-        df = pd.DataFrame()
-        df['Precision'] = pd.Series(data=self.precision).append(pd.Series([self.avg_precision]))
-        df['Recall'] = pd.Series(data=self.recall).append(pd.Series([self.avg_recall]))
-        df['F1-Score'] = pd.Series(data=self.fbeta_score).append(pd.Series([self.avg_fbeta_score]))
-        df['Support'] = pd.Series(data=self.support).append(pd.Series([self.total]))
-        cats = list(self.cats)
-        cats.append("Avg / Total")
-        df['Category'] = cats
-        df.index = pd.RangeIndex(len(df.index))
-        cols = df.columns.tolist()
-        cols = cols[-1:] + cols[:-1]
-        df = df[cols]
-        return df
-
-
 force_img_generation = False
-
-scribe_query_df = DataFramePickler.load_from_pickle('./SavedScribeQueries/midsize_tech_usa.P')
 
 all_codes = AllCodes.load_from_pickle('./source_data/pickles/canada/tidy_sets/all_codes.P', is_path=True)
 classes = all_codes.get_codes_for_level(target_level=2)
@@ -68,12 +31,12 @@ all_codes.add_code(CodeRecord(code="NA", desc="Not able to classify"))
 classes.append("NA")
 
 mdl_strs = dict()
-models = dict()
+models = dict()  # type: Dict[int, CombinedModels]
 for target_level in range(1, 4):
     level_mdl_strs = dict()
     level_mdl_strs['sgd'] = 'source_data/pickles/canada/trained_models/simple.lvl%d.sgdsv.P' % target_level
     level_mdl_strs['bayes'] = 'source_data/pickles/canada/trained_models/simple.lvl%d.bayes.P' % target_level
-    # level_mdl_strs['ann'] = 'source_data/pickles/canada/trained_models/ann/neural_net_level%d.frozen.P' % target_level
+    level_mdl_strs['ann'] = 'nnmodels/ANN/neural_net_level%d.frozen.P' % target_level
     mdl_strs[target_level] = level_mdl_strs
 
 
@@ -104,8 +67,8 @@ print('# test records: ', len(test.records))
 valid_pred = []
 test_pred = []
 try:
-    valid_pred = models[2].predict(valid.get_title_vec())
-    test_pred = models[2].predict(test.get_title_vec())
+    valid_pred = models[2].batched_predict(valid.get_title_vec())
+    test_pred = models[2].batched_predict(test.get_title_vec())
 except MemoryError:
     print("had memory error trying to predict on records")
 
@@ -113,18 +76,7 @@ except MemoryError:
 valid_report = ClassificationReporter(valid.get_code_vec(target_level=2), valid_pred, classes=classes)
 test_report = ClassificationReporter(test.get_code_vec(target_level=2), test_pred, classes=classes)
 
-
-def do_scribe_predicts(label='class'):
-    titles = scribe_query_df['title']
-    titles.fillna(value="", inplace=True)
-    # print(titles)
-    titles_pred = models[2].predict(titles)
-    # print(titles_pred)
-    scribe_query_df[label] = pd.Series(titles_pred)
-
-
 do_scribe_predicts('class')
-do_scribe_predicts('combined_class')
 
 
 def generate_canada_category_plot(output_fname, add_empty_class):

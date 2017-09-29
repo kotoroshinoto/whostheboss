@@ -100,17 +100,17 @@ class ANNclassifier:
                                      verbose=1,
                                      validation_split=0.2)
 
-    def predict(self, x):
+    def predict(self, x, batch_size=32):
         print('Vectorizing sequence data...')
         X = self.cvect.transform(x).todense()
         print('x shape: ', X.shape, " type: ", type(x))
-        return self.lbl_bin.inverse_transform(self.model.predict(X))
+        return self.lbl_bin.inverse_transform(self.model.predict(x=X, batch_size=batch_size))
 
-    def predict_proba(self, x):
+    def predict_proba(self, x, batch_size=32):
         print('Vectorizing sequence data...')
         X = self.cvect.transform(x).todense()
         print('x shape: ', X.shape, " type: ", type(x))
-        return self.model.predict(X)
+        return self.model.predict(x=X, batch_size=batch_size)
 
     def _assemble_model(self):
         print('Building model for %d classes and %d inputs ... with layers: %s' %

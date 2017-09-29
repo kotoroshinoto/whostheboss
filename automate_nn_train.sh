@@ -16,7 +16,7 @@ train \
 python -m scribe_classifier.nn_main canada_model \
 freeze \
 --model nnmodels/ANN/neural_net_level1.P \
---frozen source_data/pickles/canada/trained_models/ann/neural_net_level1.frozen.P
+--frozen nnmodels/ANN/neural_net_level1.frozen.P
 
 python -m scribe_classifier.nn_main canada_model \
 train \
@@ -35,7 +35,7 @@ train \
 python -m scribe_classifier.nn_main canada_model \
 freeze \
 --model nnmodels/ANN/neural_net_level2.P \
---frozen source_data/pickles/canada/trained_models/ann/neural_net_level2.frozen.P
+--frozen nnmodels/ANN/neural_net_level2.frozen.P
 
 python -m scribe_classifier.nn_main canada_model \
 train \
@@ -54,4 +54,4 @@ train \
 python -m scribe_classifier.nn_main canada_model \
 freeze \
 --model nnmodels/ANN/neural_net_level3.P \
---frozen source_data/pickles/canada/trained_models/ann/neural_net_level3.frozen.P
+--frozen nnmodels/ANN/neural_net_level3.frozen.P

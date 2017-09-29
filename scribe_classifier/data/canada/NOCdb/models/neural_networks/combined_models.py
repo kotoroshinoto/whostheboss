@@ -13,6 +13,7 @@ from scipy import sparse
 from sklearn.preprocessing import LabelEncoder, LabelBinarizer
 from scribe_classifier.data.canada.NOCdb.readers import AllCodes
 from .artificial_neural_net import ANNclassifier
+from keras.models import Sequential
 import gc
 
 
@@ -81,14 +82,17 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
             self.mdls[3] = None
         assert self.num_models > 0.0
 
-    def generate_proba_for(self, clf, X, cachepath):
-        proba = clf.predict_proba(X)
+    def generate_proba_for(self, clf, X, cachepath, keras_batch_size=32, is_keras=False):
+        if is_keras:
+            proba = clf.predict_proba(X, batch_size=keras_batch_size)
+        else:
+            proba = clf.predict_proba(X)
         ObjectPickler.pickle_object(proba, cachepath)
         del proba
         proba = None
         gc.collect()
 
-    def generate_proba_for_level(self, proba_level: int, X):
+    def generate_proba_for_level(self, proba_level: int, X, keras_batch_size=32):
         mdls_dict = self.mdls[proba_level]
         proba_paths = dict()
         basepath = 'tmp/proba.%d.%s.P'
@@ -98,7 +102,7 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
             for mdltype in ['sgd', 'bayes', 'ann']:
                 if mdltype in mdls_dict:
                     prob_path = basepath % (proba_level, mdltype)
-                    self.generate_proba_for(clf=mdls_dict[mdltype], X=X, cachepath=prob_path)
+                    self.generate_proba_for(clf=mdls_dict[mdltype], X=X, cachepath=prob_path, keras_batch_size=keras_batch_size, is_keras=('ann'==mdltype))
                     proba_paths[mdltype] = prob_path
         return proba_paths
 
@@ -145,24 +149,44 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
             new_cols.append(np.sum(np.take(proba, ind_map[i], axis=1), axis=1))
         return np.column_stack(new_cols)
 
-    def predict_proba(self, X) -> 'np.ndarray':
+    def predict_proba(self, X, keras_batch_size=32) -> 'np.ndarray':
         gc.enable()
         level_sums = list()
         #pre-generate probas
         for i in range(1, 4):
             if self.mdls[i] is not None:
-                self.generate_proba_for_level(proba_level=i, X=X)
+                self.generate_proba_for_level(proba_level=i, X=X, keras_batch_size=keras_batch_size)
         for i in range(1, 4):
             if self.mdls[i] is not None:
                 level_sums.append(self.condense_proba_to_target_level(self.get_proba_sum_at_level(i, X), i))
         return sum(level_sums) / self.num_models
 
-    def predict(self, X):
-        return self.bin_encs[self.target_level].inverse_transform(self.predict_proba(X))
+    def predict(self, X, keras_batch_size=32):
+        return self.bin_encs[self.target_level].inverse_transform(self.predict_proba(X=X,
+                                                                                     keras_batch_size=keras_batch_size))
 
-    def predict_titleset(self, tset: 'TitleSet'):
+    def predict_titleset(self, tset: 'TitleSet', keras_batch_size=32):
         tvec = tset.get_title_vec()
-        return self.predict(X=tvec)
+        return self.predict(X=tvec, keras_batch_size=keras_batch_size)
+
+    def batched_predict_titleset(self, tset: 'TitleSet', batch_size=4000, keras_batch_size=32):
+        tvec = tset.get_title_vec()
+        return self.batched_predict(X=tvec, batch_size=batch_size, keras_batch_size=keras_batch_size)
+
+    def batched_predict(self, X, batch_size=4000, keras_batch_size=32):
+        preds = []
+        for i in range(0, len(X), batch_size):
+            j = min(i + 4000, len(X))
+            batch = X[i:j]
+            # print('i:', i, "\tj:", j)
+            preds.append(self.predict(batch, keras_batch_size=keras_batch_size))
+            if j == len(X):
+                break
+        # for i in range(len(preds)):
+        #     print(preds[i].shape)
+        preds = np.concatenate(tuple(preds))
+        print(preds.shape)
+        return preds
 
 
 class ObjectPickler:
