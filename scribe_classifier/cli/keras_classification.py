@@ -93,8 +93,9 @@ def freeze_copy(model, frozen):
 @click.option('--emptyset', type=click.STRING, default=None, help="Add Empty String Dataset with given label to test set and validation set  before making predictions, if you provide an empty string label, default 'NA' will be used instead")
 @click.option('--val', type=click.File('rb'), required=True)
 @click.option('--test', type=click.File('rb'), required=True)
+@click.option('--lowmem/--no-lowmem', default=False, help="Randomly Sample 20% of validation set (use if memory errors are a problem)")
 @click.argument('target_level', type=click.IntRange(1, 4), default=1)
-def combine_test(target_level, model, emptyset, val, test, code_file):
+def combine_test(target_level, model, emptyset, val, test, code_file, lowmem):
     if emptyset == "":
         emptyset = "NA"
     mdl_paths = dict()
@@ -119,8 +120,10 @@ def combine_test(target_level, model, emptyset, val, test, code_file):
     if emptyset is not None:
         validset = validset.copy_and_append_empty_string_class(label=emptyset)  # type: TitleSet
         testset = testset.copy_and_append_empty_string_class(label=emptyset)  # type: TitleSet
+    if lowmem:
+        train, validset = validset.split_data_train_test(target_level=4, test_split=0.25)
+        # print(validset.get_code_vec(target_level=1))
     valid_y = validset.get_code_vec(target_level=target_level)
-
     test_y = testset.get_code_vec(target_level=target_level)
     valid_p = cmb_mdls.predict(validset.get_title_vec())
     test_p = cmb_mdls.predict(testset.get_title_vec())

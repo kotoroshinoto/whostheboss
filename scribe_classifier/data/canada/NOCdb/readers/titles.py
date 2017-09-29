@@ -108,8 +108,10 @@ class TitleSet:
             test_size=test_split
         )
         train = self.__class__()
+        train.emptyset_label = self.emptyset_label
         train.add_titles_from_vecs(title_vec=title_train, code_vec=code_train)
         test = self.__class__()
+        test.emptyset_label = self.emptyset_label
         test.add_titles_from_vecs(title_vec=title_test, code_vec=code_test)
         return train, test
 
@@ -130,6 +132,7 @@ class TitleSet:
         # save this for return values
         train = self.__class__()
         train.add_titles_from_vecs(title_vec=title_train, code_vec=code_train)
+        train.emptyset_label = self.emptyset_label
         #create this to generate stratify list
         split = self.__class__()
         split.add_titles_from_vecs(title_vec=title_split, code_vec=code_split)
@@ -146,8 +149,10 @@ class TitleSet:
 
         # save these for return values
         valid = self.__class__()
+        valid.emptyset_label = self.emptyset_label
         valid.add_titles_from_vecs(title_vec=title_valid, code_vec=code_valid)
         test = self.__class__()
+        test.emptyset_label = self.emptyset_label
         test.add_titles_from_vecs(title_vec=title_test, code_vec=code_test)
         return train, valid, test
 

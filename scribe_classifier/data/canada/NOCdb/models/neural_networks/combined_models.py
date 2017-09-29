@@ -13,12 +13,17 @@ from scipy import sparse
 from sklearn.preprocessing import LabelEncoder, LabelBinarizer
 from scribe_classifier.data.canada.NOCdb.readers import AllCodes
 from .artificial_neural_net import ANNclassifier
-# from keras.layers import Dense, Dropout
-# from keras.models import Sequential, load_model
+import gc
 
 
 class CombinedModels(BaseEstimator, ClassifierMixin):
-    def __init__(self, all_codes: 'str', lvl1_mdls: 'Dict[str, str]'=None, lvl2_mdls: 'Dict[str, str]'=None, lvl3_mdls: 'Dict[str, str]'=None, target_level=1, emptyset_label="NA"):
+    def __init__(self,
+                 all_codes: 'str',
+                 lvl1_mdls: 'Dict[str, str]'=None,
+                 lvl2_mdls: 'Dict[str, str]'=None,
+                 lvl3_mdls: 'Dict[str, str]'=None,
+                 target_level=1,
+                 emptyset_label="NA"):
         self.target_level = target_level
         self.emptyset_label = emptyset_label
         self.num_models = 0.0
@@ -76,19 +81,43 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
             self.mdls[3] = None
         assert self.num_models > 0.0
 
-    def get_proba_sum_at_level(self, proba_level: int, X):
-        probas = []
+    def generate_proba_for(self, clf, X, cachepath):
+        proba = clf.predict_proba(X)
+        ObjectPickler.pickle_object(proba, cachepath)
+        del proba
+        proba = None
+        gc.collect()
+
+    def generate_proba_for_level(self, proba_level: int, X):
         mdls_dict = self.mdls[proba_level]
+        proba_paths = dict()
+        basepath = 'tmp/proba.%d.%s.P'
         if mdls_dict is None:
             return None
         else:
-            if 'sgd' in mdls_dict:
-                probas.append(mdls_dict['sgd'].predict_proba(X))
-            if 'bayes' in mdls_dict:
-                probas.append(mdls_dict['bayes'].predict_proba(X))
-            if 'ann' in mdls_dict:
-                probas.append(mdls_dict['ann'].predict_proba(X))
-        return sum(probas)
+            for mdltype in ['sgd', 'bayes', 'ann']:
+                if mdltype in mdls_dict:
+                    prob_path = basepath % (proba_level, mdltype)
+                    self.generate_proba_for(clf=mdls_dict[mdltype], X=X, cachepath=prob_path)
+                    proba_paths[mdltype] = prob_path
+        return proba_paths
+
+    def get_proba_sum_at_level(self, proba_level: int, X):
+        probas = None
+        mdls_dict = self.mdls[proba_level]
+        basepath = 'tmp/proba.%d.%s.P'
+        if mdls_dict is None:
+            return None
+        else:
+            for mdltype in ['sgd', 'bayes', 'ann']:
+                if mdltype in mdls_dict:
+                    prob_path = basepath % (proba_level, mdltype)
+                    reqprobas = ObjectPickler.load_object(prob_path)  # type: np.ndarray
+                    if probas is None:
+                        probas = reqprobas
+                    else:
+                        probas += reqprobas
+        return probas
 
     def get_index_map_for_condensing(self, proba_level):
         proba_codes = self.ac.get_codes_for_level(target_level=proba_level)
@@ -99,7 +128,9 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
             targ_label = target_codes[i]
             for j in range(len(proba_codes)):
                 prob_label = proba_codes[j]
-                if prob_label != self.emptyset_label:
+                if prob_label == self.emptyset_label:
+                    prob_label = self.emptyset_label
+                else:
                     prob_label = prob_label[0: self.target_level]
                 if prob_label == targ_label:
                     keep_where_row.append(j)
@@ -115,7 +146,12 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
         return np.column_stack(new_cols)
 
     def predict_proba(self, X) -> 'np.ndarray':
+        gc.enable()
         level_sums = list()
+        #pre-generate probas
+        for i in range(1, 4):
+            if self.mdls[i] is not None:
+                self.generate_proba_for_level(proba_level=i, X=X)
         for i in range(1, 4):
             if self.mdls[i] is not None:
                 level_sums.append(self.condense_proba_to_target_level(self.get_proba_sum_at_level(i, X), i))
@@ -127,3 +163,13 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
     def predict_titleset(self, tset: 'TitleSet'):
         tvec = tset.get_title_vec()
         return self.predict(X=tvec)
+
+
+class ObjectPickler:
+    @staticmethod
+    def pickle_object(obj, path):
+        pickle.dump(file=open(path, 'wb'), obj=obj)
+
+    @staticmethod
+    def load_object(path):
+        return pickle.load(open(path, 'rb'))
