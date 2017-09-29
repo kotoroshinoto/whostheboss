@@ -42,7 +42,7 @@ train \
 --train_filepath ./source_data/pickles/canada/test_sets/train.set.lvl4.P \
 --test_filepath ./source_data/pickles/canada/test_sets/test.set.lvl4.P \
 --model_filepath nnmodels/ANN/neural_net_level3.P \
---epoch 35 \
+--epoch 40 \
 --activation tanh \
 --first_layer_size 2048 \
 --layer 1024 1 0.5 \

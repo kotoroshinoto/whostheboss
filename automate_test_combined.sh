@@ -38,4 +38,3 @@ python -m scribe_classifier.nn_main canada_model combined_test 3 \
 --model source_data/pickles/canada/trained_models/ann/neural_net_level3.frozen.P 3 ann \
 --val source_data/pickles/canada/test_sets/train.set.lvl4.P \
 --test source_data/pickles/canada/test_sets/test.set.lvl4.P
-

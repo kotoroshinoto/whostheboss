@@ -9,10 +9,6 @@ from scribe_classifier.data.canada.NOCdb.models.neural_networks.combined_models 
 from scribe_classifier.data.canada.NOCdb.readers.codes import AllCodes
 
 
-# ann_filepath = '/home/mgooch/PycharmProjects/insight/nnmodels/ANN/neural_net_level%d.P'
-# ann_filepath_frozen = '/home/mgooch/PycharmProjects/insight/nnmodels/ANN/neural_net_level%d.frozen.P'
-
-
 @click.group()
 def keras_classifier_cli():
     pass
@@ -40,7 +36,7 @@ def keras_classifier_train(target_level, model_filepath, epoch, layer, activatio
 
     if warmstart:
         print("Loading Existing Model")
-        mdl = ANNclassifier.load_from_pickle(model_filepath % target_level)
+        mdl = ANNclassifier.load_from_pickle(model_filepath)
         print(mdl.model.summary())
     else:
         print("Assembling New Model")
@@ -56,7 +52,7 @@ def keras_classifier_train(target_level, model_filepath, epoch, layer, activatio
 
     mdl.evaluation_metrics(x_test=x_test, y_test=y_test, x_valid=x_train, y_valid=y_train)
 
-    mdl.save_as_pickle(model_filepath % target_level)
+    mdl.save_as_pickle(model_filepath)
 
 
 @keras_classifier_cli.command(name='test')
@@ -72,7 +68,7 @@ def test_model(target_level, model_filepath, train_filepath, test_filepath):
     y_train = train.get_code_vec(target_level=target_level)
     y_test = test.get_code_vec(target_level=target_level)
 
-    mdl = ANNclassifier.load_from_pickle(model_filepath % target_level)
+    mdl = ANNclassifier.load_from_pickle(model_filepath)
     print(mdl.model.summary())
     mdl.set_warm_start(state=False)
     mdl.evaluation_metrics(x_test=x_test, y_test=y_test, x_valid=x_train, y_valid=y_train)
