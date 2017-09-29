@@ -1,12 +1,11 @@
 import os
 import pickle
-
 from keras.layers import Dense, Dropout
 from keras.models import Sequential, load_model
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.preprocessing import LabelBinarizer
-from scribe_classifier.data.canada import AllCodes, CodeRecord, TitleSet
+from ...readers import AllCodes, CodeRecord, TitleSet
 from typing import Tuple, List, Dict
 import numpy as np
 
@@ -105,6 +104,12 @@ class ANNclassifier:
         X = self.cvect.transform(x).todense()
         print('x shape: ', X.shape, " type: ", type(x))
         return self.lbl_bin.inverse_transform(self.model.predict(X))
+
+    def predict_proba(self, x):
+        print('Vectorizing sequence data...')
+        X = self.cvect.transform(x).todense()
+        print('x shape: ', X.shape, " type: ", type(x))
+        return self.model.predict(X)
 
     def _assemble_model(self):
         print('Building model for %d classes and %d inputs ... with layers: %s' %

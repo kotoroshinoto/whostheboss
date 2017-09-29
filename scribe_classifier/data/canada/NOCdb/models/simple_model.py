@@ -94,6 +94,6 @@ class SimpleModel(BaseEstimator, ClassifierMixin):
         bag = self.vect.transform(X)
         return self.clf.predict(bag)
 
-
-
-
+    def predict_proba(self, X):
+        bag = self.vect.transform(X)
+        return self.clf.predict_proba(bag)

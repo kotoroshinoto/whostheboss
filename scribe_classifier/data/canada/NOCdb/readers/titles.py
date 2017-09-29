@@ -84,7 +84,7 @@ class TitleSet:
         vec = list()
         for record in self.records:  # type: TitleRecord
             if record.code == self.emptyset_label:
-                vec.append(record.code)
+                vec.append(self.emptyset_label)
             else:
                 vec.append(record.get_code(target_level))
         return vec
