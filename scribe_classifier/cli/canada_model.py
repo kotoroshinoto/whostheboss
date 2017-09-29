@@ -17,15 +17,19 @@ def gen_data_set():
 
 
 def split_and_pickle_dataset(tset, target_level, train_filepath, valid_filepath, test_filepath, test_prop, valid_prop):
-    train, valid, test = tset.split_data_valid_train_test(test_split=test_prop, valid_split=valid_prop, target_level=target_level)
+    if valid_prop == 0.0:
+        train, test = tset.split_data_train_test(target_level=target_level, test_split=test_prop)
+    else:
+        train, valid, test = tset.split_data_valid_train_test(test_split=test_prop, valid_split=valid_prop, target_level=target_level)
+        if valid_filepath is None:
+            valid_filepath = open('./source_data/pickles/canada/test_sets/valid.set.P', 'wb')
+        valid.save_as_pickle(file=valid_filepath, is_path=False)
+
     if train_filepath is None:
         train_filepath=open('./source_data/pickles/canada/test_sets/train.set.P', 'wb')
-    if valid_filepath is None:
-        valid_filepath = open('./source_data/pickles/canada/test_sets/valid.set.P', 'wb')
     if test_filepath is None:
         test_filepath = open('./source_data/pickles/canada/test_sets/test.set.P', 'wb')
     train.save_as_pickle(file=train_filepath, is_path=False)
-    valid.save_as_pickle(file=valid_filepath, is_path=False)
     test.save_as_pickle(file=test_filepath, is_path=False)
 
 
@@ -36,7 +40,7 @@ def split_and_pickle_dataset(tset, target_level, train_filepath, valid_filepath,
 @click.option('--valid_filepath', type=click.File('wb'), default=None, help="Location where validation set will be saved in pickle format")
 @click.option('--test_filepath', type=click.File('wb'), default=None, help="Location where test set will be saved in pickle format")
 @click.option('--valid_prop', type=click.FLOAT, default=0.20, help="value between 0.0 and 1.0 designation proportion to be used for validation set")
-@click.option('--test_prop', type=click.FLOAT, default= 0.20, help="value between 0.0 and 1.0 designation proportion to be used for test set")
+@click.option('--test_prop', type=click.FLOAT, default=0.20, help="value between 0.0 and 1.0 designation proportion to be used for test set")
 def generate_data_set(target_level, example_file, train_filepath, valid_filepath, test_filepath, valid_prop, test_prop):
     """Generate Train/Validate/Test Sets"""
     all_titles = TitleSet()
@@ -112,6 +116,8 @@ def generate_simple_model(model_filepath, train_filepath, target_level, emptyset
 @click.argument('test_file', type=click.File('rb'), required=True)
 @click.argument('target_level', type=click.IntRange(1, 4), default=1)
 def test_simple_model(emptyset, model_file, validation_file, test_file, target_level):
+    if emptyset == "":
+        emptyset = "NA"
     """Run test on model with validation set and test set"""
     model = SimpleModel.load_from_pickle(model_file)  # type: SimpleModel
     valid = TitleSet.load_from_pickle(validation_file)  # type: TitleSet
@@ -169,6 +175,8 @@ def generate_multi_step_model(code_file, train_filepath, model_filepath, emptyse
 @click.argument('test_file', type=click.File('rb'), required=True)
 @click.argument('target_level', type=click.IntRange(1, 4), default=1)
 def test_multi_step_model(emptyset, model_file, validation_file, test_file, target_level):
+    if emptyset == "":
+        emptyset = "NA"
     model = MultiStepModel.load_from_pickle(model_file)  # type: MultiStepModel
     valid = TitleSet.load_from_pickle(validation_file)  # type: TitleSet
     test = TitleSet.load_from_pickle(test_file)  # type: TitleSet

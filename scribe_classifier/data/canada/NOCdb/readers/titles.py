@@ -97,11 +97,21 @@ class TitleSet:
             code_vec.append(record.get_code(target_level))
         return title_vec, code_vec
 
-    @classmethod
-    def from_vecs_split_data_valid_train_test(cls, title_vec, code_vec, test_split=0.20, valid_split=0.20) -> 'Tuple[TitleSet, TitleSet, TitleSet]':
-        new_set = cls()
-        new_set.add_titles_from_vecs(title_vec=title_vec, code_vec=code_vec)
-        return new_set.split_data_valid_train_test(test_split=test_split, valid_split=valid_split)
+    def split_data_train_test(self, target_level=1, test_split=0.20) -> 'Tuple[TitleSet, TitleSet]':
+        # split datasets into train/validation/test
+        title_vec, code_vec = self.split_into_title_and_code_vecs()
+        target_codes = self.get_code_vec(target_level=target_level)
+        title_train, title_test, code_train, code_test = train_test_split(
+            title_vec,
+            code_vec,
+            stratify=target_codes,
+            test_size=test_split
+        )
+        train = self.__class__()
+        train.add_titles_from_vecs(title_vec=title_train, code_vec=code_train)
+        test = self.__class__()
+        test.add_titles_from_vecs(title_vec=title_test, code_vec=code_test)
+        return train, test
 
     def split_data_valid_train_test(self, target_level=1, test_split=0.20, valid_split=0.20) -> 'Tuple[TitleSet, TitleSet, TitleSet]':
         # split datasets into train/validation/test

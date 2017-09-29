@@ -8,6 +8,7 @@ from sklearn.preprocessing import LabelBinarizer
 from ...readers import AllCodes, CodeRecord, TitleSet
 from typing import Tuple, List, Dict
 import numpy as np
+from keras import regularizers
 
 
 class ANNclassifier:
@@ -117,17 +118,32 @@ class ANNclassifier:
               )
         model = Sequential()
         #input layer
-        model.add(Dense(self.first_layer_size, input_shape=(self.max_words,), activation='relu'))
+        model.add(Dense(self.first_layer_size,
+                        input_shape=(self.max_words,),
+                        activation='relu',
+                        # kernel_regularizer=regularizers.l1_l2(0.01, 0.01),
+                        # activity_regularizer=regularizers.l1_l2(0.01, 0.01),
+                        # bias_regularizer=regularizers.l1_l2(0.01, 0.01)
+                        ))
         for ldef in self.layer_def:
             layer_size = ldef[0]
             num_layers = ldef[1]
             put_drops = ldef[2]
             for i in range(num_layers):
-                model.add(Dense(layer_size, activation=self.activation))  # kernel_initializer='RandomUniform', bias_initializer='random_uniform',))
+                model.add(Dense(layer_size,
+                                activation=self.activation,
+                                # kernel_regularizer=regularizers.l1_l2(0.01, 0.01),
+                                # activity_regularizer=regularizers.l1_l2(0.01, 0.01),
+                                # bias_regularizer=regularizers.l1_l2(0.01, 0.01)
+                                ))
                 if put_drops:
                     model.add(Dropout(put_drops))
         #output layer
-        model.add(Dense(self.num_classes, activation='softmax'))
+        model.add(Dense(self.num_classes, activation='softmax',
+                        # kernel_regularizer=regularizers.l1_l2(0.01, 0.01),
+                        # activity_regularizer=regularizers.l1_l2(0.01, 0.01),
+                        # bias_regularizer=regularizers.l1_l2(0.01, 0.01)
+                        ))
         model.compile(loss='categorical_crossentropy',
                       optimizer='adam',
                       metrics=['accuracy'])
