@@ -3,6 +3,7 @@ planning_docs/notes/
 source_data/wiki_glove/
 nnmodels/
 source_data/20_newsgroup/
+tmp/
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template
@@ -155,3 +156,4 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
+
