@@ -9,7 +9,7 @@ from scribe_classifier.data.canada.NOCdb.models.neural_networks.combined_models 
 from scribe_classifier.data.canada.NOCdb.readers.codes import AllCodes, CodeRecord
 from scribe_classifier.data.canada.NOCdb.readers.titles import TitleSet
 from scribe_classifier.flask_demo import app
-from scribe_classifier.data.scribe.util import ObjectPickler
+from scribe_classifier.data.scribe.util.ObjectPickler import ObjectPickler
 
 
 pd.set_option('display.max_colwidth', -1)
@@ -37,6 +37,9 @@ for target_level in range(1, 4):
                                               target_level=target_level)
     except MemoryError:
         print("Ran out of memory loading combined models")
+
+valid_report = ObjectPickler.load_from_pickle(filepath='scribe_classifier/flask_demo/pickles/report.valid.P')
+test_report = ObjectPickler.load_from_pickle(filepath='scribe_classifier/flask_demo/pickles/report.test.P')
 
 
 @app.route('/')

@@ -130,7 +130,7 @@ def generate_canada_reports(batch_size, keras_batch_size):
         keras_batch_size=keras_batch_size
     )
     ObjectPickler.save_as_pickle(obj=valid_report, filepath="scribe_classifier/flask_demo/pickles/report.valid.P")
-    ObjectPickler.save_as_pickle(obj=test_report, filepath="scribe_classifier/flask_demo/pickles/test.valid.P")
+    ObjectPickler.save_as_pickle(obj=test_report, filepath="scribe_classifier/flask_demo/pickles/report.test.P")
     # vdf = create_dataframe(valid_pred)
     # tdf = create_dataframe(test_pred)
     # DataFramePickler.save_as_pickle(df=vdf, filepath='scribe_classifier/flask_demo/pickles/valid.df.P')
