@@ -1,20 +1,20 @@
 import pickle
+import gc
+import numpy as np
 from typing import Tuple, List, Dict
 from sklearn.base import BaseEstimator, ClassifierMixin
-from sklearn.linear_model import SGDClassifier
 from scribe_classifier.data.canada.NOCdb.models.simple_model import SimpleModel
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import GridSearchCV
-from sklearn.pipeline import Pipeline
 from scribe_classifier.data.canada.NOCdb.readers import TitleSet, TitleRecord
-from sklearn.naive_bayes import MultinomialNB
-import numpy as np
-from scipy import sparse
 from sklearn.preprocessing import LabelEncoder, LabelBinarizer
 from scribe_classifier.data.canada.NOCdb.readers import AllCodes
 from .artificial_neural_net import ANNclassifier
-from keras.models import Sequential
-import gc
+# from sklearn.linear_model import SGDClassifier
+# from sklearn.feature_extraction.text import CountVectorizer
+# from sklearn.model_selection import GridSearchCV
+# from sklearn.pipeline import Pipeline
+# from sklearn.naive_bayes import MultinomialNB
+# from scipy import sparse
+# from keras.models import Sequential
 
 
 class CombinedModels(BaseEstimator, ClassifierMixin):
@@ -23,9 +23,7 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
                  lvl1_mdls: 'Dict[str, str]'=None,
                  lvl2_mdls: 'Dict[str, str]'=None,
                  lvl3_mdls: 'Dict[str, str]'=None,
-                 target_level=1,
                  emptyset_label="NA"):
-        self.target_level = target_level
         self.emptyset_label = emptyset_label
         self.num_models = 0.0
         # models
@@ -41,7 +39,7 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
             self.encs[i] = LabelEncoder().fit(self.codes[i])
             self.bin_encs[i] = LabelBinarizer().fit(self.codes[i])
             self.ids[i] = self.encs[i].transform(self.codes[i])
-        if lvl1_mdls is not None and target_level == 1:
+        if lvl1_mdls is not None:
             self.mdls[1] = dict()
             if 'sgd' in lvl1_mdls:
                 self.num_models += 1.0
@@ -54,7 +52,7 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
                 self.mdls[1]['ann'] = ANNclassifier.load_from_pickle(lvl1_mdls['ann'])  # type: ANNclassifier
         else:
             self.mdls[1] = None
-        if lvl2_mdls is not None and target_level <= 2:
+        if lvl2_mdls is not None:
             self.mdls[2] = dict()
             if 'sgd' in lvl2_mdls:
                 self.num_models += 1.0
@@ -67,7 +65,7 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
                 self.mdls[2]['ann'] = ANNclassifier.load_from_pickle(lvl2_mdls['ann'])  # type: ANNclassifier
         else:
             self.mdls[2] = None
-        if lvl3_mdls is not None and target_level <= 3:
+        if lvl3_mdls is not None:
             self.mdls[3] = dict()
             if 'sgd' in lvl3_mdls:
                 self.num_models += 1.0
@@ -81,6 +79,17 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
         else:
             self.mdls[3] = None
         assert self.num_models > 0.0
+
+    def calc_num_models(self, target_level):
+        count = 0
+        for i in range(target_level, 4):
+            mdl_lvl_d = self.mdls[i]
+            if mdl_lvl_d is None:
+                continue
+            for mdltype in ['sgd', 'bayes', 'ann']:
+                if mdltype in mdl_lvl_d:
+                    count += 1
+        return count
 
     def generate_proba_for(self, clf, X, cachepath, keras_batch_size=32, is_keras=False):
         if is_keras:
@@ -102,7 +111,12 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
             for mdltype in ['sgd', 'bayes', 'ann']:
                 if mdltype in mdls_dict:
                     prob_path = basepath % (proba_level, mdltype)
-                    self.generate_proba_for(clf=mdls_dict[mdltype], X=X, cachepath=prob_path, keras_batch_size=keras_batch_size, is_keras=('ann'==mdltype))
+                    self.generate_proba_for(clf=mdls_dict[mdltype],
+                                            X=X,
+                                            cachepath=prob_path,
+                                            keras_batch_size=keras_batch_size,
+                                            is_keras=('ann' == mdltype)
+                                            )
                     proba_paths[mdltype] = prob_path
         return proba_paths
 
@@ -123,9 +137,9 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
                         probas += reqprobas
         return probas
 
-    def get_index_map_for_condensing(self, proba_level):
+    def get_index_map_for_condensing(self, proba_level, target_level):
         proba_codes = self.ac.get_codes_for_level(target_level=proba_level)
-        target_codes = self.ac.get_codes_for_level(target_level=self.target_level)
+        target_codes = self.ac.get_codes_for_level(target_level=target_level)
         keep_where = []
         for i in range(len(target_codes)):
             keep_where_row = []
@@ -135,45 +149,49 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
                 if prob_label == self.emptyset_label:
                     prob_label = self.emptyset_label
                 else:
-                    prob_label = prob_label[0: self.target_level]
+                    prob_label = prob_label[0: target_level]
                 if prob_label == targ_label:
                     keep_where_row.append(j)
             keep_where.append(keep_where_row)
         return keep_where
 
-    def condense_proba_to_target_level(self, proba, proba_level):
-        ind_map = self.get_index_map_for_condensing(proba_level)
-        new_probas = np.zeros((proba.shape[0], len(self.codes[self.target_level])), dtype=np.float32)
+    def condense_proba_to_target_level(self, proba, proba_level, target_level):
+        ind_map = self.get_index_map_for_condensing(proba_level, target_level=target_level)
+        new_probas = np.zeros((proba.shape[0], len(self.codes[target_level])), dtype=np.float32)
         new_cols = []
         for i in range(len(ind_map)):
             new_cols.append(np.sum(np.take(proba, ind_map[i], axis=1), axis=1))
         return np.column_stack(new_cols)
 
-    def predict_proba(self, X, keras_batch_size=32) -> 'np.ndarray':
+    def predict_proba(self, X, target_level=1, keras_batch_size=32) -> 'np.ndarray':
+        mdl_count = self.calc_num_models(target_level=target_level)
+        if mdl_count == 0:
+            raise RuntimeError("Cannot predict proba for level %d without relevant models" % target_level)
         gc.enable()
         level_sums = list()
         #pre-generate probas
-        for i in range(1, 4):
+        for i in range(target_level, 4):
             if self.mdls[i] is not None:
                 self.generate_proba_for_level(proba_level=i, X=X, keras_batch_size=keras_batch_size)
-        for i in range(1, 4):
+        for i in range(target_level, 4):
             if self.mdls[i] is not None:
-                level_sums.append(self.condense_proba_to_target_level(self.get_proba_sum_at_level(i, X), i))
-        return sum(level_sums) / self.num_models
+                level_sums.append(self.condense_proba_to_target_level(self.get_proba_sum_at_level(i, X), i, target_level=target_level))
+        return sum(level_sums) / mdl_count
 
-    def predict(self, X, keras_batch_size=32):
-        return self.bin_encs[self.target_level].inverse_transform(self.predict_proba(X=X,
-                                                                                     keras_batch_size=keras_batch_size))
+    def predict(self, X, target_level=1, keras_batch_size=32):
+        return self.bin_encs[target_level].inverse_transform(self.predict_proba(X=X,
+                                                                                     keras_batch_size=keras_batch_size,
+                                                                                     target_level=target_level))
 
-    def predict_titleset(self, tset: 'TitleSet', keras_batch_size=32):
+    def predict_titleset(self, tset: 'TitleSet', target_level=1, keras_batch_size=32):
         tvec = tset.get_title_vec()
-        return self.predict(X=tvec, keras_batch_size=keras_batch_size)
+        return self.predict(X=tvec, keras_batch_size=keras_batch_size, target_level=target_level)
 
-    def batched_predict_titleset(self, tset: 'TitleSet', batch_size=4000, keras_batch_size=32):
+    def batched_predict_titleset(self, tset: 'TitleSet', target_level=1, batch_size=4000, keras_batch_size=32):
         tvec = tset.get_title_vec()
-        return self.batched_predict(X=tvec, batch_size=batch_size, keras_batch_size=keras_batch_size)
+        return self.batched_predict(X=tvec, batch_size=batch_size, keras_batch_size=keras_batch_size, target_level=target_level)
 
-    def batched_predict(self, X, batch_size=4000, keras_batch_size=32):
+    def batched_predict(self, X, target_level=1, batch_size=4000, keras_batch_size=32):
         preds = []
         total_count = len(X)
         for i in range(0, total_count, batch_size):
@@ -181,7 +199,7 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
             print("%d to %d of %d (%d%%)" % (i+1, j, total_count, (j*100) / total_count))
             batch = X[i:j]
             # print('i:', i, "\tj:", j)
-            preds.append(self.predict(batch, keras_batch_size=keras_batch_size))
+            preds.append(self.predict(batch, target_level=target_level, keras_batch_size=keras_batch_size))
             if j == len(X):
                 break
         # for i in range(len(preds)):

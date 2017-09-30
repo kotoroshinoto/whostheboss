@@ -9,6 +9,7 @@ from ...readers import AllCodes, CodeRecord, TitleSet
 from typing import Tuple, List, Dict
 import numpy as np
 from keras import regularizers
+import tensorflow as tf
 
 
 class ANNclassifier:
@@ -35,6 +36,7 @@ class ANNclassifier:
         self.layer_def = layer_def
         self.first_layer_size = first_layer_size
         self.warmstart = False
+        self.graph = None
 
     def set_warm_start(self, state=None):
         if state is None:
@@ -101,16 +103,14 @@ class ANNclassifier:
                                      validation_split=0.2)
 
     def predict(self, x, batch_size=32):
-        print('Vectorizing sequence data...')
-        X = self.cvect.transform(x).todense()
-        print('x shape: ', X.shape, " type: ", type(x))
-        return self.lbl_bin.inverse_transform(self.model.predict(x=X, batch_size=batch_size))
+        return self.lbl_bin.inverse_transform(self.predict_proba(x=x, batch_size=batch_size))
 
     def predict_proba(self, x, batch_size=32):
         print('Vectorizing sequence data...')
         X = self.cvect.transform(x).todense()
         print('x shape: ', X.shape, " type: ", type(x))
-        return self.model.predict(x=X, batch_size=batch_size)
+        with self.graph.as_default():
+            return self.model.predict(x=X, batch_size=batch_size)
 
     def _assemble_model(self):
         print('Building model for %d classes and %d inputs ... with layers: %s' %
@@ -148,6 +148,7 @@ class ANNclassifier:
                       optimizer='adam',
                       metrics=['accuracy'])
         self.model = model
+        self.graph = tf.get_default_graph()
 
     def _evaluate_metrics_pair(self, x: 'np.ndarray', y: 'np.ndarray', label=""):
         print("")
@@ -186,16 +187,19 @@ class ANNclassifier:
         codes = self.codes
         titles = self.titles
         history = self.history
+        graph = self.graph
         self.codes = None
         self.titles = None
         self.model = None
         self.history = None
+        self.graph = None
         pickle.dump(self, fh)
         #reattach resources
         self.codes = codes
         self.titles = titles
         self.model = model
         self.history = history
+        self.graph = graph
         if self.model is not None:
             self.model.save(filepath=filepath + '.mdl', overwrite=True, include_optimizer=include_optimizer)
         return
@@ -205,8 +209,9 @@ class ANNclassifier:
         fh = open(filepath, 'rb')
         if not os.path.exists(filepath) or os.path.isdir(filepath):
             return None
-        kc = pickle.load(fh)  # type: ANNclassifier
+        ann_clf = pickle.load(fh)  # type: ANNclassifier
         if os.path.exists(filepath + '.mdl') and not os.path.isdir(filepath + '.mdl'):
-            kc.model = load_model(filepath + '.mdl')
-        kc._load_assets()
-        return kc
+            ann_clf.model = load_model(filepath + '.mdl')
+            ann_clf.graph = tf.get_default_graph()
+        ann_clf._load_assets()
+        return ann_clf

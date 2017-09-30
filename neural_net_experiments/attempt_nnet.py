@@ -1,29 +1,16 @@
 # from  tensorflow.contrib.learn import DNNClassifier, SKCompat
-from scribe_classifier.data.canada import AllCodes, TitleSet, SimpleModel, CombinedModels
-from scribe_classifier.data.scribe.util.ObjectPickler import ObjectPickler
-import numpy as np
-import pandas as pd
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
-from sklearn.pipeline import Pipeline
-from sklearn.model_selection import StratifiedKFold
-from sklearn.linear_model import SGDClassifier
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import GridSearchCV
-from sklearn.pipeline import Pipeline
-from sklearn import metrics
-from sklearn.preprocessing import LabelEncoder
-from scipy import sparse
-from keras.utils import np_utils
-from keras.wrappers.scikit_learn import KerasClassifier
-from keras.datasets import imdb
-from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
-from keras.layers.convolutional import Conv1D
-from keras.layers.convolutional import MaxPooling1D
 from keras.layers.embeddings import Embedding
-from keras.preprocessing import sequence
+from keras.models import Sequential
+from keras.utils import np_utils
+from keras.wrappers.scikit_learn import KerasClassifier
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import KFold
+from sklearn.preprocessing import LabelEncoder
+
+from scribe_classifier.data.canada import AllCodes, TitleSet
+from scribe_classifier.util import ObjectPickler
 
 all_codes = AllCodes.load_from_pickle("./source_data/pickles/canada/tidy_sets/all_codes.P", is_path=True)
 

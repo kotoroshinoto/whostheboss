@@ -1,51 +1,16 @@
 #!/usr/bin/env python
+import os
+from typing import Dict
+import click
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
-from sklearn import metrics
 from scribe_classifier.data.canada import TitleSet
-from scribe_classifier.data.scribe import DataFramePickler
-from scribe_classifier.data.canada.NOCdb.readers.codes import AllCodes, CodeRecord
 from scribe_classifier.data.canada.NOCdb.models.neural_networks.combined_models import CombinedModels
-from typing import Dict, Tuple, List
-from scribe_classifier.data.scribe.util.ObjectPickler import ObjectPickler
-import click
-import os
+from scribe_classifier.data.canada.NOCdb.readers.codes import AllCodes
+from scribe_classifier.data.scribe import DataFramePickler
+from scribe_classifier.util.flask_util import ClassificationReporter
 
-
-class ClassificationReporter:
-    def __init__(self, y, y_pred, classes):
-        retvals =[]
-        for retval in metrics.precision_recall_fscore_support(y, y_pred, average='weighted'):
-            retvals.append(retval)
-        self.avg_precision = retvals[0]
-        self.avg_recall = retvals[1]
-        self.avg_fbeta_score = retvals[2]
-        self.total = len(y)
-        retvals = []
-        for retval in metrics.precision_recall_fscore_support(y, y_pred):
-            retvals.append(retval)
-        self.precision = retvals[0]
-        self.recall = retvals[1]
-        self.fbeta_score = retvals[2]
-        self.support = retvals[3]
-        self.conf_matrix = metrics.confusion_matrix(y, y_pred)
-        self.cats = classes
-
-    def get_report_dataframe(self):
-        df = pd.DataFrame()
-        df['Precision'] = pd.Series(data=self.precision).append(pd.Series([self.avg_precision]))
-        df['Recall'] = pd.Series(data=self.recall).append(pd.Series([self.avg_recall]))
-        df['F1-Score'] = pd.Series(data=self.fbeta_score).append(pd.Series([self.avg_fbeta_score]))
-        df['Support'] = pd.Series(data=self.support).append(pd.Series([self.total]))
-        cats = list(self.cats)
-        cats.append("Avg / Total")
-        df['Category'] = cats
-        df.index = pd.RangeIndex(len(df.index))
-        cols = df.columns.tolist()
-        cols = cols[-1:] + cols[:-1]
-        df = df[cols]
-        return df
 
 def get_combined_models():
     mdl_strs = dict()
@@ -129,8 +94,8 @@ def generate_canada_reports(batch_size, keras_batch_size):
         batch_size=batch_size,
         keras_batch_size=keras_batch_size
     )
-    ObjectPickler.save_as_pickle(obj=valid_report, filepath="scribe_classifier/flask_demo/pickles/report.valid.P")
-    ObjectPickler.save_as_pickle(obj=test_report, filepath="scribe_classifier/flask_demo/pickles/report.test.P")
+    valid_report.save_as_pickle(filepath="scribe_classifier/flask_demo/pickles/report.valid.P")
+    test_report.save_as_pickle(filepath="scribe_classifier/flask_demo/pickles/report.test.P")
     # vdf = create_dataframe(valid_pred)
     # tdf = create_dataframe(test_pred)
     # DataFramePickler.save_as_pickle(df=vdf, filepath='scribe_classifier/flask_demo/pickles/valid.df.P')

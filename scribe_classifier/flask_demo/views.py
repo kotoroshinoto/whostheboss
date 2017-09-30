@@ -1,16 +1,13 @@
 import io
-import os
-from typing import Dict
 import pandas as pd
+from typing import Dict
 from flask import render_template
 from flask import request
-from flask_pregen import ClassificationReporter
 from scribe_classifier.data.canada.NOCdb.models.neural_networks.combined_models import CombinedModels
-from scribe_classifier.data.canada.NOCdb.readers.codes import AllCodes, CodeRecord
-from scribe_classifier.data.canada.NOCdb.readers.titles import TitleSet
+from scribe_classifier.data.canada.NOCdb.readers.codes import AllCodes
 from scribe_classifier.flask_demo import app
-from scribe_classifier.data.scribe.util.ObjectPickler import ObjectPickler
-
+from scribe_classifier.util.flask_util import ClassificationReporter
+from scribe_classifier.data.canada.NOCdb.models.neural_networks.artificial_neural_net import ANNclassifier
 
 pd.set_option('display.max_colwidth', -1)
 
@@ -18,28 +15,24 @@ all_codes = AllCodes.load_from_pickle('./source_data/pickles/canada/tidy_sets/al
 all_codes.add_emptyset()
 classes = all_codes.get_codes_for_level(target_level=2)
 
-mdl_strs = dict()
-models = dict()  # type: Dict[int, CombinedModels]
+mdl_paths = dict()
 for target_level in range(1, 4):
-    level_mdl_strs = dict()
-    level_mdl_strs['sgd'] = 'source_data/pickles/canada/trained_models/simple.lvl%d.sgdsv.P' % target_level
-    level_mdl_strs['bayes'] = 'source_data/pickles/canada/trained_models/simple.lvl%d.bayes.P' % target_level
-    level_mdl_strs['ann'] = 'nnmodels/ANN/neural_net_level%d.frozen.P' % target_level
-    mdl_strs[target_level] = level_mdl_strs
+    level_mdl_paths = dict()
+    level_mdl_paths['sgd'] = 'source_data/pickles/canada/trained_models/simple.lvl%d.sgdsv.P' % target_level
+    level_mdl_paths['bayes'] = 'source_data/pickles/canada/trained_models/simple.lvl%d.bayes.P' % target_level
+    level_mdl_paths['ann'] = 'nnmodels/ANN/neural_net_level%d.frozen.P' % target_level
+    mdl_paths[target_level] = level_mdl_paths
 
 #models
-for target_level in range(1, 4):
-    try:
-        models[target_level] = CombinedModels('source_data/pickles/canada/tidy_sets/all_codes.P',
-                                              mdl_strs[1],
-                                              mdl_strs[2],
-                                              mdl_strs[3],
-                                              target_level=target_level)
-    except MemoryError:
-        print("Ran out of memory loading combined models")
+models = CombinedModels(all_codes='source_data/pickles/canada/tidy_sets/all_codes.P',
+                            lvl1_mdls=mdl_paths[1],
+                            lvl2_mdls=mdl_paths[2],
+                            lvl3_mdls=mdl_paths[3]
+                            )
 
-valid_report = ObjectPickler.load_from_pickle(filepath='scribe_classifier/flask_demo/pickles/report.valid.P')
-test_report = ObjectPickler.load_from_pickle(filepath='scribe_classifier/flask_demo/pickles/report.test.P')
+
+valid_report = ClassificationReporter.load_from_pickle(filepath='scribe_classifier/flask_demo/pickles/report.valid.P')  # type: ClassificationReporter
+test_report = ClassificationReporter.load_from_pickle(filepath='scribe_classifier/flask_demo/pickles/report.test.P')  # type: ClassificationReporter
 
 
 @app.route('/')
@@ -126,9 +119,9 @@ def classify_text_output_multi():
         line = line.rstrip().lstrip()
         titles.append(line)
     try:
-        preds[1] = models[1].predict(titles)
-        preds[2] = models[2].predict(titles)
-        preds[3] = models[3].predict(titles)
+        preds[1] = models.predict(titles, target_level=1)
+        preds[2] = models.predict(titles, target_level=2)
+        preds[3] = models.predict(titles, target_level=3)
 
     except MemoryError:
         df = pd.DataFrame()
