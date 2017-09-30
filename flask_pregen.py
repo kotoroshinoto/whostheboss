@@ -14,7 +14,6 @@ from scribe_classifier.util.flask_util import ClassificationReporter
 
 def get_combined_models():
     mdl_strs = dict()
-    models = dict()  # type: Dict[int, CombinedModels]
     for target_level in range(1, 4):
         level_mdl_strs = dict()
         level_mdl_strs['sgd'] = 'source_data/pickles/canada/trained_models/simple.lvl%d.sgdsv.P' % target_level
@@ -22,15 +21,11 @@ def get_combined_models():
         level_mdl_strs['ann'] = 'nnmodels/ANN/neural_net_level%d.frozen.P' % target_level
         mdl_strs[target_level] = level_mdl_strs
     # models
-    for target_level in range(1, 4):
-        try:
-            models[target_level] = CombinedModels('source_data/pickles/canada/tidy_sets/all_codes.P',
-                                                  mdl_strs[1],
-                                                  mdl_strs[2],
-                                                  mdl_strs[3],
-                                                  target_level=target_level)
-        except MemoryError:
-            print("Ran out of memory loading combined models")
+    models = CombinedModels('source_data/pickles/canada/tidy_sets/all_codes.P',
+                            mdl_strs[1],
+                            mdl_strs[2],
+                            mdl_strs[3]
+                            )
     return models
 
 
@@ -39,7 +34,7 @@ def classify_scribe_data(scribe_query_df, batch_size, keras_batch_size=4000, lab
     titles = scribe_query_df['title']
     titles.fillna(value="", inplace=True)
     # print("# of titles in scribe db: ", len(titles))
-    titles_pred = models[2].batched_predict(titles, batch_size=batch_size, keras_batch_size=keras_batch_size)
+    titles_pred = models.batched_predict(titles, batch_size=batch_size, keras_batch_size=keras_batch_size, target_level=2)
     # print(titles_pred)
     scribe_query_df[label] = pd.Series(titles_pred)
 
@@ -63,8 +58,8 @@ def classify_test_set(batch_size, keras_batch_size=4000):
     valid_pred = []
     test_pred = []
     try:
-        valid_pred = models[2].batched_predict(valid.get_title_vec(), batch_size=batch_size, keras_batch_size=keras_batch_size)
-        test_pred = models[2].batched_predict(test.get_title_vec(), batch_size=batch_size, keras_batch_size=keras_batch_size)
+        valid_pred = models.batched_predict(valid.get_title_vec(), batch_size=batch_size, keras_batch_size=keras_batch_size, target_level=2)
+        test_pred = models.batched_predict(test.get_title_vec(), batch_size=batch_size, keras_batch_size=keras_batch_size, target_level=2)
     except MemoryError:
         print("had memory error trying to predict on records")
     # generate reports
@@ -123,7 +118,7 @@ def generate_canada_category_plot(output_fname, add_empty_class, target_level=2)
     example_file = './source_data/pickles/canada/tidy_sets/all_titles.P'
     dataset = TitleSet.load_from_pickle(file=example_file, is_path=True)
     if add_empty_class:
-        dataset.copy_and_append_empty_string_class()
+        dataset = dataset.copy_and_append_empty_string_class()
     df = dataset.to_dataframe(target_level=target_level)
     fig, ax = plt.subplots()
     fig.set_size_inches(14, 9)
@@ -162,8 +157,6 @@ def generate_scribe_plots(force):
     scribe_img_path = os.path.abspath('./scribe_classifier/flask_demo/static/img/usa_midsize_tech_histogram.png')
     if force or not os.path.exists(scribe_img_path):
         generate_scribe_category_plot(scribe_query_df, scribe_img_path, 'class')
-
-
 
 
 if __name__ == "__main__":
