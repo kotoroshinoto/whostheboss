@@ -9,6 +9,7 @@ from sklearn.preprocessing import LabelEncoder, LabelBinarizer
 from scribe_classifier.data.canada.NOCdb.readers import AllCodes
 from .artificial_neural_net import ANNclassifier
 import os
+import shutil
 # from sklearn.linear_model import SGDClassifier
 # from sklearn.feature_extraction.text import CountVectorizer
 # from sklearn.model_selection import GridSearchCV
@@ -106,10 +107,6 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
         mdls_dict = self.mdls[proba_level]
         proba_paths = dict()
         basepath = 'tmp/proba.%d.%s.P'
-        if not(os.path.exists('tmp') and os.path.isdir('tmp')):
-            if os.path.exists('tmp'):
-                os.remove('tmp')
-            os.mkdir('tmp')
         if mdls_dict is None:
             return None
         else:
@@ -169,6 +166,12 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
         return np.column_stack(new_cols)
 
     def predict_proba(self, X, target_level=1, keras_batch_size=32) -> 'np.ndarray':
+        if os.path.exists('tmp'):
+            if os.path.isdir('tmp'):
+                shutil.rmtree('tmp', ignore_errors=True)
+            else:
+                os.remove('tmp')
+        os.mkdir('tmp')
         mdl_count = self.calc_num_models(target_level=target_level)
         if mdl_count == 0:
             raise RuntimeError("Cannot predict proba for level %d without relevant models" % target_level)
@@ -181,6 +184,11 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
         for i in range(target_level, 4):
             if self.mdls[i] is not None:
                 level_sums.append(self.condense_proba_to_target_level(self.get_proba_sum_at_level(i, X), i, target_level=target_level))
+        if os.path.exists('tmp'):
+            if os.path.isdir('tmp'):
+                shutil.rmtree('tmp', ignore_errors=True)
+            else:
+                os.remove('tmp')
         return sum(level_sums) / mdl_count
 
     def predict(self, X, target_level=1, keras_batch_size=32):
