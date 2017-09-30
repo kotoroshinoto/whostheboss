@@ -3,9 +3,9 @@ import pickle
 
 class ObjectPickler:
     @staticmethod
-    def save_as_pickle(df, filepath):
+    def save_as_pickle(obj, filepath):
         pickle_file = open(filepath, 'wb')
-        pickle.dump(df, pickle_file)
+        pickle.dump(obj, pickle_file)
 
     @staticmethod
     def load_from_pickle(filepath):

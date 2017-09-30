@@ -5,9 +5,10 @@ from matplotlib import pyplot as plt
 from sklearn import metrics
 from scribe_classifier.data.canada import TitleSet
 from scribe_classifier.data.scribe import DataFramePickler
-from scribe_classifier.flask_demo.views import models
 from scribe_classifier.data.canada.NOCdb.readers.codes import AllCodes, CodeRecord
 from scribe_classifier.data.canada.NOCdb.models.neural_networks.combined_models import CombinedModels
+from typing import Dict, Tuple, List
+from scribe_classifier.data.scribe.util.ObjectPickler import ObjectPickler
 import click
 import os
 
@@ -46,31 +47,6 @@ class ClassificationReporter:
         df = df[cols]
         return df
 
-
-def generate_scribe_category_plot(scribe_query_df, output_fname, label: str ='class'):
-    fig, ax = plt.subplots()
-    fig.set_size_inches(14, 9)
-    scribe_query_df.sort_values(label, inplace=True)
-    # print(scribe_query_df[label])
-    sns.countplot(data=scribe_query_df, x=label, ax=ax)
-    fig.savefig(output_fname)
-    pass
-
-
-def generate_canada_category_plot(output_fname, add_empty_class):
-    code_file = './source_data/pickles/canada/tidy_sets/all_codes.P'
-    example_file = './source_data/pickles/canada/tidy_sets/all_titles.P'
-    dataset = TitleSet()
-    dataset = TitleSet.load_from_pickle(filename=example_file)
-    if add_empty_class:
-        dataset.copy_and_append_empty_string_class()
-    df = dataset.to_dataframe(target_level=2)
-    fig, ax = plt.subplots()
-    fig.set_size_inches(14, 9)
-    sns.countplot(data=df, x='class', ax=ax)
-    fig.savefig(output_fname)
-
-
 def get_combined_models():
     mdl_strs = dict()
     models = dict()  # type: Dict[int, CombinedModels]
@@ -80,7 +56,6 @@ def get_combined_models():
         level_mdl_strs['bayes'] = 'source_data/pickles/canada/trained_models/simple.lvl%d.bayes.P' % target_level
         level_mdl_strs['ann'] = 'nnmodels/ANN/neural_net_level%d.frozen.P' % target_level
         mdl_strs[target_level] = level_mdl_strs
-
     # models
     for target_level in range(1, 4):
         try:
@@ -94,49 +69,43 @@ def get_combined_models():
     return models
 
 
-def classify_scribe_data(scribe_query_df, label='class'):
+def classify_scribe_data(scribe_query_df, batch_size, keras_batch_size=4000, label='class'):
     models = get_combined_models()
     titles = scribe_query_df['title']
     titles.fillna(value="", inplace=True)
     # print("# of titles in scribe db: ", len(titles))
-    titles_pred = models[2].batched_predict(titles)
+    titles_pred = models[2].batched_predict(titles, batch_size=batch_size, keras_batch_size=keras_batch_size)
     # print(titles_pred)
     scribe_query_df[label] = pd.Series(titles_pred)
 
 
-def classify_test_set():
+def classify_test_set(batch_size, keras_batch_size=4000):
     models = get_combined_models()
     all_codes = AllCodes.load_from_pickle('./source_data/pickles/canada/tidy_sets/all_codes.P', is_path=True)
     all_codes.add_emptyset()
     classes = all_codes.get_codes_for_level(target_level=2)
-
     # dataset
-    valid = TitleSet.load_from_pickle('./source_data/pickles/canada/test_sets/train.set.lvl4.P',
-                                      is_path=True)  # type: TitleSet
-    test = TitleSet.load_from_pickle('./source_data/pickles/canada/test_sets/test.set.lvl4.P',
-                                     is_path=True)  # type: TitleSet
-    train, valid = valid.split_data_train_test(target_level=4, test_split=0.25)
+    train = TitleSet.load_from_pickle('./source_data/pickles/canada/test_sets/train.set.lvl4.P', is_path=True)  # type: TitleSet
+    test = TitleSet.load_from_pickle('./source_data/pickles/canada/test_sets/test.set.lvl4.P', is_path=True)  # type: TitleSet
+    train, valid = train.split_data_train_test(target_level=4, test_split=0.25)
     del train
     train = None
     valid = valid.copy_and_append_empty_string_class("NA")
     test = test.copy_and_append_empty_string_class("NA")
-
     print("# validation records: ", len(valid.records))
     print('# test records: ', len(test.records))
-
     # predictions
     valid_pred = []
     test_pred = []
     try:
-        valid_pred = models[2].batched_predict(valid.get_title_vec())
-        test_pred = models[2].batched_predict(test.get_title_vec())
+        valid_pred = models[2].batched_predict(valid.get_title_vec(), batch_size=batch_size, keras_batch_size=keras_batch_size)
+        test_pred = models[2].batched_predict(test.get_title_vec(), batch_size=batch_size, keras_batch_size=keras_batch_size)
     except MemoryError:
         print("had memory error trying to predict on records")
-
     # generate reports
     valid_report = ClassificationReporter(valid.get_code_vec(target_level=2), valid_pred, classes=classes)
     test_report = ClassificationReporter(test.get_code_vec(target_level=2), test_pred, classes=classes)
-    return valid_report, test_report
+    return valid_report, test_report, valid_pred, test_pred
 
 
 @click.group()
@@ -145,28 +114,91 @@ def main_flask_prep():
     pass
 
 
-@main_flask_prep.command(name='df')
-def generate_dataframes():
-    """Classify Scribe data and create dataframes for html reports on classification metrics"""
+def create_dataframe(pred):
+    df = pd.DataFrame()
+    df['class'] = pred
+    return df
+
+
+@main_flask_prep.command(name='reports')
+@click.option('--batch_size', type=click.INT, default=4000, help='set number of records to classify at once')
+@click.option('--keras_batch_size', type=click.INT, default=4000, help='set keras batch size parameter')
+def generate_canada_reports(batch_size, keras_batch_size):
+    """create dataframes for html reports on classification metrics"""
+    valid_report, test_report, valid_pred, test_pred = classify_test_set(
+        batch_size=batch_size,
+        keras_batch_size=keras_batch_size
+    )
+    ObjectPickler.save_as_pickle(obj=valid_report, filepath="scribe_classifier/flask_demo/pickles/report.valid.P")
+    ObjectPickler.save_as_pickle(obj=test_report, filepath="scribe_classifier/flask_demo/pickles/test.valid.P")
+    # vdf = create_dataframe(valid_pred)
+    # tdf = create_dataframe(test_pred)
+    # DataFramePickler.save_as_pickle(df=vdf, filepath='scribe_classifier/flask_demo/pickles/valid.df.P')
+    # DataFramePickler.save_as_pickle(df=tdf, filepath='scribe_classifier/flask_demo/pickles/test.df.P')
+
+
+@main_flask_prep.command(name='scribe_df')
+@click.option('--batch_size', type=click.INT, default=4000, help='set number of records to classify at once')
+@click.option('--keras_batch_size', type=click.INT, default=4000, help='set keras batch size parameter')
+def scribe_dataframe(batch_size, keras_batch_size):
+    """Classify Scribe data and save as a pickle"""
     scribe_query_df = DataFramePickler.load_from_pickle('./SavedScribeQueries/midsize_tech_usa.P')
-    classify_scribe_data(scribe_query_df, label='class')
-    valid_report, test_report = classify_test_set()
+    classify_scribe_data(scribe_query_df,
+                         label='class',
+                         batch_size=batch_size,
+                         keras_batch_size=keras_batch_size
+                         )
+    DataFramePickler.save_as_pickle(df=scribe_query_df,
+                                    filepath='SavedScribeQueries/classified/scribe_classified_df.P')
 
 
-@main_flask_prep.command(name='plots')
+def generate_canada_category_plot(output_fname, add_empty_class, target_level=2):
+    code_file = './source_data/pickles/canada/tidy_sets/all_codes.P'
+    ac = AllCodes.load_from_pickle(file=code_file, is_path=True)
+    example_file = './source_data/pickles/canada/tidy_sets/all_titles.P'
+    dataset = TitleSet.load_from_pickle(file=example_file, is_path=True)
+    if add_empty_class:
+        dataset.copy_and_append_empty_string_class()
+    df = dataset.to_dataframe(target_level=target_level)
+    fig, ax = plt.subplots()
+    fig.set_size_inches(14, 9)
+    sns.countplot(data=df, x='codes', ax=ax)
+    fig.savefig(output_fname)
+
+
+@main_flask_prep.command(name='canada_plots')
 @click.option('--force/--no-force', default=False, help='Re-generate images even if they already exist')
-def generate_plots(force):
-    """generate some plots"""
-    scribe_query_df = DataFramePickler.load_from_pickle('./SavedScribeQueries/classified/midsize_tech_usa.P')
+def generate_canada_plots(force):
+    """generate some plots from the dataframe and train/test set pickles"""
+    print("Creating Metrics plots")
     canada_img_path = os.path.abspath('./scribe_classifier/flask_demo/static/img/canada_histogram.png')
     canada_img_path_with_emptycat = os.path.abspath('./scribe_classifier/flask_demo/static/img/canada_histogram_emptycat.png')
     if force or not os.path.exists(canada_img_path):
         generate_canada_category_plot(canada_img_path, False)
     if force or not os.path.exists(canada_img_path_with_emptycat):
         generate_canada_category_plot(canada_img_path_with_emptycat, True)
+
+
+def generate_scribe_category_plot(scribe_query_df, output_fname, label: str ='class'):
+    fig, ax = plt.subplots()
+    fig.set_size_inches(14, 9)
+    scribe_query_df.sort_values(label, inplace=True)
+    # print(scribe_query_df[label])
+    sns.countplot(data=scribe_query_df, x=label, ax=ax)
+    fig.savefig(output_fname)
+    pass
+
+
+@main_flask_prep.command(name='scribe_plots')
+@click.option('--force/--no-force', default=False, help='Re-generate images even if they already exist')
+def generate_scribe_plots(force):
+    print("Creating Scribe Plot")
+    scribe_query_df = DataFramePickler.load_from_pickle('./SavedScribeQueries/classified/scribe_classified_df.P')
     scribe_img_path = os.path.abspath('./scribe_classifier/flask_demo/static/img/usa_midsize_tech_histogram.png')
     if force or not os.path.exists(scribe_img_path):
         generate_scribe_category_plot(scribe_query_df, scribe_img_path, 'class')
+
+
 
 
 if __name__ == "__main__":

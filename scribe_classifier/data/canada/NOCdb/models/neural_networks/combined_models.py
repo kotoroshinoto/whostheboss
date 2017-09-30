@@ -175,8 +175,10 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
 
     def batched_predict(self, X, batch_size=4000, keras_batch_size=32):
         preds = []
-        for i in range(0, len(X), batch_size):
-            j = min(i + 4000, len(X))
+        total_count = len(X)
+        for i in range(0, total_count, batch_size):
+            j = min(i + batch_size, total_count)
+            print("%d to %d of %d (%d%%)" % (i+1, j, total_count, (j*100) / total_count))
             batch = X[i:j]
             # print('i:', i, "\tj:", j)
             preds.append(self.predict(batch, keras_batch_size=keras_batch_size))

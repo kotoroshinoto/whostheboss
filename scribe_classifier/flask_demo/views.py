@@ -4,7 +4,7 @@ from typing import Dict
 import pandas as pd
 from flask import render_template
 from flask import request
-from preconstruct_eval_dataframes_for_flask import ClassificationReporter
+from flask_pregen import ClassificationReporter
 from scribe_classifier.data.canada.NOCdb.models.neural_networks.combined_models import CombinedModels
 from scribe_classifier.data.canada.NOCdb.readers.codes import AllCodes, CodeRecord
 from scribe_classifier.data.canada.NOCdb.readers.titles import TitleSet
