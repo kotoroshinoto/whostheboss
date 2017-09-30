@@ -10,6 +10,7 @@ from scribe_classifier.data.canada.NOCdb.readers import AllCodes
 from .artificial_neural_net import ANNclassifier
 import os
 import shutil
+from threading import Semaphore
 # from sklearn.linear_model import SGDClassifier
 # from sklearn.feature_extraction.text import CountVectorizer
 # from sklearn.model_selection import GridSearchCV
@@ -36,6 +37,7 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
         self.bin_encs = dict()
         self.encs = dict()  # type: Dict[int, LabelEncoder]
         self.ids = dict()
+        self.lock = Semaphore()
         for i in range(1, 4):
             self.codes[i] = self.ac.get_codes_for_level(target_level=i)
             self.encs[i] = LabelEncoder().fit(self.codes[i])
@@ -166,6 +168,7 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
         return np.column_stack(new_cols)
 
     def predict_proba(self, X, target_level=1, keras_batch_size=32) -> 'np.ndarray':
+        self.lock.acquire()
         if os.path.exists('tmp'):
             if os.path.isdir('tmp'):
                 shutil.rmtree('tmp', ignore_errors=True)
@@ -189,6 +192,7 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
                 shutil.rmtree('tmp', ignore_errors=True)
             else:
                 os.remove('tmp')
+        self.lock.release()
         return sum(level_sums) / mdl_count
 
     def predict(self, X, target_level=1, keras_batch_size=32):
