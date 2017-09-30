@@ -141,13 +141,14 @@ def classify_test_set():
 
 @click.group()
 def main_flask_prep():
+    """Prepare images and dataframes for the flask app"""
     pass
 
 
 @main_flask_prep.command(name='df')
 def generate_dataframes():
+    """Classify Scribe data and create dataframes for html reports on classification metrics"""
     scribe_query_df = DataFramePickler.load_from_pickle('./SavedScribeQueries/midsize_tech_usa.P')
-    """create dataframes for html reports on classification metrics"""
     classify_scribe_data(scribe_query_df, label='class')
     valid_report, test_report = classify_test_set()
 
@@ -155,8 +156,8 @@ def generate_dataframes():
 @main_flask_prep.command(name='plots')
 @click.option('--force/--no-force', default=False, help='Re-generate images even if they already exist')
 def generate_plots(force):
+    """generate some plots"""
     scribe_query_df = DataFramePickler.load_from_pickle('./SavedScribeQueries/classified/midsize_tech_usa.P')
-    """Classify Scribe data and generate some plots"""
     canada_img_path = os.path.abspath('./scribe_classifier/flask_demo/static/img/canada_histogram.png')
     canada_img_path_with_emptycat = os.path.abspath('./scribe_classifier/flask_demo/static/img/canada_histogram_emptycat.png')
     if force or not os.path.exists(canada_img_path):
