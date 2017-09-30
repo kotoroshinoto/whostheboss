@@ -8,6 +8,7 @@ from scribe_classifier.data.canada.NOCdb.readers.codes import AllCodes
 from scribe_classifier.flask_demo import app
 from scribe_classifier.util.flask_util import ClassificationReporter
 from scribe_classifier.data.canada.NOCdb.models.neural_networks.artificial_neural_net import ANNclassifier
+import os
 
 pd.set_option('display.max_colwidth', -1)
 

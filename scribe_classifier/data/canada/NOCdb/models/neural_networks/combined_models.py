@@ -8,6 +8,7 @@ from scribe_classifier.data.canada.NOCdb.readers import TitleSet, TitleRecord
 from sklearn.preprocessing import LabelEncoder, LabelBinarizer
 from scribe_classifier.data.canada.NOCdb.readers import AllCodes
 from .artificial_neural_net import ANNclassifier
+import os
 # from sklearn.linear_model import SGDClassifier
 # from sklearn.feature_extraction.text import CountVectorizer
 # from sklearn.model_selection import GridSearchCV
@@ -105,6 +106,10 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
         mdls_dict = self.mdls[proba_level]
         proba_paths = dict()
         basepath = 'tmp/proba.%d.%s.P'
+        if not(os.path.exists('tmp') and os.path.isdir('tmp')):
+            if os.path.exists('tmp'):
+                os.remove('tmp')
+            os.mkdir('tmp')
         if mdls_dict is None:
             return None
         else:
