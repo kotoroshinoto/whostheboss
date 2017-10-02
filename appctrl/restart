@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-source ./stop
-source ./start
+source ./appctrl/stop
+source ./appctrl/start
