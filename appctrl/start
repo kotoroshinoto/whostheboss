@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
-NUM_WORKERS=3
-TIMEOUT=120
-
 gunicorn run_flask_demo:app -D \
---workers $NUM_WORKERS \
---timeout $TIMEOUT \
+--workers 1 \
+--timeout 120 \
 --log-level=debug

@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
 
-source ./appctrl/stop
-source ./appctrl/start
+pkill gunicorn
+gunicorn run_flask_demo:app -D \
+--workers 1 \
+--timeout 120 \
+--log-level=debug
