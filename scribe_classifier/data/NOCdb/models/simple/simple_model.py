@@ -12,13 +12,13 @@ from scribe_classifier.data.NOCdb.readers import TitleSet, TitleRecord
 class SimpleModel(BaseEstimator, ClassifierMixin):
     """This class can learn using one of 3 methods, multinomial bayes, support vector classifiers,
     or stochastic gradient descent support vectors"""
-    def __init__(self, target_level=1, emptyset_label: str=None, cv=None, ngram_start=1, ngram_stop=5, model_type='sgdsv'):
+    def __init__(self, target_level=1, emptyset_label: str=None, cv=None, ngram_start=1, ngram_stop=5, model_type='sgdsv', oversampled=False):
         self.target_level = target_level
         self.model_type = model_type
         self.parameters = dict()
         self.vect = CountVectorizer(stop_words='english', ngram_range=(ngram_start, ngram_stop))
         # self.parameters['vect__ngram_range'] = [(1, x) for x in range(ngram_start, ngram_stop + ngram_step, ngram_step)]
-
+        self.oversampled = oversampled
         if self.model_type == 'bayes':
             self.parameters['alpha'] = (1e-3, 1e-4, 1e-5, 1e-6)
             # self.prop_records = 1.0/8.0
@@ -31,8 +31,10 @@ class SimpleModel(BaseEstimator, ClassifierMixin):
             self.ml_clf = SVC(kernel='linear', probability=True)
         else:
             raise ValueError("Unrecognized model type")
-
-        self.clf = GridSearchCV(self.ml_clf, self.parameters, n_jobs=-1, cv=cv, scoring='accuracy')
+        if self.oversampled:
+            self.clf = self.ml_clf
+        else:
+            self.clf = GridSearchCV(self.ml_clf, self.parameters, n_jobs=-1, cv=cv, scoring='accuracy')
         if emptyset_label is not None:
             if emptyset_label == "":
                 self.emptyset_label = "NA"
@@ -64,7 +66,7 @@ class SimpleModel(BaseEstimator, ClassifierMixin):
         class_counts = title_set.count_classes()
         if self.emptyset_label is not None:
             if self.model_type == 'bayes':
-                prop_records = 0.25
+                prop_records = 0.50
             else:
                 prop_records = 1.0 / float(len(class_counts))
 
@@ -94,14 +96,21 @@ class SimpleModel(BaseEstimator, ClassifierMixin):
         self.clf.fit(bag, y)
         return self
 
+    def initialize_vectorizer(self, X, y):
+        self.vect.fit(raw_documents=X, y=y)
+
+    def partial_fit(self, X, y, **fit_params):
+        bag = self.vect.transform(raw_documents=X)
+        self.clf.fit(bag, y)
+
     def predict(self, X):
         """predict classes for input X"""
-        bag = self.vect.transform(X)
+        bag = self.vect.transform(raw_documents=X)
         return self.clf.predict(bag)
 
     def predict_proba(self, X):
         """predict class probabilities for input X"""
-        bag = self.vect.transform(X)
+        bag = self.vect.transform(raw_documents=X)
         return self.clf.predict_proba(bag)
 
     # TODO, will probably need to implement partial fitting for batched training on very large datasets later on

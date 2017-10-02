@@ -228,36 +228,32 @@ class TitleSet:
                 sets_for_codes[parent_code].add_title(title_record)
         return sets_for_codes
 
-    def copy_and_oversample_to_flatten_stratification(self) -> 'TitleSet':
+    def copy_and_oversample_to_flatten_stratification(self, target_level=4) -> 'TitleSet':
         """a strategy I attempted was oversampling to get more input data and hopefully prevent the small number of some
         categories from being too much of a problem. This didn't work very well, but might deserve additional thought, so
         I left it in the codebase"""
-        # counts = self.count_classes(target_level=4)
-        # max_count = -1
-        # for code in counts:
-        #     if counts[code] > max_count:
-        #         max_count = counts[code]
-        # target_count = max_count * 100
-        # ratio_dict = dict()
-        # for code in counts:
-        #     ratio_dict[code] = target_count - counts[code]
-        # print(ratio_dict)
-        # exit()
-        # ros = RandomOverSampler(ratio=ratio_dict)
+        counts = self.count_classes(target_level=target_level)
+        max_count = -1
+        for code in counts:
+            if counts[code] > max_count:
+                max_count = counts[code]
+        target_count = max_count * 10
+        ratio_dict = dict()
+        for code in counts:
+            ratio_dict[code] = target_count - counts[code]
         title_enc = LabelEncoder()
         code_enc = LabelEncoder()
-        ros = RandomOverSampler(ratio='all')
-
-        title_vec = self.get_title_vec()
-        title_vec_encoded = title_enc.fit_transform(title_vec)
-
+        # ros = RandomOverSampler(ratio='all')
+        ros = RandomOverSampler(ratio=ratio_dict)
         code_vec = self.get_code_vec(target_level=4)
-        code_vec_encoded = code_enc.fit_transform(code_vec)
+        # code_vec_encoded = code_enc.fit_transform(code_vec)
+        title_vec = self.get_title_vec()
+        # title_vec_encoded = title_enc.fit_transform(title_vec)
 
-        X = np.array(title_vec_encoded, dtype=np.int).reshape(-1, 1)
-        Y = np.array(code_vec_encoded, dtype=np.int)
+        # X = np.array(title_vec_encoded, dtype=np.int).reshape(-1, 1)
+        # Y = np.array(code_vec_encoded, dtype=np.int)
 
-        X_resamp, Y_resamp = ros.fit_sample(X=X, y=Y)
+        X_resamp, Y_resamp = ros.fit_sample(X=np.asarray(title_vec).reshape(-1, 1), y=code_vec)
 
         new_set = self.__class__()  # type: TitleSet
         new_set.emptyset_label = self.emptyset_label
@@ -268,15 +264,12 @@ class TitleSet:
                 is_emptyset=trecord.is_emptyset)
             )
 
-        x_rs_vec = list(title_enc.inverse_transform(X_resamp.flatten()))
-        y_rs_vec = list(code_enc.inverse_transform(Y_resamp))
-        # x_rs_vec = list()
-        # for row in x_rs_vec_2D:
-        #     for item in row:
-        #         x_rs_vec.append(item)
-        # print(x_rs_vec)
-        # print(y_rs_vec)
-        new_set.add_titles_from_vecs(title_vec=x_rs_vec, code_vec=y_rs_vec)
+        # x_rs_vec = list(title_enc.inverse_transform(X_resamp.flatten()))
+        # y_rs_vec = list(code_enc.inverse_transform(Y_resamp))
+
+        # new_set.add_titles_from_vecs(title_vec=x_rs_vec, code_vec=y_rs_vec)
+        new_set.add_titles_from_vecs(title_vec=X_resamp.flatten().tolist(), code_vec=Y_resamp.tolist())
+        # print(new_set.count_classes(target_level=target_level))
         return new_set
 
 

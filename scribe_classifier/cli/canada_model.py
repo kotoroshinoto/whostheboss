@@ -97,19 +97,32 @@ def simple():
 def generate_simple_model(model_filepath, train_filepath, target_level, emptyset, oversample, model_type):
     """Use simple Model, predict one specific category level all at once, using SGDClassifier, MultinomialBayes, or SVC"""
     train = TitleSet.load_from_pickle(train_filepath)
-    if oversample or model_type == 'bayes':
+    if oversample:
+        mdl = SimpleModel(target_level=target_level, emptyset_label=emptyset, model_type='bayes', oversampled=oversample)
+    elif model_type == 'bayes':
         mdl = SimpleModel(target_level=target_level, emptyset_label=emptyset, model_type='bayes')
     else:
         mdl = SimpleModel(target_level=target_level, emptyset_label=emptyset, model_type=model_type)
     if oversample:
         # print("oversampling")
         train = train.copy_and_oversample_to_flatten_stratification()
-    mdl.fit_titleset(title_set=train)
+    titles = train.get_title_vec()
+    codes = train.get_code_vec(target_level=target_level)
+    if oversample:
+        mdl.initialize_vectorizer(X=titles, y=codes)
+        for i in range(0, len(titles), 4000):
+            end = min(len(titles), i+4000)
+            print("training from %d to %d" % (i+1, end))
+            titleslice = titles[i:end]
+            codeslice = codes[i:end]
+            mdl.partial_fit(X=titleslice, y=codeslice)
+    else:
+        mdl.fit_titleset(title_set=train)
     if model_filepath is None:
         if oversample:
             model_filepath = open('./pickles/TrainedModels/simple.lvl%d.%s.%s.P' % (target_level, 'oversample','bayes'), 'wb')
         else:
-            model_filepath=open('./pickles/TrainedModels/simple.lvl%d.%s.P' % (target_level, model_type0), 'wb')
+            model_filepath = open('./pickles/TrainedModels/simple.lvl%d.%s.P' % (target_level, model_type), 'wb')
     mdl.save_as_pickle(file=model_filepath, is_path=False)
 
 

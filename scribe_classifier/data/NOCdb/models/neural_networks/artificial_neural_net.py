@@ -1,7 +1,6 @@
 import os
 import pickle
 from typing import Tuple, List
-
 import numpy as np
 import tensorflow as tf
 # from keras import regularizers
@@ -11,7 +10,6 @@ from keras.models import Sequential, load_model
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.preprocessing import LabelBinarizer
-
 from scribe_classifier.data.NOCdb.readers import CodeSet, TitleSet
 
 
