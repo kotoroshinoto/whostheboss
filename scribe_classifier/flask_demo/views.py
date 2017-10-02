@@ -83,10 +83,10 @@ def classify_text_input():
 @app.route('/output', methods=['POST'])
 def classify_text_output():
     test_text = request.form['job_title_test']
-    test_pred1 = models[1].predict([test_text])[0]
-    test_pred2 = models[2].predict([test_text])[0]
-    test_pred3 = models[3].predict([test_text])[0]
-    test_pred4 = models[4].predict([test_text])[0]
+    test_pred1 = models.predict([test_text], target_level=1)[0]
+    test_pred2 = models.predict([test_text], target_level=2)[0]
+    test_pred3 = models.predict([test_text], target_level=3)[0]
+    test_pred4 = models.predict([test_text], target_level=4)[0]
     pred_descript1 = all_codes.codes[test_pred1].desc
     pred_descript2 = all_codes.codes[test_pred2].desc
     pred_descript3 = all_codes.codes[test_pred3].desc
@@ -129,9 +129,9 @@ def classify_text_output_multi():
             continue
         preds[i] = models.batched_predict(X=titles, target_level=i)
         for j in range(len(titles)):
-            out_descs[j].append(all_codes.codes[preds[j][i]].desc)
-        df['Level%d_Code' % i] = preds[i]
-        df['Level%d_Description' % i] = out_descs[i]
+            out_descs[i].append(all_codes.codes[preds[i][j]].desc)
+        df['Level %d Code' % i] = preds[i]
+        df['Level %d Description' % i] = out_descs[i]
     return render_template("multi_output.html", dataframe=df.to_html(index=False, classes=["table", "table-bordered"]))
 
 
