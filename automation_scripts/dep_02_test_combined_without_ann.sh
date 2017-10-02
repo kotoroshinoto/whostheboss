@@ -10,6 +10,8 @@ python -m scribe_classifier.nn_main model combined_test 1 \
 --model source_data/pickles/canada/trained_models/simple.lvl2.sgdsv.P 2 sgd \
 --model source_data/pickles/canada/trained_models/simple.lvl3.bayes.P 3 bayes \
 --model source_data/pickles/canada/trained_models/simple.lvl3.sgdsv.P 3 sgd \
+--model source_data/pickles/canada/trained_models/simple.lvl4.bayes.P 4 bayes \
+--model source_data/pickles/canada/trained_models/simple.lvl4.sgdsv.P 4 sgd \
 --val source_data/pickles/canada/test_sets/train.set.lvl4.P \
 --test source_data/pickles/canada/test_sets/test.set.lvl4.P
 
@@ -21,6 +23,8 @@ python -m scribe_classifier.nn_main model combined_test 2 \
 --model source_data/pickles/canada/trained_models/simple.lvl2.sgdsv.P 2 sgd \
 --model source_data/pickles/canada/trained_models/simple.lvl3.bayes.P 3 bayes \
 --model source_data/pickles/canada/trained_models/simple.lvl3.sgdsv.P 3 sgd \
+--model source_data/pickles/canada/trained_models/simple.lvl4.bayes.P 4 bayes \
+--model source_data/pickles/canada/trained_models/simple.lvl4.sgdsv.P 4 sgd \
 --val source_data/pickles/canada/test_sets/train.set.lvl4.P \
 --test source_data/pickles/canada/test_sets/test.set.lvl4.P
 
@@ -30,5 +34,16 @@ python -m scribe_classifier.nn_main model combined_test 3 \
 --code_file source_data/pickles/canada/tidy_sets/all_codes.P \
 --model source_data/pickles/canada/trained_models/simple.lvl3.bayes.P 3 bayes \
 --model source_data/pickles/canada/trained_models/simple.lvl3.sgdsv.P 3 sgd \
+--model source_data/pickles/canada/trained_models/simple.lvl4.bayes.P 4 bayes \
+--model source_data/pickles/canada/trained_models/simple.lvl4.sgdsv.P 4 sgd \
+--val source_data/pickles/canada/test_sets/train.set.lvl4.P \
+--test source_data/pickles/canada/test_sets/test.set.lvl4.P
+
+#level 4
+python -m scribe_classifier.nn_main model combined_test 4 \
+--emptyset NA \
+--code_file source_data/pickles/canada/tidy_sets/all_codes.P \
+--model source_data/pickles/canada/trained_models/simple.lvl4.bayes.P 4 bayes \
+--model source_data/pickles/canada/trained_models/simple.lvl4.sgdsv.P 4 sgd \
 --val source_data/pickles/canada/test_sets/train.set.lvl4.P \
 --test source_data/pickles/canada/test_sets/test.set.lvl4.P

@@ -19,8 +19,8 @@ setup(
     install_requires=reqs,
     description="classify job titles into categories using machine learning",
     long_description="""\
-	This package trains one of several machine learning models and can use them to translate job titles into classifications
-	""",
+    This package trains one of several machine learning models and can use them to translate job titles into classifications
+    """,
     author="Michael Gooch",
     author_email="goochmi@gmail.com",
     url="https://bitbucket.org/kotoroshinoto/scribebinclustering",
@@ -29,7 +29,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'classify-jobtitles = scribe_classifier.main:main',
+            'classify-jobtitles = scribe_classifier.simple_main:main',
             'classify-jobtitles-nn = scribe_classifier.nn_main:nn_main:'
         ]
     }

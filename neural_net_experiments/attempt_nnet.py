@@ -9,8 +9,8 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import LabelEncoder
 
-from scribe_classifier.data.canada import AllCodes, TitleSet
-from scribe_classifier.util import ObjectPickler
+from scribe_classifier.data.NOCdb import AllCodes, TitleSet
+from scribe_classifier.flaskprep import ObjectPickler
 
 all_codes = AllCodes.load_from_pickle("./source_data/pickles/canada/tidy_sets/all_codes.P", is_path=True)
 

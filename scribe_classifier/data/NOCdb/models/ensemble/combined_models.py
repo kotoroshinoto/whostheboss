@@ -7,10 +7,10 @@ from threading import Semaphore
 from typing import Dict
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.preprocessing import LabelEncoder, LabelBinarizer
-from scribe_classifier.data.canada.models.neural_networks.artificial_neural_net import ANNclassifier
-from scribe_classifier.data.canada.models.simple.simple_model import SimpleModel
-from scribe_classifier.data.canada.readers import CodeSet
-from scribe_classifier.data.canada.readers import TitleSet
+from scribe_classifier.data.NOCdb.models.neural_networks.artificial_neural_net import ANNclassifier
+from scribe_classifier.data.NOCdb.models.simple.simple_model import SimpleModel
+from scribe_classifier.data.NOCdb.readers import CodeSet
+from scribe_classifier.data.NOCdb.readers import TitleSet
 
 
 class CombinedModels(BaseEstimator, ClassifierMixin):
@@ -21,6 +21,7 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
                  lvl1_mdls: 'Dict[str, str]'=None,
                  lvl2_mdls: 'Dict[str, str]'=None,
                  lvl3_mdls: 'Dict[str, str]'=None,
+                 lvl4_mdls: 'Dict[str, str]'=None,
                  emptyset_label="NA"):
         """initialize a new instance, can receive level 1, 2, and 3 dictionaries with ['sgd', 'bayes', 'neural'] inputs
         sgd and bayes are paths to SimpleModel pickles, and neural is a path to an ANNclassifier pickle.
@@ -36,56 +37,41 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
         self.encs = dict()  # type: Dict[int, LabelEncoder]
         self.ids = dict()
         self.lock = Semaphore()
-        for i in range(1, 4):
+        for i in range(1, 5):
             self.codes[i] = self.ac.get_codes_for_level(target_level=i)
             self.encs[i] = LabelEncoder().fit(self.codes[i])
             self.bin_encs[i] = LabelBinarizer().fit(self.codes[i])
             self.ids[i] = self.encs[i].transform(self.codes[i])
-        if lvl1_mdls is not None:
-            self.mdls[1] = dict()
-            if 'sgd' in lvl1_mdls:
-                self.num_models += 1.0
-                self.mdls[1]['sgd'] = SimpleModel.load_from_pickle(lvl1_mdls['sgd'], is_path=True)  # type: SimpleModel
-            if 'bayes' in lvl1_mdls:
-                self.num_models += 1.0
-                self.mdls[1]['bayes'] = SimpleModel.load_from_pickle(lvl1_mdls['bayes'], is_path=True)  # type: SimpleModel
-            if 'neural' in lvl1_mdls:
-                self.num_models += 1.0
-                self.mdls[1]['neural'] = ANNclassifier.load_from_pickle(lvl1_mdls['neural'])  # type: ANNclassifier
-        else:
-            self.mdls[1] = None
-        if lvl2_mdls is not None:
-            self.mdls[2] = dict()
-            if 'sgd' in lvl2_mdls:
-                self.num_models += 1.0
-                self.mdls[2]['sgd'] = SimpleModel.load_from_pickle(lvl2_mdls['sgd'], is_path=True)  # type: SimpleModel
-            if 'bayes' in lvl2_mdls:
-                self.num_models += 1.0
-                self.mdls[2]['bayes'] = SimpleModel.load_from_pickle(lvl2_mdls['bayes'], is_path=True)  # type: SimpleModel
-            if 'neural' in lvl2_mdls:
-                self.num_models += 1.0
-                self.mdls[2]['neural'] = ANNclassifier.load_from_pickle(lvl2_mdls['neural'])  # type: ANNclassifier
-        else:
-            self.mdls[2] = None
-        if lvl3_mdls is not None:
-            self.mdls[3] = dict()
-            if 'sgd' in lvl3_mdls:
-                self.num_models += 1.0
-                self.mdls[3]['sgd'] = SimpleModel.load_from_pickle(lvl3_mdls['sgd'], is_path=True)  # type: SimpleModel
-            if 'bayes' in lvl3_mdls:
-                self.num_models += 1.0
-                self.mdls[3]['bayes'] = SimpleModel.load_from_pickle(lvl3_mdls['bayes'], is_path=True)  # type: SimpleModel
-            if 'neural' in lvl3_mdls:
-                self.num_models += 1.0
-                self.mdls[3]['neural'] = ANNclassifier.load_from_pickle(lvl3_mdls['neural'])  # type: ANNclassifier
-        else:
-            self.mdls[3] = None
+        self._add_models_for_level(lvl_mdls=lvl1_mdls, target_level=1)
+        self._add_models_for_level(lvl_mdls=lvl2_mdls, target_level=2)
+        self._add_models_for_level(lvl_mdls=lvl3_mdls, target_level=3)
+        self._add_models_for_level(lvl_mdls=lvl4_mdls, target_level=4)
         assert self.num_models > 0.0
 
-    def _calc_num_models(self, target_level):
+    def _add_models_for_level(self, lvl_mdls, target_level):
+        """Adds models for a given level"""
+        if lvl_mdls is not None:
+            self.mdls[target_level] = dict()
+            for mdltype in ['sgd', 'bayes', 'neural']:
+                if mdltype in lvl_mdls:
+                    # print("adding 1 to lvl_mdls")
+                    self.num_models += 1.0
+                    if mdltype == 'neural':
+                        self.mdls[target_level][mdltype] = ANNclassifier.load_from_pickle(
+                            filepath=lvl_mdls[mdltype]
+                        )  # type: ANNclassifier
+                    else:
+                        self.mdls[target_level][mdltype] = SimpleModel.load_from_pickle(
+                            file=lvl_mdls[mdltype],
+                            is_path=True
+                        )  # type: SimpleModel
+        else:
+            self.mdls[target_level] = None
+
+    def calc_num_models(self, target_level):
         """calculate the number of models available that are applicable for target level"""
         count = 0
-        for i in range(target_level, 4):
+        for i in range(target_level, 5):
             mdl_lvl_d = self.mdls[i]
             if mdl_lvl_d is None:
                 continue
@@ -186,16 +172,16 @@ class CombinedModels(BaseEstimator, ClassifierMixin):
             else:
                 os.remove('tmp')
         os.mkdir('tmp')
-        mdl_count = self._calc_num_models(target_level=target_level)
+        mdl_count = self.calc_num_models(target_level=target_level)
         if mdl_count == 0:
             raise RuntimeError("Cannot predict proba for level %d without relevant models" % target_level)
         gc.enable()
         level_sums = list()
         #pre-generate probas
-        for i in range(target_level, 4):
+        for i in range(target_level, 5):
             if self.mdls[i] is not None:
                 self._generate_proba_for_level(proba_level=i, X=X, keras_batch_size=keras_batch_size)
-        for i in range(target_level, 4):
+        for i in range(target_level, 5):
             if self.mdls[i] is not None:
                 level_sums.append(self._condense_proba_to_target_level(self._get_proba_sum_at_level(i, X), i, target_level=target_level))
         if os.path.exists('tmp'):

@@ -1,6 +1,6 @@
 from keras.models import load_model
-from scribe_classifier.data.canada import TitleSet, TitleRecord
-from scribe_classifier.data.canada import AllCodes, CodeRecord
+from scribe_classifier.data.NOCdb import TitleSet, TitleRecord
+from scribe_classifier.data.NOCdb import AllCodes, CodeRecord
 from sklearn.metrics import classification_report
 from sklearn.feature_extraction.text import CountVectorizer
 from typing import List

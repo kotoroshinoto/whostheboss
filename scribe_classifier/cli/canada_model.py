@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 import click
 from sklearn import metrics
-from scribe_classifier.data.canada import AllCodes, TitleSet, SimpleModel, MultiStepModel
+from scribe_classifier.data.NOCdb.readers import CodeSet, TitleSet
+from scribe_classifier.data.NOCdb.models.simple import SimpleModel
+from scribe_classifier.data.NOCdb.models.multi_level import MultiStepModel
 
 
 @click.group()
 def canada_model_cli():
-    """Tools for working with Canadian JobTitle Database"""
+    """Tools for working with models based on the Canadian NOC JobTitle Database"""
     pass
 
 
@@ -17,6 +19,7 @@ def gen_data_set():
 
 
 def split_and_pickle_dataset(tset, target_level, train_filepath, valid_filepath, test_filepath, test_prop, valid_prop):
+    """This function splits a dataset and pickles the results"""
     if valid_prop == 0.0:
         train, test = tset.split_data_train_test(target_level=target_level, test_split=test_prop)
     else:
@@ -34,15 +37,15 @@ def split_and_pickle_dataset(tset, target_level, train_filepath, valid_filepath,
 
 
 @gen_data_set.command(name="file")
-@click.option('--target_level', type=click.IntRange(1, 4), default=2, help="train against this code abstraction level")
+@click.option('--target_level', type=click.IntRange(1, 4), default=4, help="int between 1 and 4 specifying the code level to use for stratified splits")
 @click.option('--example_file', type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True), required=True, help="This file should contain all examples with their level 4 coding in tab-separated format")
 @click.option('--train_filepath', type=click.File('wb'), default=None, help="Location where training set will be saved in pickle format")
 @click.option('--valid_filepath', type=click.File('wb'), default=None, help="Location where validation set will be saved in pickle format")
 @click.option('--test_filepath', type=click.File('wb'), default=None, help="Location where test set will be saved in pickle format")
-@click.option('--valid_prop', type=click.FLOAT, default=0.20, help="value between 0.0 and 1.0 designation proportion to be used for validation set")
-@click.option('--test_prop', type=click.FLOAT, default=0.20, help="value between 0.0 and 1.0 designation proportion to be used for test set")
+@click.option('--valid_prop', type=click.FLOAT, default=0.20, help="value between 0.0 and 1.0 designating proportion to be used for validation set")
+@click.option('--test_prop', type=click.FLOAT, default=0.20, help="value between 0.0 and 1.0 designating proportion to be used for test set")
 def generate_data_set(target_level, example_file, train_filepath, valid_filepath, test_filepath, valid_prop, test_prop):
-    """Generate Train/Validate/Test Sets"""
+    """Generate Train/Validate/Test Sets, from NOC text data"""
     all_titles = TitleSet()
     all_titles.add_titles_from_file(filename=example_file)
     split_and_pickle_dataset(
@@ -65,6 +68,7 @@ def generate_data_set(target_level, example_file, train_filepath, valid_filepath
 @click.option('--valid_prop', type=click.FLOAT, default=0.20, help="value between 0.0 and 1.0 designation proportion to be used for validation set")
 @click.option('--test_prop', type=click.FLOAT, default= 0.20, help="value between 0.0 and 1.0 designation proportion to be used for test set")
 def generate_data_set_from_pickle(target_level, example_file, train_filepath, valid_filepath, test_filepath, valid_prop, test_prop):
+    """Generate Train/Validate/Test Sets, from NOC pickled data"""
     all_titles = TitleSet.load_from_pickle(file=example_file, is_path=False)
     split_and_pickle_dataset(
         tset=all_titles,
@@ -79,7 +83,7 @@ def generate_data_set_from_pickle(target_level, example_file, train_filepath, va
 
 @canada_model_cli.group()
 def simple():
-    """Work with Simple Models"""
+    """Work with simple Models"""
     pass
 
 
@@ -91,7 +95,7 @@ def simple():
 @click.option('--oversample/--no-oversample', default=False, help="toggle random oversampling, will use MultinomialNB model in this mode instead of SGDClassifier")
 @click.option('--model_type', type=click.STRING, default='sgdsv', help="specify model type, one of ['sgdsv', 'bayes', 'gauss']")
 def generate_simple_model(model_filepath, train_filepath, target_level, emptyset, oversample, model_type):
-    """Use Simple Model, predict one specific category level all at once, using SGDClassifier"""
+    """Use simple Model, predict one specific category level all at once, using SGDClassifier, MultinomialBayes, or SVC"""
     train = TitleSet.load_from_pickle(train_filepath)
     if oversample or model_type == 'bayes':
         mdl = SimpleModel(target_level=target_level, emptyset_label=emptyset, model_type='bayes')
@@ -116,9 +120,9 @@ def generate_simple_model(model_filepath, train_filepath, target_level, emptyset
 @click.argument('test_file', type=click.File('rb'), required=True)
 @click.argument('target_level', type=click.IntRange(1, 4), default=1)
 def test_simple_model(emptyset, model_file, validation_file, test_file, target_level):
+    """Run test on model with validation set and test set"""
     if emptyset == "":
         emptyset = "NA"
-    """Run test on model with validation set and test set"""
     model = SimpleModel.load_from_pickle(model_file)  # type: SimpleModel
     valid = TitleSet.load_from_pickle(validation_file)  # type: TitleSet
     test = TitleSet.load_from_pickle(test_file)  # type: TitleSet
@@ -175,6 +179,7 @@ def generate_multi_step_model(code_file, train_filepath, model_filepath, emptyse
 @click.argument('test_file', type=click.File('rb'), required=True)
 @click.argument('target_level', type=click.IntRange(1, 4), default=1)
 def test_multi_step_model(emptyset, model_file, validation_file, test_file, target_level):
+    """Run test on multi-step model with validation set and test set"""
     if emptyset == "":
         emptyset = "NA"
     model = MultiStepModel.load_from_pickle(model_file)  # type: MultiStepModel

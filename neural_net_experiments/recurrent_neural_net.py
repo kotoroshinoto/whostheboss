@@ -1,7 +1,7 @@
 import pickle
 from sklearn.preprocessing import LabelBinarizer, LabelEncoder
 from sklearn.model_selection import train_test_split
-from scribe_classifier.data.canada.NOCdb import AllCodes, CodeRecord, TitleSet, TitleRecord
+from scribe_classifier.data.NOCdb.NOCdb import AllCodes, CodeRecord, TitleSet, TitleRecord
 from typing import List, Dict, Tuple
 from keras.models import load_model
 from keras.preprocessing.text import Tokenizer

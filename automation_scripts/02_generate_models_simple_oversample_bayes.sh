@@ -24,3 +24,11 @@ python \
 --target_level 3 \
 --emptyset NA \
 --oversample
+
+python \
+-m scribe_classifier.simple_main model simple train \
+--train_filepath ./source_data/pickles/canada/test_sets/train.set.lvl4.P \
+--model_filepath ./source_data/pickles/canada/trained_models/simple.lvl4.oversample.P \
+--target_level 4 \
+--emptyset NA \
+--oversample

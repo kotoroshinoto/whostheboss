@@ -9,6 +9,7 @@ split_point = re.compile(", u['\"]")
 
 
 def process_file(input_dir, filename):
+    """processes the file to clean it properly"""
     retval = []
     cityfile = open(os.path.join(input_dir, filename), 'r')
     line = cityfile.readline()
@@ -16,7 +17,7 @@ def process_file(input_dir, filename):
     if not listmatch:
         return []
     listname = listmatch.group(1)
-    print("extracting %s data_scribe_unique" % listname)
+    # print("extracting %s data_scribe_unique" % listname)
     content = listmatch.group(2)
     split_obj = split_point.split(content)
     for item in split_obj:
@@ -28,6 +29,7 @@ def process_file(input_dir, filename):
 
 
 def clean_file(input_dir, output_dir, filename):
+    """clean given file and place it into output directory with given filename"""
     filecontent = process_file(input_dir=input_dir, filename=filename)
     outfile = open(os.path.join(output_dir, filename) % filename, 'w')
     # outfile = sys.stdout
@@ -35,10 +37,17 @@ def clean_file(input_dir, output_dir, filename):
     outfile.close()
 
 
-@click.command()
+@click.group()
+def uniques_cli():
+    """operations involving unique-entry files from scribe"""
+    pass
+
+
+@uniques_cli.command(name='tidy')
 @click.argument('input_dir', type=click.Path(file_okay=False, dir_okay=True, exists=True, resolve_path=True, readable=True), default=None)
 @click.argument('output_dir', type=click.Path(file_okay=False, dir_okay=True, exists=True, resolve_path=True, writable=True), default=None)
 def clean_all_unique_files(input_dir, output_dir):
+    """clean unique entry files provided by scribe"""
     cwd = os.path.abspath('.')
     if input_dir is None:
         input_dir = os.path.join(cwd, 'source_data', 'raw', 'scribe', 'unique_labels')

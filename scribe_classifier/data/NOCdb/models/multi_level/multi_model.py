@@ -2,8 +2,8 @@
 import pickle
 from typing import Dict, List
 
-from scribe_classifier.data.canada.models.simple.simple_model import SimpleModel
-from scribe_classifier.data.canada.readers import TitleSet, CodeSet, TitleRecord
+from scribe_classifier.data.NOCdb.models.simple.simple_model import SimpleModel
+from scribe_classifier.data.NOCdb.readers import TitleSet, CodeSet, TitleRecord
 
 
 class MultiStepPredictions:

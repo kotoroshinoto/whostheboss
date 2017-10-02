@@ -1,35 +1,36 @@
 #!/usr/bin/env python
 import os
-from typing import Dict
 import click
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
-from scribe_classifier.data.canada import TitleSet
-from scribe_classifier.data.canada.NOCdb.models.neural_networks.combined_models import CombinedModels
-from scribe_classifier.data.canada.NOCdb.readers.codes import AllCodes
+from scribe_classifier.data.NOCdb.models.ensemble import CombinedModels
+from scribe_classifier.data.NOCdb.readers import TitleSet, CodeSet
 from scribe_classifier.data.scribe import DataFramePickler
-from scribe_classifier.util.flask_util import ClassificationReporter
+from scribe_classifier.flaskprep import ClassificationReporter
 
 
 def get_combined_models():
+    """assembles a combined models object with all available models"""
     mdl_strs = dict()
-    for target_level in range(1, 4):
+    for target_level in range(1, 5):
         level_mdl_strs = dict()
         level_mdl_strs['sgd'] = 'source_data/pickles/canada/trained_models/simple.lvl%d.sgdsv.P' % target_level
         level_mdl_strs['bayes'] = 'source_data/pickles/canada/trained_models/simple.lvl%d.bayes.P' % target_level
-        level_mdl_strs['ann'] = 'nnmodels/ANN/neural_net_level%d.frozen.P' % target_level
+        level_mdl_strs['neural'] = 'nnmodels/ANN/neural_net_level%d.P' % target_level
         mdl_strs[target_level] = level_mdl_strs
     # models
     models = CombinedModels('source_data/pickles/canada/tidy_sets/all_codes.P',
                             mdl_strs[1],
                             mdl_strs[2],
-                            mdl_strs[3]
+                            mdl_strs[3],
+                            mdl_strs[4]
                             )
     return models
 
 
 def classify_scribe_data(scribe_query_df, batch_size, keras_batch_size=4000, label='class'):
+    """Classifies scribe's data into level 2 buckets and adds a new column with the labels"""
     models = get_combined_models()
     titles = scribe_query_df['title']
     titles.fillna(value="", inplace=True)
@@ -40,8 +41,9 @@ def classify_scribe_data(scribe_query_df, batch_size, keras_batch_size=4000, lab
 
 
 def classify_test_set(batch_size, keras_batch_size=4000):
+    """Classifies test set and validation set, and returns the resulting reports and prediction vectors"""
     models = get_combined_models()
-    all_codes = AllCodes.load_from_pickle('./source_data/pickles/canada/tidy_sets/all_codes.P', is_path=True)
+    all_codes = CodeSet.load_from_pickle('./source_data/pickles/canada/tidy_sets/all_codes.P', is_path=True)
     all_codes.add_emptyset()
     classes = all_codes.get_codes_for_level(target_level=2)
     # dataset
@@ -74,12 +76,6 @@ def main_flask_prep():
     pass
 
 
-def create_dataframe(pred):
-    df = pd.DataFrame()
-    df['class'] = pred
-    return df
-
-
 @main_flask_prep.command(name='reports')
 @click.option('--batch_size', type=click.INT, default=4000, help='set number of records to classify at once')
 @click.option('--keras_batch_size', type=click.INT, default=4000, help='set keras batch size parameter')
@@ -91,10 +87,6 @@ def generate_canada_reports(batch_size, keras_batch_size):
     )
     valid_report.save_as_pickle(filepath="scribe_classifier/flask_demo/pickles/report.valid.P")
     test_report.save_as_pickle(filepath="scribe_classifier/flask_demo/pickles/report.test.P")
-    # vdf = create_dataframe(valid_pred)
-    # tdf = create_dataframe(test_pred)
-    # DataFramePickler.save_as_pickle(df=vdf, filepath='scribe_classifier/flask_demo/pickles/valid.df.P')
-    # DataFramePickler.save_as_pickle(df=tdf, filepath='scribe_classifier/flask_demo/pickles/test.df.P')
 
 
 @main_flask_prep.command(name='scribe_df')
@@ -113,8 +105,9 @@ def scribe_dataframe(batch_size, keras_batch_size):
 
 
 def generate_canada_category_plot(output_fname, add_empty_class, target_level=2):
+    """Generates plots of the number of titles within each category in the canadian NOC database at target level"""
     code_file = './source_data/pickles/canada/tidy_sets/all_codes.P'
-    ac = AllCodes.load_from_pickle(file=code_file, is_path=True)
+    ac = CodeSet.load_from_pickle(file=code_file, is_path=True)
     example_file = './source_data/pickles/canada/tidy_sets/all_titles.P'
     dataset = TitleSet.load_from_pickle(file=example_file, is_path=True)
     if add_empty_class:
@@ -140,6 +133,7 @@ def generate_canada_plots(force):
 
 
 def generate_scribe_category_plot(scribe_query_df, output_fname, label: str ='class'):
+    """Generates plots of the number of items with label in dataframe"""
     fig, ax = plt.subplots()
     fig.set_size_inches(14, 9)
     scribe_query_df.sort_values(label, inplace=True)

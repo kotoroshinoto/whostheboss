@@ -8,7 +8,7 @@ from scribe_classifier.data.NOCdb.readers import TitleRecord, TitleSet, CodeReco
 
 @click.group()
 def db_tidy_main_cli():
-    """"""
+    """Operations to clean and prepare NOC database for use"""
     pass
 
 
@@ -17,6 +17,8 @@ def db_tidy_main_cli():
 @click.option('--outfile', '-o', type=click.File('w'), default=None, help="file to write mapped output to in tabular format")
 @click.option('--pickle', '-p', type=click.File('wb'), default=None, help="file to write mapped output to in pickle format")
 def clean_codes(infile, outfile, pickle):
+    """This program cleans up the NOC code file, saving the resulting code set in a pickle format.\n
+    User can redirect stdout if they desire to save a tabular copy of the same data."""
     if outfile is None:
         outfile = sys.stdout
     rdr = reader(infile)
@@ -42,9 +44,10 @@ def clean_codes(infile, outfile, pickle):
 @click.option('--outfile', '-o', type=click.File('w'), default=None, help="file to write mapped output to in tabular format")
 @click.option('--pickle', '-p', type=click.File('wb'), default=None, help="file to write mapped output to in pickle format")
 def clean_titles(infile, outfile, pickle):
-    """this program takes output for jobtitles from clean_lists.py
-    and rips out non alphanumeric characters, leaving single whitespaces between words\n
-    It will then map the old value to the new values and write the Dict to a pickle file for later use"""
+    """This program will clean NOC title examples, splitting dual-gender titles, condensing some prefixes
+    and rips out non alphanumeric characters, leaving single whitespaces between words.\n
+    It creates a pickle file containing the prepared titleset. \n
+    User can redirect stdout to capture a tabular copy of the file as well"""
     if outfile is None:
         outfile = sys.stdout
     rdr = reader(infile)

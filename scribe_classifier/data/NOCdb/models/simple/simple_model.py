@@ -6,7 +6,7 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import SVC
-from scribe_classifier.data.canada.readers import TitleSet, TitleRecord
+from scribe_classifier.data.NOCdb.readers import TitleSet, TitleRecord
 
 
 class SimpleModel(BaseEstimator, ClassifierMixin):

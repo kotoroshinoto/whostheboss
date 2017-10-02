@@ -1,1 +1,1 @@
-from scribe_classifier.data.canada.models.simple.simple_model import SimpleModel
+from scribe_classifier.data.NOCdb.models.simple.simple_model import SimpleModel

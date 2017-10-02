@@ -23,8 +23,8 @@ from keras.layers import Dense, Input, Flatten
 from keras.layers import Conv1D, MaxPooling1D, Embedding
 from keras.models import Model
 from scribe_classifier.data.scribe.readers.dbhandler import DataFramePickler
-from scribe_classifier.data.canada import TitleSet, TitleRecord
-from scribe_classifier.data.canada import AllCodes, CodeRecord
+from scribe_classifier.data.NOCdb import TitleSet, TitleRecord
+from scribe_classifier.data.NOCdb import AllCodes, CodeRecord
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from keras.optimizers import RMSprop
