@@ -1,7 +1,7 @@
 import pickle
 from sklearn.preprocessing import LabelBinarizer, LabelEncoder
 from sklearn.model_selection import train_test_split
-from scribe_classifier.data.NOCdb.NOCdb import AllCodes, CodeRecord, TitleSet, TitleRecord
+from scribe_classifier.data.NOCdb.readers import CodeSet, CodeRecord, TitleSet, TitleRecord
 from typing import List, Dict, Tuple
 from keras.models import load_model
 from keras.preprocessing.text import Tokenizer
@@ -59,7 +59,7 @@ class RecurrentNeuralClassifier:
 
     def fit(self):
         #Convert text samples in dataset to sequences of word indexes (encoding/bagofwords, etc)
-        all_codes = AllCodes.load_from_pickle('source_data/pickles/canada/tidy_sets/all_codes.P', is_path=True)
+        all_codes = CodeSet.load_from_pickle('source_data/pickles/canada/tidy_sets/all_codes.P', is_path=True)
         all_codes.add_emptyset("NA")
         tset = TitleSet.load_from_pickle('source_data/pickles/canada/tidy_sets/all_titles.P', is_path=True)
         all_codevec = all_codes.get_codes_for_level(target_level=self.target_level)
@@ -139,15 +139,15 @@ class RecurrentNeuralClassifier:
 
 
 def recurrent_neural_net_main():
-    target_level = 3
+    target_level = 1
 
-    rnc = RecurrentNeuralClassifier(embeddings_file='source_data/wiki_glove/glove.6B.100d.txt',
-                                    embedding_dim=100,
+    rnc = RecurrentNeuralClassifier(embeddings_file='source_data/wiki_glove/glove.6B.300d.txt',
+                                    embedding_dim=300,
                                     target_level=target_level,
                                     word_limit=20000,
                                     max_len=1000,
                                     epochs=15,
-                                    batch_size=256
+                                    batch_size=32
                                     )
 
     rnc.fit()

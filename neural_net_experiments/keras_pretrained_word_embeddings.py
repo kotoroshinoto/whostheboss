@@ -38,7 +38,7 @@ VALIDATION_SPLIT = 0.2
 print('Indexing word vectors.')
 
 embeddings_index = {}
-f = open(os.path.join(GLOVE_DIR, 'glove.6B.100d.txt'))
+f = open(os.path.join(GLOVE_DIR, 'glove.6B.300d.txt'))
 for line in f:
     values = line.split()
     word = values[0]
