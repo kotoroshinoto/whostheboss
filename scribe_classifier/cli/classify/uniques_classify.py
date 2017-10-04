@@ -78,7 +78,7 @@ def classify_uniques_cli(input_filepath, output_filepath, levels, code_file, mod
     clean_titles = get_classification_titles(titles)
     print("vector obtained")
     print("performing classifications")
-    for i in range(levels[0], levels[1]):
+    for i in range(levels[0], levels[1] + 1):
         preds[i] = cmb_mdls.batched_predict(clean_titles,
                                            batch_size=batchsize,
                                            target_level=i,
@@ -86,7 +86,7 @@ def classify_uniques_cli(input_filepath, output_filepath, levels, code_file, mod
     print("performing classifications")
     print("combining classifications")
     for i in range(len(preds)):
-        for j in range(1, 5):
+        for j in range(levels[0], levels[1] + 1):
             titles[i].codes[j] = preds[j][i]
     print("combining classifications completed")
     print("writing output file")
