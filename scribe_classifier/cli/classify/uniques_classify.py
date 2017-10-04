@@ -4,21 +4,6 @@ from scribe_classifier.data.NOCdb.models.ensemble import CombinedModels
 from typing import List
 
 
-class ScribeTitle:
-    def __init__(self, title_str):
-        self.orig_title = str(title_str)
-        self.title = tp.preprocess_slugify(tp.preprocess_title_prefixes(title_str))
-        self.codes = dict()
-
-    def __str__(self):
-        # output will be, Original input \t cleaned input \t predicted class1 \t predicted class2 \t predicted class3 \t predicted class4 etc
-        codes = []
-        for i in range(1,5):
-            if i in self.codes:
-                codes.append(self.codes[i])
-        return "\t".join([self.orig_title, self.title, "\t".join(codes)])
-
-
 def get_classification_titles(stl: 'List[ScribeTitle]'):
     retl = []
     for st in stl:
@@ -43,7 +28,6 @@ def get_classification_titles(stl: 'List[ScribeTitle]'):
 def classify_uniques_cli(input_filepath, output_filepath, levels, code_file, model, batchsize, keras_batch, emptyset):
     if emptyset == "":
         emptyset = "NA"
-    titles = []
     count = 0
     print("loading models into combined ensemble")
     mdl_paths = dict()
@@ -67,29 +51,30 @@ def classify_uniques_cli(input_filepath, output_filepath, levels, code_file, mod
                               emptyset_label=emptyset)
     print("ensemble complete")
     print("loading data")
+    titles = []
+    slugtitles = []
     for line in input_filepath:
         line = line.rstrip()
         count += 1
-        st = ScribeTitle(title_str=line)
-        titles.append(st)
+        titles.append(line)
+        slugtitles.append(tp.preprocess_slugify(tp.preprocess_title_prefixes(line)))
     print("data loading complete")
     preds = dict()
-    print("getting vector of input titles")
-    clean_titles = get_classification_titles(titles)
-    print("vector obtained")
     print("performing classifications")
     for i in range(levels[0], levels[1] + 1):
-        preds[i] = cmb_mdls.batched_predict(clean_titles,
+        preds[i] = cmb_mdls.batched_predict(slugtitles,
                                            batch_size=batchsize,
                                            target_level=i,
                                            keras_batch_size=keras_batch)
     print("performing classifications")
-    print("combining classifications")
-    for i in range(len(preds)):
-        for j in range(levels[0], levels[1] + 1):
-            titles[i].codes[j] = preds[j][i]
-    print("combining classifications completed")
     print("writing output file")
-    for item in titles:
-        print(item, file=output_filepath)
+    for i in range(len(preds)):
+        t = titles[i]
+        st = slugtitles[j]
+        p = preds[j]
+        codes = []
+        for j in range(levels[0], levels[1] + 1):
+            codes.append(p[j])
+        print("\t".join([t, st, "\t".join(codes)]), file=output_filepath)
     print("Operation completed")
+
