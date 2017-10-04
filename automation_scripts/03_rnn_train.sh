@@ -7,8 +7,7 @@ python recurrent_neural_net.py \
 --model_filepath nnmodels/RNN/rnnclf_lvl1.P \
 --epochs 40 \
 --batch_size 256 \
---target_level 1 \
---warmstart
+--target_level 1
 
 python recurrent_neural_net.py \
 --emptyset NA \
@@ -17,8 +16,7 @@ python recurrent_neural_net.py \
 --model_filepath nnmodels/RNN/rnnclf_lvl2.P \
 --epochs 40 \
 --batch_size 256 \
---target_level 2 \
---warmstart
+--target_level 2
 
 python recurrent_neural_net.py \
 --emptyset NA \
@@ -27,8 +25,7 @@ python recurrent_neural_net.py \
 --model_filepath nnmodels/RNN/rnnclf_lvl3.P \
 --epochs 40 \
 --batch_size 256 \
---target_level 3 \
---warmstart
+--target_level 3
 
 python recurrent_neural_net.py \
 --emptyset NA \
@@ -37,5 +34,4 @@ python recurrent_neural_net.py \
 --model_filepath nnmodels/RNN/rnnclf_lvl4.P \
 --epochs 40 \
 --batch_size 256 \
---target_level 4 \
---warmstart
+--target_level 4
