@@ -31,10 +31,34 @@ def process_file(input_dir, filename):
 def clean_file(input_dir, output_dir, filename):
     """clean given file and place it into output directory with given filename"""
     filecontent = process_file(input_dir=input_dir, filename=filename)
-    outfile = open(os.path.join(output_dir, filename) % filename, 'w')
+    outfile = open(os.path.join(output_dir, filename), 'w', encoding='utf8')
     # outfile = sys.stdout
+
+    filecontent = clean_records(filecontent)
+
     print("\n".join(filecontent), file=outfile)
     outfile.close()
+
+
+quote_finder = re.compile('^["\'](.*)[\'\"]$')
+
+
+def clean_record(line: str):
+    line = line[2:-1].encode().decode(encoding='unicode_escape').rstrip().lstrip()
+    mo = quote_finder.match(line)
+    if mo:
+        line = mo.groups()[0].rstrip().lstrip()
+    return line
+
+
+def clean_records(lines: 'List[str]') -> 'List[str]':
+    outlines = []
+    for i in range(len(lines)):
+        if lines[i] == 'None':
+            outlines.append('None')
+        else:
+            outlines.append(clean_record(lines[i]))
+    return outlines
 
 
 @click.group()

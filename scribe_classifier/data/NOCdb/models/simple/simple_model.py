@@ -3,7 +3,6 @@ from typing import List
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import SGDClassifier
-from sklearn.model_selection import GridSearchCV
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import SVC
 from scribe_classifier.data.NOCdb.readers import TitleSet, TitleRecord
@@ -15,26 +14,22 @@ class SimpleModel(BaseEstimator, ClassifierMixin):
     def __init__(self, target_level=1, emptyset_label: str=None, cv=None, ngram_start=1, ngram_stop=5, model_type='sgdsv', oversampled=False):
         self.target_level = target_level
         self.model_type = model_type
-        self.parameters = dict()
+        # self.parameters = dict()
         self.vect = CountVectorizer(stop_words='english', ngram_range=(ngram_start, ngram_stop))
         # self.parameters['vect__ngram_range'] = [(1, x) for x in range(ngram_start, ngram_stop + ngram_step, ngram_step)]
         self.oversampled = oversampled
         if self.model_type == 'bayes':
-            self.parameters['alpha'] = (1e-3, 1e-4, 1e-5, 1e-6)
+            # self.parameters['alpha'] = (1e-3, 1e-4, 1e-5, 1e-6)
             # self.prop_records = 1.0/8.0
-            self.ml_clf = MultinomialNB(alpha=1e-4)
+            self.clf = MultinomialNB(alpha=1e-6)
         elif self.model_type == 'sgdsv':
-            self.parameters['alpha'] = (1e-3, 1e-4, 1e-5, 1e-6)
-            self.parameters['tol'] = (1e-3, 1e-4, 1e-5, 1e-6)
-            self.ml_clf = SGDClassifier(alpha=1e-4, max_iter=3000, tol=1e-4, n_jobs=-1, loss='log')
+            # self.parameters['alpha'] = (1e-3, 1e-4, 1e-5, 1e-6)
+            # self.parameters['tol'] = (1e-3, 1e-4, 1e-5, 1e-6)
+            self.clf = SGDClassifier(alpha=1e-6, max_iter=3000, tol=1e-6, n_jobs=-1, loss='log')
         elif self.model_type == 'svc':
-            self.ml_clf = SVC(kernel='linear', probability=True)
+            self.clf = SVC(kernel='linear', probability=True, tol=1e-6)
         else:
             raise ValueError("Unrecognized model type")
-        if self.oversampled:
-            self.clf = self.ml_clf
-        else:
-            self.clf = GridSearchCV(self.ml_clf, self.parameters, n_jobs=-1, cv=cv, scoring='accuracy')
         if emptyset_label is not None:
             if emptyset_label == "":
                 self.emptyset_label = "NA"
