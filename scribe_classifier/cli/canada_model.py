@@ -215,7 +215,6 @@ def test_multi_step_model(emptyset, model_file, validation_file, test_file, targ
         print(metrics.classification_report(valid_target_codes, valid_level_pred))
         print("Test Set:")
         print(metrics.classification_report(test_target_codes, test_level_pred))
-
         print("Val  Acc: ", metrics.accuracy_score(valid_target_codes, valid_pred),
               "Test Acc", metrics.accuracy_score(test_target_codes, test_pred))
 
