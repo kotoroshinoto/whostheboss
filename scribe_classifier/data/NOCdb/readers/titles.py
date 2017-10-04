@@ -354,7 +354,7 @@ class TitlePreprocessor:
     @staticmethod
     def preprocess_slugify(s: str)->str:
         """slugify a string, using spaces as separators"""
-        s = slugify(text=s, separator=" ")
+        s = slugify(s, separator=" ")
         return s
 
     @classmethod

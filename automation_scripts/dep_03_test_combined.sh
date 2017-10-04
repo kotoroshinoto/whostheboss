@@ -14,11 +14,11 @@ python -m scribe_classifier.nn_main model combined_test 1 \
 --model source_data/pickles/canada/trained_models/simple.lvl3.bayes.P 3 bayes \
 --model source_data/pickles/canada/trained_models/simple.lvl3.sgdsv.P 3 sgd \
 --model nnmodels/ANN/neural_net_level3.P 3 neural \
---val source_data/pickles/canada/test_sets/train.set.lvl4.P \
---test source_data/pickles/canada/test_sets/test.set.lvl4.P \
 --model source_data/pickles/canada/trained_models/simple.lvl4.bayes.P 4 bayes \
 --model source_data/pickles/canada/trained_models/simple.lvl4.sgdsv.P 4 sgd \
---model nnmodels/ANN/neural_net_level4.P 4 neural
+--model nnmodels/ANN/neural_net_level4.P 4 neural \
+--val source_data/pickles/canada/test_sets/train.set.lvl4.P \
+--test source_data/pickles/canada/test_sets/test.set.lvl4.P
 
 #level 2
 python -m scribe_classifier.nn_main model combined_test 2 \
