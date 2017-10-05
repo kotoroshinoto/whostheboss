@@ -68,10 +68,10 @@ def classify_uniques_cli(input_filepath, output_filepath, levels, code_file, mod
                                            keras_batch_size=keras_batch)
     print("performing classifications")
     print("writing output file")
-    for i in range(len(preds)):
-        text = [titles[i], slugtitles[i]]
-        for j in range(levels[0], levels[1] + 1):
-            text.append(preds[j][i])
+    for j in range(len(preds)):
+        text = [titles[j], slugtitles[j]]
+        for i in range(levels[0], levels[1] + 1):
+            text.append(preds[i][j])
         print("\t".join(text), file=output_filepath)
     print("Operation completed")
 
