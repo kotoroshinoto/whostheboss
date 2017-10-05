@@ -69,12 +69,9 @@ def classify_uniques_cli(input_filepath, output_filepath, levels, code_file, mod
     print("performing classifications")
     print("writing output file")
     for i in range(len(preds)):
-        t = titles[i]
-        st = slugtitles[j]
-        p = preds[j]
-        codes = []
+        text = [titles[i], slugtitles[i]]
         for j in range(levels[0], levels[1] + 1):
-            codes.append(p[j])
-        print("\t".join([t, st, "\t".join(codes)]), file=output_filepath)
+            text.append(preds[j][i])
+        print("\t".join(text), file=output_filepath)
     print("Operation completed")
 
