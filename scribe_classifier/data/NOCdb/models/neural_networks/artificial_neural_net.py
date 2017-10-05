@@ -106,9 +106,9 @@ class ANNclassifier:
 
     def predict_proba(self, x, batch_size=32):
         """predict class probabilities for input vector"""
-        print('Vectorizing sequence data...')
+        # print('Vectorizing sequence data...')
         X = self.cvect.transform(x).todense()
-        print('x shape: ', X.shape, " type: ", type(x))
+        # print('x shape: ', X.shape, " type: ", type(x))
         with self.graph.as_default():
             return self.model.predict(x=X, batch_size=batch_size)
 
