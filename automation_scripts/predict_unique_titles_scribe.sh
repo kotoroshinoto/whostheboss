@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-python -m scribe_classifier.classify_main uniques \--code_file source_data/pickles/canada/tidy_sets/all_codes.P \
+python -m scribe_classifier.classify_main uniques \
+--code_file source_data/pickles/canada/tidy_sets/all_codes.P \
 --model source_data/pickles/canada/trained_models/simple.lvl1.bayes.P 1 bayes \
 --model source_data/pickles/canada/trained_models/simple.lvl1.sgdsv.P 1 sgd \
 --model nnmodels/ANN/neural_net_level1.P 1 neural \

@@ -63,20 +63,21 @@ class RecurrentNeuralClassifier:
         self.model = model
 
     def fit(self, X, y, validation_data:'Tuple[List[str], List[str]]'=None):
-        #Convert text samples in dataset to sequences of word indexes (encoding/bagofwords, etc)
-        all_codes = CodeSet.load_from_pickle('source_data/pickles/canada/tidy_sets/all_codes.P', is_path=True)
-        all_codes.add_emptyset("NA")
-        tset = TitleSet.load_from_pickle('source_data/pickles/canada/tidy_sets/all_titles.P', is_path=True)
-        all_codevec = all_codes.get_codes_for_level(target_level=self.target_level)
-        num_classes = len(all_codevec)
-        tset = tset.copy_and_append_empty_string_class()
-        tset_titlevec = tset.get_title_vec()
+        if not self.warm_start:
+            #Convert text samples in dataset to sequences of word indexes (encoding/bagofwords, etc)
+            all_codes = CodeSet.load_from_pickle('source_data/pickles/canada/tidy_sets/all_codes.P', is_path=True)
+            all_codes.add_emptyset("NA")
+            tset = TitleSet.load_from_pickle('source_data/pickles/canada/tidy_sets/all_titles.P', is_path=True)
+            all_codevec = all_codes.get_codes_for_level(target_level=self.target_level)
+            num_classes = len(all_codevec)
+            tset = tset.copy_and_append_empty_string_class()
+            tset_titlevec = tset.get_title_vec()
 
-        #fit label binarizer and tokenizer on ALL the data
-        self.lblbin.fit(all_codevec)
-        self.tokenizer.fit_on_texts(tset_titlevec)
-        word_index = self.tokenizer.word_index
-        print('Found %s unique tokens.' % len(word_index))
+            #fit label binarizer and tokenizer on ALL the data
+            self.lblbin.fit(all_codevec)
+            self.tokenizer.fit_on_texts(tset_titlevec)
+            word_index = self.tokenizer.word_index
+            print('Found %s unique tokens.' % len(word_index))
 
         #transform our actual data
         y_train = self.lblbin.transform(y)

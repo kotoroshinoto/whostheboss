@@ -109,6 +109,8 @@ class ANNclassifier:
         # print('Vectorizing sequence data...')
         X = self.cvect.transform(x).todense()
         # print('x shape: ', X.shape, " type: ", type(x))
+        if self.graph is None:
+            raise RuntimeError("graph object is None")
         with self.graph.as_default():
             return self.model.predict(x=X, batch_size=batch_size)
 
@@ -219,5 +221,7 @@ class ANNclassifier:
         if os.path.exists(filepath + '.mdl') and not os.path.isdir(filepath + '.mdl'):
             ann_clf.model = load_model(filepath + '.mdl')
             ann_clf.graph = tf.get_default_graph()
+            if ann_clf.graph is None:
+                print("default graph was None")
         ann_clf._load_assets()
         return ann_clf

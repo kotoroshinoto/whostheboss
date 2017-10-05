@@ -1,11 +1,11 @@
 #!/usr/bin/env python
+import re
 import sys
 import os
 import click
 from sklearn import metrics
-from scribe_classifier.data.NOCdb.readers import TitleRecord, TitleSet, CodeRecord, CodeSet, TitlePreprocessor
-from scribe_classifier.data.NOCdb.models.ensemble_util.ensemble_funcs import predict_from_files
-from scribe_classifier.data.NOCdb.readers import CodeSet, TitleSet
+from scribe_classifier.data.NOCdb.readers import TitleRecord, TitleSet, CodeRecord, CodeSet, TitlePreprocessor, TitlePreprocessor as tp
+from scribe_classifier.data.scribe import DbHandler, DataFramePickler
 
 
 @click.group()
@@ -152,8 +152,10 @@ def generate_data_set_from_pickle(target_level, example_file, train_filepath, va
         test_prop=test_prop
     )
 
+
 @canada_model_cli.group()
 def model():
+    """Work with models"""
     pass
 
 @model.group()
@@ -375,6 +377,138 @@ def ensemble():
     pass
 
 
+@ensemble.command(name='test')
+@click.option('--code_file', type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True), required=True, help="This file should contain all codes and descriptions in tab-separated format. It will be used to understand how to stratify the models")
+@click.option('--model',
+              type=click.Tuple((click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True),
+                    click.INT,
+                    click.STRING)),
+              multiple=True,
+              help="provide a model to use, its type [sgd, bayes, neural], and specify its target level")
+@click.option('--emptyset', type=click.STRING, default=None, help="Add Empty String Dataset with given label to test set and validation set  before making predictions, if you provide an empty string label, default 'NA' will be used instead")
+@click.option('--val', type=click.File('rb'), required=True)
+@click.option('--test', type=click.File('rb'), required=True)
+@click.option('--lowmem/--no-lowmem', default=False, help="Randomly Sample 20% of validation set (use if memory errors are a problem)")
+@click.option('--batchsize', type=click.INT, default=4000, help="number of titles to predict per batch")
+@click.option('--keras_batch', type=click.INT, default=32, help="keras batch size to use during prediction")
+@click.argument('target_level', type=click.IntRange(1, 4), default=1)
+def combine_test(target_level, model, emptyset, val, test, code_file, lowmem, batchsize, keras_batch):
+    from scribe_classifier.data.NOCdb.models.ensemble.combined_models import CombinedModels
+    from scribe_classifier.data.NOCdb.models.simple import SimpleModel
+    from scribe_classifier.data.NOCdb.models.neural_networks import ANNclassifier
+    """test a combined ensemble model with a validation and test set on a target level of classification"""
+    if emptyset == "":
+        emptyset = "NA"
+    models = dict()
+    for tup in model:
+        tlvl = tup[1]
+        mdl_type = tup[2]  # type: str
+        modelpath = tup[0]
+        if tlvl not in models:
+            models[tlvl] = dict()
+        if mdl_type == 'ann':
+            models[tlvl][mdl_type] = ANNclassifier.load_from_pickle(modelpath)
+        else:
+            models[tlvl][mdl_type] = SimpleModel.load_from_pickle(modelpath, is_path=True)
+    if 1 not in models:
+        models[1] = None
+    if 2 not in models:
+        models[2] = None
+    if 3 not in models:
+        models[3] = None
+    if 4 not in models:
+        models[4] = None
+    cmb_mdls = CombinedModels(all_codes=code_file,
+                              emptyset_label=emptyset)
+    cmb_mdls.add_models_from_dict(models)
+
+    validset = TitleSet.load_from_pickle(val)  # type: TitleSet
+    testset = TitleSet.load_from_pickle(test)  # type: TitleSet
+    if emptyset is not None:
+        validset = validset.copy_and_append_empty_string_class(label=emptyset)  # type: TitleSet
+        testset = testset.copy_and_append_empty_string_class(label=emptyset)  # type: TitleSet
+    if lowmem:
+        train, validset = validset.split_data_train_test(target_level=4, test_split=0.25)
+        # print(validset.get_code_vec(target_level=1))
+    valid_y = validset.get_code_vec(target_level=target_level)
+    test_y = testset.get_code_vec(target_level=target_level)
+    valid_p = cmb_mdls.batched_predict(validset.get_title_vec(),
+                                       batch_size=batchsize,
+                                       target_level=target_level,
+                                       keras_batch_size=keras_batch)
+    test_p = cmb_mdls.batched_predict(testset.get_title_vec(),
+                                      batch_size=batchsize,
+                                      target_level=target_level,
+                                      keras_batch_size=keras_batch)
+    print("Validation Set:")
+    print(metrics.classification_report(valid_y, valid_p))
+    print("Test Set:")
+    print(metrics.classification_report(test_y, test_p))
+    print("Val  Acc: ", metrics.accuracy_score(valid_y, valid_p),
+          "Test Acc", metrics.accuracy_score(test_y, test_p))
+
+
+@ensemble.command(name='test_to_files')
+@click.option('--code_file', type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True), required=True, help="This file should contain all codes and descriptions in tab-separated format. It will be used to understand how to stratify the models")
+@click.option('--model',
+              type=click.Tuple((click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True),
+                    click.INT,
+                    click.STRING)),
+              multiple=True,
+              help="provide a model to use, its type [sgd, bayes, neural], and specify its target level")
+@click.option('--emptyset', type=click.STRING, default=None, help="Add Empty String Dataset with given label to test set and validation set  before making predictions, if you provide an empty string label, default 'NA' will be used instead")
+@click.option('--val', type=click.File('rb'), required=True)
+@click.option('--test', type=click.File('rb'), required=True)
+@click.option('--batchsize', type=click.INT, default=4000, help="number of titles to predict per batch")
+@click.option('--keras_batch', type=click.INT, default=32, help="keras batch size to use during prediction")
+@click.option('--basepath', default="./proba_matrix", type=click.Path(dir_okay=True, file_okay=False, resolve_path=True, writable=True))
+def combine_test_files(model, emptyset, val, test, code_file, batchsize, keras_batch, basepath):
+    from scribe_classifier.data.NOCdb.models.ensemble.combined_models import CombinedModels
+    from scribe_classifier.data.NOCdb.models.simple import SimpleModel
+    from scribe_classifier.data.NOCdb.models.neural_networks import ANNclassifier
+    """test a combined ensemble model with a validation and test set on a target level of classification"""
+    if emptyset == "":
+        emptyset = "NA"
+    models = dict()
+    for tup in model:
+        tlvl = tup[1]
+        mdl_type = tup[2]  # type: str
+        modelpath = tup[0]
+        if tlvl not in models:
+            models[tlvl] = dict()
+        if mdl_type == 'ann':
+            models[tlvl][mdl_type] = ANNclassifier.load_from_pickle(modelpath)
+        else:
+            models[tlvl][mdl_type] = SimpleModel.load_from_pickle(modelpath, is_path=True)
+    if 1 not in models:
+        models[1] = None
+    if 2 not in models:
+        models[2] = None
+    if 3 not in models:
+        models[3] = None
+    if 4 not in models:
+        models[4] = None
+    cmb_mdls = CombinedModels(all_codes=code_file,
+                              emptyset_label=emptyset)
+    cmb_mdls.add_models_from_dict(models)
+    validset = TitleSet.load_from_pickle(val)  # type: TitleSet
+    testset = TitleSet.load_from_pickle(test)  # type: TitleSet
+    if emptyset is not None:
+        validset = validset.copy_and_append_empty_string_class(label=emptyset)  # type: TitleSet
+        testset = testset.copy_and_append_empty_string_class(label=emptyset)  # type: TitleSet
+    os.makedirs(basepath, exist_ok=True)
+    cmb_mdls.batched_predict_proba_per_model_to_files(X=testset.get_title_vec(),
+                                                      batch_size=batchsize,
+                                                      keras_batch_size=keras_batch,
+                                                      path=basepath,
+                                                      file_prefix="test")
+    cmb_mdls.batched_predict_proba_per_model_to_files(X=validset.get_title_vec(),
+                                                      batch_size=batchsize,
+                                                      keras_batch_size=keras_batch,
+                                                      path=basepath,
+                                                      file_prefix="valid")
+
+
 @ensemble.command(name='test_predict_from_files')
 @click.option('--code_file', type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True), required=True, help="This file should contain all codes and descriptions in tab-separated format. It will be used to understand how to stratify the models")
 @click.option('--emptyset', type=click.STRING, default=None, help="Add Empty String Dataset with given label to test set and validation set  before making predictions, if you provide an empty string label, default 'NA' will be used instead")
@@ -384,6 +518,7 @@ def ensemble():
 @click.option('--model', required=True, type=(click.STRING, click.IntRange(1, 4)), multiple=True, help="modeltype and model's target level")
 @click.argument('target_level', type=click.IntRange(1, 4), default=1)
 def test_predict_from_files(code_file, emptyset, val, test, basepath, target_level, model):
+    from scribe_classifier.data.NOCdb.models.ensemble_util.ensemble_funcs import predict_from_files
     ac = CodeSet.load_from_pickle(code_file, is_path=True)
     ac.add_emptyset(emptyset_label=emptyset)
     include_dict = dict()
@@ -420,7 +555,20 @@ def test_predict_from_files(code_file, emptyset, val, test, basepath, target_lev
           "Test Acc", metrics.accuracy_score(test_y, test_p))
 
 
-@ensemble.command(name='test')
+def get_classification_titles(stl: 'List[ScribeTitle]'):
+    retl = []
+    for st in stl:
+        retl.append(st.title)
+    return retl
+
+
+@canada_model_cli.group()
+def uniques():
+    """work with unique column data files from scribe"""
+    pass
+
+
+@uniques.command(name='generate_probability_matrices')
 @click.option('--code_file', type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True), required=True, help="This file should contain all codes and descriptions in tab-separated format. It will be used to understand how to stratify the models")
 @click.option('--model',
               type=click.Tuple((click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True),
@@ -428,80 +576,62 @@ def test_predict_from_files(code_file, emptyset, val, test, basepath, target_lev
                     click.STRING)),
               multiple=True,
               help="provide a model to use, its type [sgd, bayes, neural], and specify its target level")
-@click.option('--emptyset', type=click.STRING, default=None, help="Add Empty String Dataset with given label to test set and validation set  before making predictions, if you provide an empty string label, default 'NA' will be used instead")
-@click.option('--val', type=click.File('rb'), required=True)
-@click.option('--test', type=click.File('rb'), required=True)
-@click.option('--lowmem/--no-lowmem', default=False, help="Randomly Sample 20% of validation set (use if memory errors are a problem)")
 @click.option('--batchsize', type=click.INT, default=4000, help="number of titles to predict per batch")
 @click.option('--keras_batch', type=click.INT, default=32, help="keras batch size to use during prediction")
-@click.argument('target_level', type=click.IntRange(1, 4), default=1)
-def combine_test(target_level, model, emptyset, val, test, code_file, lowmem, batchsize, keras_batch):
+@click.option('--emptyset', type=click.STRING, default=None, help="account for this emptyset label the model was trained with as necessary")
+@click.option('--basepath', required=True, type=click.Path(dir_okay=True, file_okay=False, resolve_path=True, writable=True))
+@click.argument('input_filepath', type=click.File('r'))
+def generate_probability_matrices(input_filepath, basepath, code_file, model, batchsize, keras_batch, emptyset):
     from scribe_classifier.data.NOCdb.models.ensemble.combined_models import CombinedModels
     from scribe_classifier.data.NOCdb.models.simple import SimpleModel
     from scribe_classifier.data.NOCdb.models.neural_networks import ANNclassifier
-    """test a combined ensemble model with a validation and test set on a target level of classification"""
     if emptyset == "":
         emptyset = "NA"
-    mdl_paths = dict()
+    count = 0
+    print("loading models into combined ensemble")
+    models = dict()
     for tup in model:
         tlvl = tup[1]
         mdl_type = tup[2]  # type: str
         modelpath = tup[0]
-        if tlvl not in mdl_paths:
-            mdl_paths[tlvl] = dict()
+        if tlvl not in models:
+            models[tlvl] = dict()
         if mdl_type == 'ann':
-            mdl_paths[tlvl][mdl_type] = ANNclassifier.load_from_pickle(modelpath)
+            models[tlvl][mdl_type] = ANNclassifier.load_from_pickle(modelpath)
         else:
-            mdl_paths[tlvl][mdl_type] = SimpleModel.load_from_pickle(modelpath, is_path=True)
-    if 1 not in mdl_paths:
-        mdl_paths[1] = None
-    if 2 not in mdl_paths:
-        mdl_paths[2] = None
-    if 3 not in mdl_paths:
-        mdl_paths[3] = None
-    if 4 not in mdl_paths:
-        mdl_paths[4] = None
+            models[tlvl][mdl_type] = SimpleModel.load_from_pickle(modelpath, is_path=True)
+    if 1 not in models:
+        models[1] = None
+    if 2 not in models:
+        models[2] = None
+    if 3 not in models:
+        models[3] = None
+    if 4 not in models:
+        models[4] = None
     cmb_mdls = CombinedModels(all_codes=code_file,
                               emptyset_label=emptyset)
-    cmb_mdls.add_models_from_dict(mdl_paths)
+    cmb_mdls.add_models_from_dict(models)
 
-    validset = TitleSet.load_from_pickle(val)  # type: TitleSet
-    testset = TitleSet.load_from_pickle(test)  # type: TitleSet
-    if emptyset is not None:
-        validset = validset.copy_and_append_empty_string_class(label=emptyset)  # type: TitleSet
-        testset = testset.copy_and_append_empty_string_class(label=emptyset)  # type: TitleSet
-    if lowmem:
-        train, validset = validset.split_data_train_test(target_level=4, test_split=0.25)
-        # print(validset.get_code_vec(target_level=1))
-    valid_y = validset.get_code_vec(target_level=target_level)
-    test_y = testset.get_code_vec(target_level=target_level)
-    valid_p = cmb_mdls.batched_predict(validset.get_title_vec(),
-                                       batch_size=batchsize,
-                                       target_level=target_level,
-                                       keras_batch_size=keras_batch)
-    test_p = cmb_mdls.batched_predict(testset.get_title_vec(),
-                                      batch_size=batchsize,
-                                      target_level=target_level,
-                                      keras_batch_size=keras_batch)
-    cmb_mdls.batched_predict_proba_per_model_to_files(X=testset.get_title_vec(),
+    print("ensemble complete")
+    print("loading data")
+    titles = []
+    slugtitles = []
+    for line in input_filepath:
+        line = line.rstrip()
+        count += 1
+        titles.append(line)
+        slugtitles.append(tp.preprocess_slugify(tp.preprocess_title_prefixes(line)))
+    print("data loading complete")
+
+    print("performing classifications")
+    cmb_mdls.batched_predict_proba_per_model_to_files(X=slugtitles,
                                                       batch_size=batchsize,
                                                       keras_batch_size=keras_batch,
-                                                      path="./",
-                                                      file_prefix="test.")
-    cmb_mdls.batched_predict_proba_per_model_to_files(X=testset.get_title_vec(),
-                                                      batch_size=batchsize,
-                                                      keras_batch_size=keras_batch,
-                                                      path="./",
-                                                      file_prefix="valid.")
-    print("Validation Set:")
-    print(metrics.classification_report(valid_y, valid_p))
-    print("Test Set:")
-    print(metrics.classification_report(test_y, test_p))
-    print("Val  Acc: ", metrics.accuracy_score(valid_y, valid_p),
-          "Test Acc", metrics.accuracy_score(test_y, test_p))
+                                                      path=basepath)
+    print("performing classifications")
 
 
-@ensemble.command(name='test_to_files')
+@uniques.command(name='predict_from_matrices')
 @click.option('--code_file', type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True), required=True, help="This file should contain all codes and descriptions in tab-separated format. It will be used to understand how to stratify the models")
 @click.option('--model',
               type=click.Tuple((click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True),
@@ -509,57 +639,144 @@ def combine_test(target_level, model, emptyset, val, test, code_file, lowmem, ba
                     click.STRING)),
               multiple=True,
               help="provide a model to use, its type [sgd, bayes, neural], and specify its target level")
-@click.option('--emptyset', type=click.STRING, default=None, help="Add Empty String Dataset with given label to test set and validation set  before making predictions, if you provide an empty string label, default 'NA' will be used instead")
-@click.option('--val', type=click.File('rb'), required=True)
-@click.option('--test', type=click.File('rb'), required=True)
-@click.option('--batchsize', type=click.INT, default=4000, help="number of titles to predict per batch")
-@click.option('--keras_batch', type=click.INT, default=32, help="keras batch size to use during prediction")
-@click.option('--basepath', default="./proba_matrix", type=click.Path(dir_okay=True, file_okay=False, resolve_path=True, writable=True))
-def combine_test_files(model, emptyset, val, test, code_file, batchsize, keras_batch, basepath):
-    from scribe_classifier.data.NOCdb.models.ensemble.combined_models import CombinedModels
-    from scribe_classifier.data.NOCdb.models.simple import SimpleModel
-    from scribe_classifier.data.NOCdb.models.neural_networks import ANNclassifier
-    """test a combined ensemble model with a validation and test set on a target level of classification"""
-    if emptyset == "":
-        emptyset = "NA"
-    mdl_paths = dict()
+@click.option('--levels', default=(1, 4), type=(click.IntRange(min=1, max=4), click.IntRange(min=1, max=4)), help="")
+@click.option('--emptyset', type=click.STRING, default=None, help="account for this emptyset label the model was trained with as necessary")
+@click.option('--basepath', required=True, type=click.Path(dir_okay=True, file_okay=False, resolve_path=True, writable=True))
+@click.argument('input_filepath', type=click.File('r'))
+@click.argument('output_filepath', type=click.File('w'))
+def predict_from_matrices(basepath, input_filepath, output_filepath, levels, code_file, model, emptyset):
+    from scribe_classifier.data.NOCdb.models.ensemble_util.ensemble_funcs import predict_from_files
+    ac = CodeSet.load_from_pickle(code_file, is_path=True)
+    ac.add_emptyset(emptyset_label=emptyset)
+    include_dict = dict()
     for tup in model:
-        tlvl = tup[1]
-        mdl_type = tup[2]  # type: str
-        modelpath = tup[0]
-        if tlvl not in mdl_paths:
-            mdl_paths[tlvl] = dict()
-        if mdl_type == 'ann':
-            mdl_paths[tlvl][mdl_type] = ANNclassifier.load_from_pickle(modelpath)
+        if tup[1] not in include_dict:
+            include_dict[tup[1]] = list()
+        include_dict[tup[1]].append(tup[0])
+
+    print("loading data")
+    titles = []
+    slugtitles = []
+    for line in input_filepath:
+        line = line.rstrip()
+        count += 1
+        titles.append(line)
+        slugtitles.append(tp.preprocess_slugify(tp.preprocess_title_prefixes(line)))
+    print("data loading complete")
+
+    print("transforming probabilities into predictions at target levels")
+    preds = dict()
+    for i in range(levels[0], levels[1]+1):
+        preds[i] = predict_from_files(
+            basepath=basepath,
+            prefix='valid',
+            target_level=i,
+            code_set=ac,
+            emptyset_label=emptyset,
+            include_dict=include_dict
+        )
+    print("transformations complete")
+
+    print("writing output file")
+    for j in range(len(preds)):
+        text = [titles[j], slugtitles[j]]
+        for i in range(levels[0], levels[1] + 1):
+            text.append(preds[i][j])
+        print("\t".join(text), file=output_filepath)
+    print("Operation completed")
+
+
+list_extractor = re.compile("^unique (.+):\[(.+)\]$")
+split_point = re.compile(", u['\"]")
+
+
+def process_file(input_dir, filename):
+    """processes the file to clean it properly"""
+    retval = []
+    cityfile = open(os.path.join(input_dir, filename), 'r')
+    line = cityfile.readline()
+    listmatch = list_extractor.match(line)
+    if not listmatch:
+        return []
+    listname = listmatch.group(1)
+    # print("extracting %s data_scribe_unique" % listname)
+    content = listmatch.group(2)
+    split_obj = split_point.split(content)
+    for item in split_obj:
+        if item == 'None' or (item.startswith('u') and (item[1] == '"' or item[1] == "'")):
+            retval.append(item)
         else:
-            mdl_paths[tlvl][mdl_type] = SimpleModel.load_from_pickle(modelpath, is_path=True)
-    if 1 not in mdl_paths:
-        mdl_paths[1] = None
-    if 2 not in mdl_paths:
-        mdl_paths[2] = None
-    if 3 not in mdl_paths:
-        mdl_paths[3] = None
-    if 4 not in mdl_paths:
-        mdl_paths[4] = None
-    cmb_mdls = CombinedModels(all_codes=code_file,
-                              emptyset_label=emptyset)
-    cmb_mdls.add_models_from_dict(mdl_paths)
-    validset = TitleSet.load_from_pickle(val)  # type: TitleSet
-    testset = TitleSet.load_from_pickle(test)  # type: TitleSet
-    if emptyset is not None:
-        validset = validset.copy_and_append_empty_string_class(label=emptyset)  # type: TitleSet
-        testset = testset.copy_and_append_empty_string_class(label=emptyset)  # type: TitleSet
-    os.makedirs(basepath, exist_ok=True)
-    cmb_mdls.batched_predict_proba_per_model_to_files(X=testset.get_title_vec(),
-                                                      batch_size=batchsize,
-                                                      keras_batch_size=keras_batch,
-                                                      path=basepath,
-                                                      file_prefix="test")
-    cmb_mdls.batched_predict_proba_per_model_to_files(X=validset.get_title_vec(),
-                                                      batch_size=batchsize,
-                                                      keras_batch_size=keras_batch,
-                                                      path=basepath,
-                                                      file_prefix="valid")
+            retval.append("u%s%s" % (item[-1], item))
+    return retval
+
+
+def clean_file(input_dir, output_dir, filename):
+    """clean given file and place it into output directory with given filename"""
+    filecontent = process_file(input_dir=input_dir, filename=filename)
+    outfile = open(os.path.join(output_dir, filename), 'w', encoding='utf8')
+    # outfile = sys.stdout
+
+    filecontent = clean_records(filecontent)
+
+    print("\n".join(filecontent), file=outfile)
+    outfile.close()
+
+
+quote_finder = re.compile('^["\'](.*)[\'\"]$')
+
+
+def clean_record(line: str):
+    line = line[2:-1].encode().decode(encoding='unicode_escape').rstrip().lstrip()
+    mo = quote_finder.match(line)
+    if mo:
+        line = mo.groups()[0].rstrip().lstrip()
+    return line
+
+
+def clean_records(lines: 'List[str]') -> 'List[str]':
+    outlines = []
+    for i in range(len(lines)):
+        if lines[i] == 'None':
+            outlines.append('None')
+        else:
+            outlines.append(clean_record(lines[i]))
+    return outlines
+
+
+@uniques.command(name='tidy')
+@click.argument('input_dir', type=click.Path(file_okay=False, dir_okay=True, exists=True, resolve_path=True, readable=True), default=None)
+@click.argument('output_dir', type=click.Path(file_okay=False, dir_okay=True, exists=True, resolve_path=True, writable=True), default=None)
+def clean_all_unique_files(input_dir, output_dir):
+    """clean unique entry files provided by scribe"""
+    cwd = os.path.abspath('.')
+    if input_dir is None:
+        input_dir = os.path.join(cwd, 'source_data', 'raw', 'scribe', 'unique_labels')
+        print("input_dir defaulting to: %s" % input_dir)
+    if output_dir is None:
+        output_dir = os.path.join(cwd, 'source_data', 'processed', 'scribe', 'unique_labels')
+        print("output_dir defaulting to: %s" % output_dir)
+
+    clean_file(input_dir=input_dir, output_dir=output_dir, filename="cities.txt")
+    clean_file(input_dir=input_dir, output_dir=output_dir, filename="countries.txt")
+    clean_file(input_dir=input_dir, output_dir=output_dir, filename="industries.txt")
+    clean_file(input_dir=input_dir, output_dir=output_dir, filename="titles.txt")
+
+
+@canada_model_cli.group()
+def scribedb():
+    """operations involving unique-entry files from scribe"""
+    pass
+
+
+@scribedb.command(name='pull_data')
+@click.argument('url', type=click.STRING, required=True)
+@click.option('--user', type=click.STRING, prompt=True, hide_input=False, required=True)
+@click.option('--pwd', type=click.STRING, prompt=True, hide_input=True, required=True)
+def pull_scribe_data_cli(url, user, pwd):
+    """Pulls Mid to small size USA Tech from SQL"""
+    dbh = DbHandler(url, user, pwd)
+    df = dbh.grab_usa_medium_tech_data()
+    DataFramePickler.save_as_pickle(df, './SavedScribeQueries/midsize_tech_usa.P')
 
 
 if __name__ == "__main__":

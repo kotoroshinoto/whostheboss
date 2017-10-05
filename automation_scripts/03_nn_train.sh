@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #25
-python -m scribe_classifier.nn_main model \
+python -m scribe_classifier.cli.main model neural_net \
 train \
 --emptyset NA \
 --train_filepath ./source_data/pickles/canada/test_sets/train.set.lvl4.P \
@@ -17,7 +17,7 @@ train \
 1
 
 #30
-python -m scribe_classifier.nn_main model \
+python -m scribe_classifier.cli.main model neural_net \
 train \
 --emptyset NA \
 --train_filepath ./source_data/pickles/canada/test_sets/train.set.lvl4.P \
@@ -34,7 +34,7 @@ train \
 2
 
 #40
-python -m scribe_classifier.nn_main model \
+python -m scribe_classifier.cli.main model neural_net \
 train \
 --emptyset NA \
 --train_filepath ./source_data/pickles/canada/test_sets/train.set.lvl4.P \
@@ -51,7 +51,7 @@ train \
 3
 
 #30
-python -m scribe_classifier.nn_main model \
+python -m scribe_classifier.cli.main model neural_net \
 train \
 --emptyset NA \
 --train_filepath ./source_data/pickles/canada/test_sets/train.set.lvl4.P \
