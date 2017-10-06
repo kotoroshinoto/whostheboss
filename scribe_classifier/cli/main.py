@@ -633,12 +633,7 @@ def generate_probability_matrices(input_filepath, basepath, code_file, model, ba
 
 @uniques.command(name='predict_from_matrices')
 @click.option('--code_file', type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True), required=True, help="This file should contain all codes and descriptions in tab-separated format. It will be used to understand how to stratify the models")
-@click.option('--model',
-              type=click.Tuple((click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True),
-                    click.INT,
-                    click.STRING)),
-              multiple=True,
-              help="provide a model to use, its type [sgd, bayes, neural], and specify its target level")
+@click.option('--model', required=True, type=(click.STRING, click.IntRange(1, 4)), multiple=True, help="modeltype and model's target level")
 @click.option('--levels', default=(1, 4), type=(click.IntRange(min=1, max=4), click.IntRange(min=1, max=4)), help="")
 @click.option('--emptyset', type=click.STRING, default=None, help="account for this emptyset label the model was trained with as necessary")
 @click.option('--basepath', required=True, type=click.Path(dir_okay=True, file_okay=False, resolve_path=True, writable=True))
