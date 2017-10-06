@@ -663,7 +663,7 @@ def predict_from_matrices(basepath, input_filepath, output_filepath, levels, cod
     for i in range(levels[0], levels[1]+1):
         preds[i] = predict_from_files(
             basepath=basepath,
-            prefix='valid',
+            prefix='',
             target_level=i,
             code_set=ac,
             emptyset_label=emptyset,
