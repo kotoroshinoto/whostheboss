@@ -654,7 +654,6 @@ def predict_from_matrices(basepath, input_filepath, output_filepath, levels, cod
     slugtitles = []
     for line in input_filepath:
         line = line.rstrip()
-        count += 1
         titles.append(line)
         slugtitles.append(tp.preprocess_slugify(tp.preprocess_title_prefixes(line)))
     print("data loading complete")
