@@ -10,7 +10,7 @@ class ObjectPickler:
     @staticmethod
     def pickle_object(obj, path):
         """save serialized python objects to file"""
-        pickle.dump(file=open(path, 'wb'), obj=obj)
+        pickle.dump(file=open(path, 'wb'), obj=obj, protocol=4)
 
     @staticmethod
     def load_object(path):
