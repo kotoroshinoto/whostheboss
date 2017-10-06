@@ -655,7 +655,7 @@ def predict_from_matrices(basepath, input_filepath, output_filepath, levels, cod
     for line in input_filepath:
         line = line.rstrip()
         titles.append(line)
-        slugtitles.append(tp.preprocess_slugify(tp.preprocess_title_prefixes(line)))
+        slugtitles.append(tp.preprocess_slugify(tp.preprocess_title_prefixes(str(line))))
     print("data loading complete")
 
     print("transforming probabilities into predictions at target levels")
@@ -669,10 +669,11 @@ def predict_from_matrices(basepath, input_filepath, output_filepath, levels, cod
             emptyset_label=emptyset,
             include_dict=include_dict
         )
+        print("loaded matrix with shape: ", preds[i].shape)
     print("transformations complete")
 
     print("writing output file")
-    for j in range(len(preds)):
+    for j in range(len(titles)):
         text = [titles[j], slugtitles[j]]
         for i in range(levels[0], levels[1] + 1):
             text.append(preds[i][j])
