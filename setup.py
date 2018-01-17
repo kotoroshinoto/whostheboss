@@ -29,8 +29,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'classify-jobtitles = scribe_classifier.simple_main:main',
-            'classify-jobtitles-tf = scribe_classifier.nn_main:nn_main:'
+            'classify-jobtitles = scribe_classifier.cli.main:canada_model_cli'
         ]
     }
 )
