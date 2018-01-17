@@ -6,6 +6,7 @@ source_data/20_newsgroup/
 tmp/
 SavedScribeQueries/
 proba_matrix/
+scribedata/
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template
