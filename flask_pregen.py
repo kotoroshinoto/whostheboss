@@ -8,24 +8,22 @@ from scribe_classifier.data.NOCdb.models.ensemble import CombinedModels
 from scribe_classifier.data.NOCdb.readers import TitleSet, CodeSet
 from scribe_classifier.data.scribe import DataFramePickler
 from scribe_classifier.flaskprep import ClassificationReporter
+from scribe_classifier.data.NOCdb.models.simple.simple_model import SimpleModel
+from scribe_classifier.data.NOCdb.models.neural_networks.artificial_neural_net import ANNclassifier
 
 
 def get_combined_models():
     """assembles a combined models object with all available models"""
-    mdl_strs = dict()
+    mdls = dict()
     for target_level in range(1, 5):
-        level_mdl_strs = dict()
-        level_mdl_strs['sgd'] = 'source_data/pickles/canada/trained_models/simple.lvl%d.sgdsv.P' % target_level
-        level_mdl_strs['bayes'] = 'source_data/pickles/canada/trained_models/simple.lvl%d.bayes.P' % target_level
-        level_mdl_strs['neural'] = 'nnmodels/ANN/neural_net_level%d.P' % target_level
-        mdl_strs[target_level] = level_mdl_strs
+        level_mdls = dict()
+        level_mdls['sgd'] = SimpleModel.load_from_pickle('scribedata/source_data/pickles/canada/trained_models/simple.lvl%d.sgdsv.P' % target_level)
+        level_mdls['bayes'] = SimpleModel.load_from_pickle('scribedata/source_data/pickles/canada/trained_models/simple.lvl%d.bayes.P' % target_level)
+        level_mdls['neural'] = ANNclassifier.load_from_pickle('scribedata/nnmodels/ANN/neural_net_level%d.P' % target_level)
+        mdls[target_level] = level_mdls
     # models
-    models = CombinedModels('source_data/pickles/canada/tidy_sets/all_codes.P',
-                            mdl_strs[1],
-                            mdl_strs[2],
-                            mdl_strs[3],
-                            mdl_strs[4]
-                            )
+    models = CombinedModels('scribedata/source_data/pickles/canada/tidy_sets/all_codes.P')
+    models.add_models_from_dict(models=mdls)
     return models
 
 
