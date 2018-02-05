@@ -5,32 +5,29 @@ from flask import render_template
 from flask import request
 
 from scribe_classifier.data.NOCdb.models.ensemble.combined_models import CombinedModels
+from scribe_classifier.data.NOCdb.models.neural_networks import ANNclassifier
+from scribe_classifier.data.NOCdb.models.simple import SimpleModel
 from scribe_classifier.data.NOCdb.readers.codes import CodeSet
 from scribe_classifier.flask_demo import app
 from scribe_classifier.flaskprep import ClassificationReporter
 
 pd.set_option('display.max_colwidth', -1)
 
-all_codes = CodeSet.load_from_pickle('./source_data/pickles/canada/tidy_sets/all_codes.P', is_path=True)
+all_codes = CodeSet.load_from_pickle('./scribedata/source_data/pickles/canada/tidy_sets/all_codes.P', is_path=True)
 all_codes.add_emptyset()
 classes = all_codes.get_codes_for_level(target_level=2)
 
 mdl_paths = dict()
 for target_level in range(1, 5):
     level_mdl_paths = dict()
-    level_mdl_paths['sgd'] = 'source_data/pickles/canada/trained_models/simple.lvl%d.sgdsv.P' % target_level
-    level_mdl_paths['bayes'] = 'source_data/pickles/canada/trained_models/simple.lvl%d.bayes.P' % target_level
-    level_mdl_paths['neural'] = 'nnmodels/ANN/neural_net_level%d.P' % target_level
+    level_mdl_paths['sgd'] = SimpleModel.load_from_pickle('scribedata/source_data/pickles/canada/trained_models/simple.lvl%d.sgdsv.P' % target_level, is_path=True)
+    level_mdl_paths['bayes'] = SimpleModel.load_from_pickle('scribedata/source_data/pickles/canada/trained_models/simple.lvl%d.bayes.P' % target_level, is_path=True)
+    level_mdl_paths['neural'] = ANNclassifier.load_from_pickle('scribedata/nnmodels/ANN/neural_net_level%d.P' % target_level)
     mdl_paths[target_level] = level_mdl_paths
 
 #models
-models = CombinedModels(all_codes='source_data/pickles/canada/tidy_sets/all_codes.P',
-                            lvl1_mdls=mdl_paths[1],
-                            lvl2_mdls=mdl_paths[2],
-                            lvl3_mdls=mdl_paths[3],
-                            lvl4_mdls=mdl_paths[4]
-                            )
-
+models = CombinedModels(all_codes='source_data/pickles/canada/tidy_sets/all_codes.P')
+models.add_models_from_dict(mdl_paths)
 
 valid_report = ClassificationReporter.load_from_pickle(filepath='scribe_classifier/flask_demo/pickles/report.valid.P')  # type: ClassificationReporter
 test_report = ClassificationReporter.load_from_pickle(filepath='scribe_classifier/flask_demo/pickles/report.test.P')  # type: ClassificationReporter
